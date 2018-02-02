@@ -1,0 +1,56 @@
+***CREAR EL PROYECTO***
+
+$ mkdir ~/Escritorio/code_evolution
+$ cd code_evolution
+
+*SERVER*
+
+$ mkdir server
+$ cd server
+$ npm init
+
+--Instalación de dependencias
+$ npm install express --save (Framework de Node)
+$ npm install bcrypt-nodejs --save (Encriptar password)
+$ npm install body-parser --save (Parsear los datos que recibamos por post... a Json)
+$ npm install connect-multiparty --save (Nos permite la subida de ficheros)
+$ npm install jwt-simple --save (Autentificación con token)
+$ npm install moment --save (Permite el tratamiento de fechas y horas en JS)
+$ npm install mongoose --save (ORM Mapeo Objeto-Relacional para trabajar con mongoDB en Node)
+X$ npm install mongoose-pagination --save (Para hacer paginación. NO ES NECESARIO EN PRINCIPIO)
+$ npm install nodemon --save-dev (Herramienta para desarrollo que nos recarga el servidor cada vez que se modifique el código en el servidor)
+
+
+-- Crear BBDD
+$ mongo
+$ use code_evolution;
+$ db.evolution.save({order:1, name:'organismo unicelular', description:'', image:''});
+
+--Conexión a la BBDD
+Crear fichero index.js en server/ con la configuración a la BBDD
+
+--Lanzar server
+Añadir scripts start para que lance la orden nodemon
+
+-- Crear servidor con Express
+Crear fichero app.js en server/ con la lógica de express e incluirlo en index.js para que 
+importe el app y empieze a escuchar
+
+-- Crear modelos en sever/models/
+
+-- Crear controladores en server/controllers: Intermediario entre el cliente y la BBDD. EL cliente hace una petición al controlador, este si es necesario accede a BBDD, procesa la información y le devuelve lo que ha pedido el cliente
+
+-- Crear archivos de rutas en server/routes con el mapeo ruta-funcionalidad controlador
+
+-- Cargar ficheros de rutas y rutas en app.js
+
+
+*CLIENT*
+
+-- Crear proyecto Angular
+$ npm install -g @angular/cli (SI NO ESTA INSTALADO ANGULAR CLI)
+$ ng new client
+$ cd client
+$ npm start (Ejecutar servidor de angular)
+
+--Titulo de la aplicación: app.component.ts
