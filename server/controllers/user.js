@@ -64,8 +64,7 @@ function loginUser (req, res){
                         if(params.gethash){
                             //Devolver token de jwt
                             res.status(200).send({
-                                token: jwt.createToken(user),
-                                level:user.level
+                                token: jwt.createToken(user)                                
                             });
                         }else{
                             //Devolver usuario logueado
