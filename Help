@@ -47,7 +47,7 @@ importe el app y empieze a escuchar
 
 *CLIENT*
 
--- Crear proyecto Angular
+-- Crear proyecto con Angular
 $ npm install -g @angular/cli (SI NO ESTA INSTALADO ANGULAR CLI)
 $ ng new client
 $ cd client
