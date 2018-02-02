@@ -54,3 +54,19 @@ $ cd client
 $ npm start (Ejecutar servidor de angular)
 
 --Titulo de la aplicación: app.component.ts
+
+-- Incluir assets: jquery, bootstrap
+
+-- Incluir librerias en index.html
+
+-- Crear en assets/css/styles.css con estilos propios
+
+-- Crear modelos en src/app/models, componentes en src/app/components, servicios en src/app/services y vistas en src/app/views
+
+-- Componente: Funcionalidad de una pagina. 
+-- Servicio: Llamada HTTP a la API-REST
+-- Vista: Código html
+
+-- Cargar componentes en app.module.ts
+-- Cargar componentes y definir rutas en app.routing.ts
+-- Variables globales en carpeta services
