@@ -8,7 +8,10 @@ var jwt = require ('../services/jwt');
 var global = require ('../services/global');
 
 
-
+/**
+ * @param req Entrada del controlador
+ * @param res Respuesta del controlador
+ */
 function addUser (req, res){
     var user = new User();
     var params = req.body; //Recogemos los datos que llegan por POST
