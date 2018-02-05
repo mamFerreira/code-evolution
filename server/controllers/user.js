@@ -8,10 +8,6 @@ var jwt = require ('../services/jwt');
 var global = require ('../services/global');
 
 
-/**
- * @param req Entrada del controlador
- * @param res Respuesta del controlador
- */
 function addUser (req, res){
     var user = new User();
     var params = req.body; //Recogemos los datos que llegan por POST
@@ -22,28 +18,39 @@ function addUser (req, res){
     user.image = 'null';
     
     if (user.name && user.surname && user.email && params.password){
-        //Encriptación de la contraseña
-        bcrypt.hash(params.password,null,null, function (err, result){
-            if(err){
-                console.log(err);
-                res.status(500).send({message:'Error en la encriptación del password'});                
+
+        //Comprobamos si existe usuario con mismo email
+        User.findOne({email:user.email.toLowerCase()},(err,user_db) => {
+            if(err){                
+                res.status(500).send({message:'Error en la petición'});   
             }else{
-                user.password = result;                
-                user.save((err,userAdd) => {
-                    if(err){
-                        res.status(500).send({message:'Error al guardar el usuario'});
-                    }else{
-                        if(!userAdd){
-                            res.status(404).send({message:'Usuario no registrado'});
+                if (user_db){
+                    res.status(404).send({message:'Ya existe un usuario con el email ' + user.email});
+                }else{
+                    //Encriptación de la contraseña
+                    bcrypt.hash(params.password,null,null, function (err, result){
+                        if(err){                            
+                            res.status(500).send({message:'Error en la encriptación del password'});                
                         }else{
-                            res.status(200).send({user: userAdd});
+                            user.password = result;                
+                            user.save((err,userAdd) => {
+                                if(err){
+                                    res.status(500).send({message:'Error al guardar el usuario'});
+                                }else{
+                                    if(!userAdd){
+                                        res.status(404).send({message:'Usuario no registrado'});
+                                    }else{
+                                        res.status(200).send({user: userAdd});
+                                    }
+                                }
+                            });
                         }
-                    }
-                });
+                    });
+                }
             }
-        });
+        });        
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
+        res.status(404).send({message:'Rellena los campos obligatorios'});
     }
 }
 

@@ -1,3 +1,11 @@
-body {
-    background: #eee;
+/*GLOBAL*/
+html, body{
+    margin: 0;
+    height: 100%;
+    background: rgb(230, 230, 230);        
+}
+
+.form-login,
+.form-register{
+    margin-top: 50px;
 }
