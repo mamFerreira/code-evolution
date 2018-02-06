@@ -5,6 +5,10 @@ html, body{
     background: #eee;          
 }
 
+.container{    
+    margin-top: 60px;
+}
+
 /*LOGIN, REGISTRO*/
 
 .form-login,
