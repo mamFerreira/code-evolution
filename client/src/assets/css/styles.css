@@ -2,10 +2,44 @@
 html, body{
     margin: 0;
     height: 100%;
-    background: rgb(230, 230, 230);        
+    background: #eee;          
 }
+
+/*LOGIN, REGISTRO*/
 
 .form-login,
 .form-register{
     margin-top: 50px;
+}
+
+/*BARRA DE NAVEGACIÓN*/
+
+.navbar {
+    font-size: 15px;
+}
+
+.navbar .navbar-header {
+    margin-left: 2.5%;    
+}
+
+.navbar .navbar-left {
+    margin-right: 2.5%;    
+}
+
+.navbar .navbar-right {
+    margin-right: 2.5%;    
+}
+
+.navbar .navbar-right img{
+    margin-right: 20px;    
+}
+
+.navbar .glyphicon{
+    font-size: 25px;
+    display: block;
+    width: 100%;
+}
+
+.btn-logout {
+    cursor:pointer;
 }

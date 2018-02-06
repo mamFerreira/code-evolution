@@ -15,7 +15,7 @@ export class UserService {
         this.url = GLOBAL.url;
     }
 
-    signup (user_to_login, gethash=null){
+    loginUser (user_to_login, gethash=null){
         if(gethash != null){
             user_to_login.gethash = gethash;
         }
@@ -26,11 +26,21 @@ export class UserService {
         return this._http.post(this.url+'user-login', params, {headers:headers}).map(res=>res.json());
     }
 
-    register (user_to_register){
+    registerUser (user_to_register){
         let params = JSON.stringify(user_to_register);
         let headers = new Headers({'Content-Type':'application/json'});
         
         return this._http.post(this.url+'user-add', params, {headers:headers}).map(res=>res.json());
+    }
+
+    updateUser (user_to_update){
+        let params = JSON.stringify(user_to_update);
+        let headers = new Headers({
+            'Content-Type':'application/json',
+            'Authorization': this.getToken()
+        });
+        
+        return this._http.put(this.url+'user-update'+user_to_update._id, params, {headers:headers}).map(res=>res.json());
     }
 
     getIdentity() {

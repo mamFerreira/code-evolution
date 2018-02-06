@@ -1,11 +1,28 @@
 <div *ngIf="identity">
-  <p>Esta logueado en la aplicación</p>
-  <span>
-    {{identity.email}}
-  </span>
-  <span class="btn btn-warning" (click)="logout()">
-    Cerrar sesión
-  </span>
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <!-- El logotipo y el icono que despliega el menú se agrupan para mostrarlos mejor en los dispositivos móviles -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Desplegar navegación</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">CODE-EVOLUTION</a>
+      <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-globe"></span></a>
+    </div>
+    
+    <!-- Agrupar los enlaces de navegación, los formularios y cualquier otro elemento que se pueda ocultar al minimizar la barra -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse"> 
+      <ul class="nav navbar-nav navbar-right">
+        <li><p class="navbar-text"><img src="#">Nivel X</p></li>
+        <li><p class="navbar-text"><img src="#">{{identity.email}}</p></li>
+        <li><a href="#"><span class="glyphicon glyphicon-cog"></span></a></li>
+        <li><a (click)="logout()" class="btn-logout"><span class="glyphicon glyphicon-log-out"></span></a></li>
+      </ul>
+    </div>
+  </nav>
+
 </div>
 
 <div *ngIf="!identity">

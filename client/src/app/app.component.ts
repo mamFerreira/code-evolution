@@ -21,17 +21,17 @@ export class AppComponent implements OnInit{
   constructor(    
     private _userService:UserService
   ){
+    this.identity = this._userService.getIdentity();
+    this.token = this._userService.getToken();
     this.user = new User ('','','','','','ROLE_USER','','');
     this.user_register = new User ('','','','','','ROLE_USER','','');
   }
 
   ngOnInit(){
-    this.identity = this._userService.getIdentity();
-    this.token = this._userService.getToken();
   }
 
-  onSubmitLogin(){           
-    this._userService.signup(this.user).subscribe(
+  onSubmitLogin(){
+    this._userService.loginUser(this.user).subscribe(
       response => {     
 
         this.identity = response.user;
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit{
           localStorage.setItem('identity',JSON.stringify(this.identity));
 
           //Conseguir el token para enviarselo a cada petición HTTP
-          this._userService.signup(this.user,true).subscribe(
+          this._userService.loginUser(this.user,true).subscribe(
             response => {              
               this.token = response.token;
               if (this.token.length < 1){
@@ -83,7 +83,7 @@ export class AppComponent implements OnInit{
     this.sMsgRegister = "";
     this.eMsgRegister = "";
 
-    this._userService.register(this.user_register).subscribe(
+    this._userService.registerUser(this.user_register).subscribe(
       response => {
         let user = response.user;
         this.user_register = user;

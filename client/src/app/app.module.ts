@@ -5,11 +5,13 @@ import { HttpModule } from '@angular/http';
 
 
 import { AppComponent } from './app.component';
+import { UserEditComponent } from './components/user_edit.component';
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    UserEditComponent
   ],
   imports: [
     BrowserModule,
