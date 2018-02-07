@@ -13,14 +13,14 @@ import { User } from '../models/user';
 
 export class UserEditComponent implements OnInit {
 
-    public titulo: String;
+    public titulo: string;
     public user: User;
     public identity;
     public token;
     public successMessage;
     public errorMessage;
     public filesToUpload: Array<File>;
-    public url: String;
+    public url: string;
 
     constructor(
         private _userService: UserService

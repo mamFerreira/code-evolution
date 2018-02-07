@@ -9,7 +9,7 @@ export class UserService {
 
     public identity;
     public token;
-    public url: String;
+    public url: string;
 
     constructor (private _http: Http){
         this.url = GLOBAL.url;

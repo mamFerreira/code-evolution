@@ -15,4 +15,4 @@ client/e2e/*.js
 client/e2e/*.map
 
 # uploads
-server/uploads
+server/uploads/users

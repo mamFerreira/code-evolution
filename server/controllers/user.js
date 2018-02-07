@@ -4,10 +4,13 @@ var fs = require('fs');
 var path = require('path');
 var bcrypt = require('bcrypt-nodejs');
 var User = require ('../models/user');
+var GLOBAL = require ('../services/global');
 var jwt = require ('../services/jwt');
-var global = require ('../services/global');
 
-
+/**
+ * Añadir nuevo usuario
+ * @returns user: Usuario creado
+ */
 function addUser (req, res){
     var user = new User();
     var params = req.body; //Recogemos los datos que llegan por POST
@@ -54,6 +57,10 @@ function addUser (req, res){
     }
 }
 
+/**
+ * Login usuario
+ * @returns token: Token creado si gethash == true. user: Usuario logueado si gethash == false
+ */
 function loginUser (req, res){
     var params = req.body;
 
@@ -89,6 +96,10 @@ function loginUser (req, res){
     })
 }
 
+/**
+ * Actualizar usuario
+ * @returns user: Usuario antes de actualizar
+ */
 function updateUser (req, res){
     var userId = req.params.id || req.user.sub;
     var update = req.body;     
@@ -107,6 +118,10 @@ function updateUser (req, res){
     })
 }
 
+/**
+ * Subir imagen de usuario
+ * @returns image: Nombre de la imagen. user: Usuario sin actualizar
+ */
 function uploadIUser (req, res){
     var userId = req.user.sub;
     var file_name = 'No subido...';
@@ -137,15 +152,19 @@ function uploadIUser (req, res){
     }
 }
 
+/**
+ * Cargar imagen de usuario
+ * @return imagen de usuario
+ */
 function loadIUser (req, res){
     var imageFile = req.params.imageFile;
-    var path_file = global.PATH_FILE_USER + imageFile;
+    var path_file = GLOBAL.PATH_FILE_USER + imageFile;
 
     fs.exists(path_file, (exists) => {
         if(exists){
             res.sendFile(path.resolve(path_file));
         }else{
-            res.status(200).send({message:'La imagen no existe'}); 
+            res.status(404).send({message:'La imagen no existe'}); 
         }
     });
 }
