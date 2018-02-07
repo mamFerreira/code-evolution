@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+
+import { GLOBAL } from './services/global';
 import { UserService } from './services/user.service';
 import { User } from './models/user';
 
@@ -17,6 +19,7 @@ export class AppComponent implements OnInit{
   public eMsgLogin;
   public eMsgRegister;
   public showRegisterForm;
+  public url;
 
   constructor(    
     private _userService:UserService
@@ -25,6 +28,7 @@ export class AppComponent implements OnInit{
     this.token = this._userService.getToken();
     this.user = new User ('','','','','','ROLE_USER','','');
     this.user_register = new User ('','','','','','ROLE_USER','','');
+    this.url = GLOBAL.url;
   }
 
   ngOnInit(){

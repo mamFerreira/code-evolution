@@ -1,35 +1,32 @@
 <div *ngIf="identity">
-  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <!-- El logotipo y el icono que despliega el menú se agrupan para mostrarlos mejor en los dispositivos móviles -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="sr-only">Desplegar navegación</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" [routerLink]="['/']">CODE-EVOLUTION</a>
-      <a class="navbar-brand" [routerLink]="['/']"><span class="glyphicon glyphicon-globe"></span></a>
-    </div>
-    
-    <!-- Agrupar los enlaces de navegación, los formularios y cualquier otro elemento que se pueda ocultar al minimizar la barra -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse"> 
-      <ul class="nav navbar-nav navbar-right">
-        <li><p class="navbar-text"><img src="#">Nivel X</p></li>
-        <li><p class="navbar-text"><img src="#">{{identity.email}}</p></li>
-        <li><a [routerLink]="['/update_user']" title="Modificar mis datos"><span class="glyphicon glyphicon-cog"></span></a></li>
-        <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="clearfix"></div>
-
-
+  <div class="menu_navegation">
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+          <!-- El logotipo y el icono que despliega el menú se agrupan para mostrarlos mejor en los dispositivos móviles -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Desplegar navegación</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" [routerLink]="['/']">CODE-EVOLUTION</a>
+          <a class="navbar-brand" [routerLink]="['/']"><span class="glyphicon glyphicon-globe"></span></a>
+        </div>
+        
+        <!-- Agrupar los enlaces de navegación, los formularios y cualquier otro elemento que se pueda ocultar al minimizar la barra -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse"> 
+          <ul class="nav navbar-nav navbar-right">
+            <li><p class="navbar-text"><img class="nav_image" src="../assets/images/minions.jpeg"/>Nivel X</p></li>
+            <li><p class="navbar-text"><img class="nav_image" id="nav_user_image" src="{{url}}user-load/{{identity.image}}"/><span id="nav_user_name">{{identity.name}}</span></p></li>
+            <li><a [routerLink]="['/update_user']" title="Modificar mis datos"><span class="glyphicon glyphicon-cog"></span></a></li>
+            <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>
+          </ul>
+        </div>
+      </nav>    
+  </div>
   <div class="container central col-11">
       <router-outlet></router-outlet>
-  </div>
-  
+  </div>  
 </div>
 
 <div *ngIf="!identity">
