@@ -75,15 +75,37 @@ function addEvolution (req, res){
 }
 
 //updateEvolution: Actualizar evolución 
+function updateEvolution (req,res){
+
+}
 
 //uploadIEvolution: Subir imagen evolucion
+function uploadIEvolution (req,res){
+
+}
 
 //loadIUser: Carga imagen evolución
+function loadIUser (req,res){
 
+}
 
+//uploadISEvolution: Subir imagen pequeña evolucion
+function uploadISEvolution (req,res){
+
+}
+
+//loadISEvolutionUser: Carga imagen pequeña evolución
+function loadISEvolutionUser (req,res){
+
+}
 
 module.exports = {
     getEvolution,
     getEvolutions,
-    addEvolution
+    addEvolution,
+    updateEvolution,
+    uploadIEvolution,
+    loadIUser,
+    uploadISEvolution,
+    loadISEvolutionUser
 };
