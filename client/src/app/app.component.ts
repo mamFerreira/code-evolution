@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { GLOBAL } from './services/global';
 import { UserService } from './services/user.service';
@@ -22,6 +23,7 @@ export class AppComponent implements OnInit{
   public url;
 
   constructor(    
+    private _router: Router,
     private _userService:UserService
   ){
     this.identity = this._userService.getIdentity();
@@ -39,7 +41,7 @@ export class AppComponent implements OnInit{
       response => {     
 
         this.identity = response.user;
-
+        
         if(!this.identity._id){
           this.eMsgLogin = 'El usuario no está correctamente identificado';
         }else{
@@ -57,6 +59,7 @@ export class AppComponent implements OnInit{
                 localStorage.setItem('token',this.token);
                 this.eMsgLogin = "";
                 this.user = new User ('','','','','','ROLE_USER','','');
+                this._router.navigate(['/']);
               }
             },
             error => {
@@ -115,6 +118,7 @@ export class AppComponent implements OnInit{
     localStorage.removeItem('token');
     this.identity = null;
     this.token = null;  
+    this._router.navigate(['/']);
   }
 
   showRegister(){    

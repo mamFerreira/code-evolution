@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var bcrypt = require('bcrypt-nodejs');
 var User = require ('../models/user');
+var Level = require ('../models/level');
 var GLOBAL = require ('../services/global');
 var jwt = require ('../services/jwt');
 
@@ -67,7 +68,7 @@ function loginUser (req, res){
     var _email = params.email;
     var _password = params.password;
 
-    User.findOne({email:_email.toLowerCase()},(err,user) => {
+    User.findOne({email:_email.toLowerCase()}).populate({path:'level'}).exec((err,user) => {
         if(err){
             console.log(err);
             res.status(500).send({message:'Error en la petición'});   
@@ -85,7 +86,15 @@ function loginUser (req, res){
                             });
                         }else{
                             //Devolver usuario logueado
-                            res.status(200).send({user});
+                            Level.populate(user.level,{"path":"evolution"},(err,userEvolution) => {
+                                if(err){
+                                    console.log(err);
+                                    res.status(500).send({message:'Error en la petición'});   
+                                }else{
+                                    res.status(200).send({user});
+                                }
+                            });
+                            
                         }
                     }else{
                         res.status(404).send({message:'Contraseña incorrecta'});
@@ -93,7 +102,7 @@ function loginUser (req, res){
                 });
             }
         }
-    })
+    });
 }
 
 /**

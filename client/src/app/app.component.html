@@ -10,13 +10,13 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" [routerLink]="['/']">CODE-EVOLUTION</a>
-          <a class="navbar-brand" [routerLink]="['/']"><span class="glyphicon glyphicon-globe"></span></a>
+          <a class="navbar-brand" [routerLink]="['world']"><span class="glyphicon glyphicon-globe"></span></a>
         </div>
         
         <!-- Agrupar los enlaces de navegación, los formularios y cualquier otro elemento que se pueda ocultar al minimizar la barra -->
         <div class="collapse navbar-collapse navbar-ex1-collapse"> 
           <ul class="nav navbar-nav navbar-right">
-            <li><p class="navbar-text"><img class="nav_image" src="#"/>Nivel X</p></li>
+            <li><p class="navbar-text"><img class="nav_image" src="{{url}}evolution-load/{{identity.level.evolution.image_small}}"/>Nivel {{identity.level.order}}</p></li>
             <li><p class="navbar-text"><img class="nav_image" id="nav_user_image" src="{{url}}user-load/{{identity.image}}"/><span id="nav_user_name">{{identity.name}}</span></p></li>
             <li><a [routerLink]="['/update_user']" title="Modificar mis datos"><span class="glyphicon glyphicon-cog"></span></a></li>
             <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>

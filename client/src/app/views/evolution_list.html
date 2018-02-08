@@ -1,0 +1,9 @@
+<h1>Titulo{{titulo}}</h1>
+<div *ngIf="identity">    
+    <div *ngFor="let evolution of evolutions">
+        <a href="levels/{{evolution._id}}">
+            {{evolution.name}}            
+            <img src="{{url}}evolution-load/{{evolution.image}}" style="width:10%;"/>
+        </a>            
+    </div>        
+</div>

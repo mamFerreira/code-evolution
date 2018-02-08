@@ -5,13 +5,17 @@ import { HttpModule } from '@angular/http';
 import { routing, appRoutingProviders } from './app.routing';
 
 import { AppComponent } from './app.component';
+import { HomeComponent } from './components/home.component';
+import { EvolutionListComponent } from './components/evolution_list.component';
 import { UserEditComponent } from './components/user_edit.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    UserEditComponent
+    HomeComponent,
+    UserEditComponent,
+    EvolutionListComponent
   ],
   imports: [
     BrowserModule,

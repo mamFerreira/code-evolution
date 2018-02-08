@@ -31,7 +31,7 @@
     </form>      
 </div>
 <div class="col-md-4 col-lg-4 float-right">      
-    <div class="img_for_edit" ng-if="user.image && user.image != 'null'">        
+    <div class="img_for_edit" *ngIf="user.image && user.image != 'null'">        
         <img src="{{url}}user-load/{{user.image}}" style="width:80%;"/>
     </div>
 </div>
