@@ -30,32 +30,16 @@ export class EvolutionListComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.getEvolution();
+        this.getEvolutions();
     }
 
-    getEvolution() {
+    getEvolutions() {
         this._evolutionService.getEvolutions(this.token).subscribe(
             response => {
                 if (!response.evolutions) {
                     // Hacer algo
                 } else {
-                    this.evolutions = response.evolutions;
-                    for (let i = 0; i < this.evolutions.length; i++) {
-                        this._evolutionService.getNumLevels(this.token, this.evolutions[i]._id ).subscribe(
-                            response => {
-                                this.evolutions[i].num_levels = response.count;
-                            },
-                            error => {
-                                let errorMessage = <any> error;
-                    
-                                if (errorMessage != null) {
-                                    let body = JSON.parse(error._body);
-                                    // this.alertMessage = body.message;
-                                    console.log(error);
-                                }
-                            }
-                        );                        
-                    }                    
+                    this.evolutions = response.evolutions;                  
                 }
             },
             error => {

@@ -9,14 +9,15 @@ var Level = require ('../models/level');
 function getLevel (req, res){
     var levelId = req.params.id;
 
-    Level.find({_id: levelId, active: 1}).populate({path:'evolution'}).exec((err,album)=>{
+    Level.find({_id: levelId, active: 1}).populate({path:'evolution'}).exec((err,level)=>{
         if(err){
             res.status(500).send({message:'Error en la petición'});
         }else{
-            if(!artist){
+            if(!level){
                 res.status(404).send({message:'El nivel no existe'});
             }else{
-                res.status(200).send({level});
+                var levelAux = level[0];
+                res.status(200).send({level:levelAux});
             }
         }
     });   

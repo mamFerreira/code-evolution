@@ -13,6 +13,16 @@ export class LevelService {
         this.url = GLOBAL.url;
     }
 
+    getLevel (token, id){
+        let headers = new Headers({
+            'Content-Type' : "application/json",
+            'Authorization': token
+        });
+        let options = new RequestOptions({headers:headers});
+
+        return this._http.get(this.url+'level/'+id,options).map(res=>res.json());
+    }
+
     getLevels (token, evolutionId = null) {
         let headers = new Headers({
             'Content-Type' : 'application/json',

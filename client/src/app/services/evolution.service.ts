@@ -13,6 +13,16 @@ export class EvolutionService {
         this.url = GLOBAL.url;
     }
 
+    getEvolution (token, id: string){
+        let headers = new Headers({
+            'Content-Type' : "application/json",
+            'Authorization': token
+        });
+        let options = new RequestOptions({headers:headers});
+
+        return this._http.get(this.url+'evolution/'+id,options).map(res=>res.json());
+    }
+
     getEvolutions(token) {
         let headers = new Headers({
             'Content-Type' : 'application/json',
@@ -22,16 +32,4 @@ export class EvolutionService {
 
         return this._http.get(this.url + 'evolutions', options).map(res => res.json());
     }
-
-    getNumLevels(token, id) {
-        let headers = new Headers({
-            'Content-Type' : 'application/json',
-            'Authorization': token
-        });
-
-        let options = new RequestOptions({headers: headers});
-
-        return this._http.get(this.url + 'evolution-num-levels/' + id, options).map(res => res.json());
-    }
-
 }
