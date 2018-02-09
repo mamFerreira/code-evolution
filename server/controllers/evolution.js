@@ -48,6 +48,25 @@ function getEvolutions (req,res){
 }
 
 /**
+ * Obtener el número de niveles de la evolución indicada
+ * @returns count: Número de niveles
+ */
+function getNumLevels (req, res){
+    var evolutionId = req.params.id;
+
+    Level.find({evolution:evolutionId, active:1}).count((err,count) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor'});
+        }else{
+            if(!count){
+                count = 0;
+            }
+            res.status(200).send({count});
+        }
+    });
+}
+
+/**
  * Registrar nueva evolución en BBDD
  * @returns evolution: Evolución creada
  */
@@ -187,6 +206,7 @@ function loadIEvolution (req,res){
 module.exports = {
     getEvolution,
     getEvolutions,
+    getNumLevels,
     addEvolution,
     updateEvolution,
     uploadIEvolution,    

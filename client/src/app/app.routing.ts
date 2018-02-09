@@ -7,7 +7,7 @@ import { EvolutionListComponent } from './components/evolution_list.component';
 
 const appRoutes: Routes = [
     {path: '', component: HomeComponent},
-    {path: 'world', component: EvolutionListComponent},
+    {path: 'evolutions', component: EvolutionListComponent},
     {path: 'update_user', component: UserEditComponent},
     {path: '**', component: HomeComponent}
 ];

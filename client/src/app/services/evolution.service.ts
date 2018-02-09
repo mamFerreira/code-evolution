@@ -23,4 +23,15 @@ export class EvolutionService {
         return this._http.get(this.url + 'evolutions', options).map(res => res.json());
     }
 
+    getNumLevels(token, id) {
+        let headers = new Headers({
+            'Content-Type' : 'application/json',
+            'Authorization': token
+        });
+
+        let options = new RequestOptions({headers: headers});
+
+        return this._http.get(this.url + 'evolution-num-levels/' + id, options).map(res => res.json());
+    }
+
 }
