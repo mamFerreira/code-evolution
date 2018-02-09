@@ -7,6 +7,8 @@ import { routing, appRoutingProviders } from './app.routing';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home.component';
 import { EvolutionListComponent } from './components/evolution_list.component';
+import { LevelListComponent } from './components/level_list.component';
+import { LevelPlayComponent } from './components/level_play.component';
 import { UserEditComponent } from './components/user_edit.component';
 
 
@@ -14,8 +16,10 @@ import { UserEditComponent } from './components/user_edit.component';
   declarations: [
     AppComponent,
     HomeComponent,
-    UserEditComponent,
-    EvolutionListComponent
+    EvolutionListComponent,
+    LevelListComponent,
+    LevelPlayComponent,
+    UserEditComponent
   ],
   imports: [
     BrowserModule,

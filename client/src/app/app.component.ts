@@ -59,7 +59,7 @@ export class AppComponent implements OnInit{
                 localStorage.setItem('token', this.token);
                 this.eMsgLogin = '';
                 this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '');
-                this._router.navigate(['/']);
+                this._router.navigate(['home']);
               }
             },
             error => {

@@ -3,12 +3,12 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 
 @Component({
-    selector: 'app-level-list',
-    templateUrl: '../views/level_list.html',
+    selector: 'app-level-play',
+    templateUrl: '../views/level_play.html',
     providers: []
 })
 
-export class LevelListComponent implements OnInit {
+export class LevelPlayComponent implements OnInit {
 
     public title: string;
     
@@ -16,11 +16,11 @@ export class LevelListComponent implements OnInit {
         private _route: ActivatedRoute,
         private _router: Router
     ) {
-        this.title = 'Seleccione un nivel';        
+        this.title = 'Empieze a jugar al nivel';        
     }
 
     ngOnInit() {
-        //Comprobar si el usuario ha llegado a dicha evolución
+        //Comprobar si el usuario ha llegado al nivel
     }
 
 }

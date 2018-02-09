@@ -1,12 +1,12 @@
-<h1>Titulo{{titulo}}</h1>
+<h1 class="head-title">{{title}}</h1>
 <div *ngIf="identity">    
     <div *ngFor="let evolution of evolutions">
-        <a href="levels/{{evolution._id}}" *ngIf="identity.level.evolution.order > evolution.order">
+        <a [routerLink]="['/play/evolution',evolution._id]" *ngIf="identity.level.evolution.order > evolution.order">
             {{evolution.name}}            
             <img src="{{url}}evolution-load/{{evolution.image}}" style="width:10%;"/>     
             {{evolution.num_levels}}  de {{evolution.num_levels}}     
         </a> 
-        <a href="levels/{{evolution._id}}" *ngIf="identity.level.evolution.order == evolution.order">
+        <a [routerLink]="['/play/evolution',evolution._id]" *ngIf="identity.level.evolution.order == evolution.order">
             {{evolution.name}}            
             <img src="{{url}}evolution-load/{{evolution.image}}" style="width:10%;"/>     
             {{identity.level.evolution.order-1}}  de {{evolution.num_levels}}     

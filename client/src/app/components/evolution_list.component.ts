@@ -13,7 +13,7 @@ import { EvolutionService } from '../services/evolution.service';
 
 export class EvolutionListComponent implements OnInit {    
 
-    public titulo: string;
+    public title: string;
     public evolutions: Evolution[];    
     public identity;
     public token;
@@ -23,7 +23,7 @@ export class EvolutionListComponent implements OnInit {
         private _userService: UserService,
         private _evolutionService: EvolutionService
     ) {
-        this.titulo = '';
+        this.title = 'Seleccione una evolución';
         this.identity = this._userService.getIdentity();
         this.token = this._userService.getToken();
         this.url = GLOBAL.url;        
