@@ -1,16 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 
 import { GLOBAL } from '../services/global';
-import { EvolutionService } from '../services/evolution.service';
 import { Evolution } from '../models/evolution';
 import { UserService } from '../services/user.service';
-
-type IDictionary = [string, number];
+import { EvolutionService } from '../services/evolution.service';
 
 @Component({
     selector: 'app-evolution-list',
     templateUrl: '../views/evolution_list.html',
-    providers: [EvolutionService]
+    providers: [UserService, EvolutionService]
 })
 
 export class EvolutionListComponent implements OnInit {    
