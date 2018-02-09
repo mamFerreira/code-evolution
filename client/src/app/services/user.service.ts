@@ -11,44 +11,44 @@ export class UserService {
     public token;
     public url: string;
 
-    constructor (private _http: Http){
+    constructor (private _http: Http) {
         this.url = GLOBAL.url;
     }
 
-    loginUser (user_to_login, gethash=null){
-        if(gethash != null){
+    loginUser (user_to_login, gethash= null) {
+        if (gethash != null) {
             user_to_login.gethash = gethash;
         }
         
         let params = JSON.stringify(user_to_login);
-        let headers = new Headers({'Content-Type':'application/json'});
+        let headers = new Headers({'Content-Type': 'application/json'});
 
-        return this._http.post(this.url+'user-login', params, {headers:headers}).map(res=>res.json());
+        return this._http.post(this.url + 'user-login', params, {headers: headers}).map(res => res.json());
     }
 
-    registerUser (user_to_register){
+    registerUser (user_to_register) {
         let params = JSON.stringify(user_to_register);
-        let headers = new Headers({'Content-Type':'application/json'});
+        let headers = new Headers({'Content-Type': 'application/json'});
         
-        return this._http.post(this.url+'user-add', params, {headers:headers}).map(res=>res.json());
+        return this._http.post(this.url + 'user-add', params, {headers: headers}).map(res => res.json());
     }
 
-    updateUser (user_to_update){
+    updateUser (user_to_update) {
         let params = JSON.stringify(user_to_update);
         let headers = new Headers({
-            'Content-Type':'application/json',
+            'Content-Type': 'application/json',
             'Authorization': this.getToken()
         });
         
-        return this._http.put(this.url+'user-update', params, {headers:headers}).map(res=>res.json());
+        return this._http.put(this.url + 'user-update', params, {headers: headers}).map(res => res.json());
     }
 
     getIdentity() {
         let identity = JSON.parse(localStorage.getItem('identity'));
 
-        if(identity != "undefined"){
+        if (identity !== 'undefined') {
             this.identity = identity;
-        }else{
+        } else {
             this.identity = null;
         }
 
@@ -58,9 +58,9 @@ export class UserService {
     getToken() {
         let token = localStorage.getItem('token');
 
-        if(token != "undefined"){
+        if (token !== 'undefined') {
             this.token = token;
-        }else{
+        } else {
             this.token = null;
         }
         return this.token;

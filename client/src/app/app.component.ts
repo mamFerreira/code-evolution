@@ -24,48 +24,48 @@ export class AppComponent implements OnInit{
 
   constructor(    
     private _router: Router,
-    private _userService:UserService
-  ){
+    private _userService: UserService
+  ) {
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
-    this.user = new User ('','','','','','ROLE_USER','','');
-    this.user_register = new User ('','','','','','ROLE_USER','','');
+    this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '');
+    this.user_register = new User ('', '', '', '', '', 'ROLE_USER', '', '');
     this.url = GLOBAL.url;
   }
 
-  ngOnInit(){
+  ngOnInit() {
   }
 
-  onSubmitLogin(){
+  onSubmitLogin() {
     this._userService.loginUser(this.user).subscribe(
       response => {     
 
         this.identity = response.user;
         
-        if(!this.identity._id){
+        if (!this.identity._id) {
           this.eMsgLogin = 'El usuario no está correctamente identificado';
-        }else{
-          //Crear elemento en el localstorage para tener al usuario en sesión
-          localStorage.setItem('identity',JSON.stringify(this.identity));
+        } else {
+          // Crear elemento en el localstorage para tener al usuario en sesión
+          localStorage.setItem('identity', JSON.stringify(this.identity));
 
-          //Conseguir el token para enviarselo a cada petición HTTP
-          this._userService.loginUser(this.user,true).subscribe(
+          // Conseguir el token para enviarselo a cada petición HTTP
+          this._userService.loginUser(this.user, true).subscribe(
             response => {              
               this.token = response.token;
-              if (this.token.length < 1){
+              if (this.token.length < 1) {
                 this.eMsgLogin = 'Token no generado correctamente';
-              }else{
-                //Crear elemento en el localstorage para tener el token en sesión
-                localStorage.setItem('token',this.token);
-                this.eMsgLogin = "";
-                this.user = new User ('','','','','','ROLE_USER','','');
+              } else {
+                // Crear elemento en el localstorage para tener el token en sesión
+                localStorage.setItem('token', this.token);
+                this.eMsgLogin = '';
+                this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '');
                 this._router.navigate(['/']);
               }
             },
             error => {
-              var _error = <any> error;
+              let _error = <any> error;
 
-              if(_error != null){          
+              if (_error != null) {          
                 this.eMsgLogin = JSON.parse(error._body).message;
                 console.log(_error);
               }
@@ -75,9 +75,9 @@ export class AppComponent implements OnInit{
 
       },
       error => {
-        var _error = <any> error;
+        let _error = <any> error;
 
-        if(_error != null){          
+        if (_error != null) {          
           this.eMsgLogin = JSON.parse(error._body).message;
           console.log(_error);
         }
@@ -85,27 +85,27 @@ export class AppComponent implements OnInit{
     );
   }
 
-  onSubmitRegister(){
+  onSubmitRegister() {
 
-    this.sMsgRegister = "";
-    this.eMsgRegister = "";
+    this.sMsgRegister = '';
+    this.eMsgRegister = '';
 
     this._userService.registerUser(this.user_register).subscribe(
       response => {
         let user = response.user;
         this.user_register = user;
 
-        if(!user._id){
-          this.eMsgRegister = 'Error al registrarse'
-        }else{
-          this.sMsgRegister = "Registro realizado correctamente, identificate con " + this.user_register.email;
-          this.user_register = new User ('','','','','','ROLE_USER','','');
+        if (!user._id) {
+          this.eMsgRegister = 'Error al registrarse';
+        } else {
+          this.sMsgRegister = 'Registro realizado correctamente, identificate con ' + this.user_register.email;
+          this.user_register = new User ('', '', '', '', '', 'ROLE_USER', '', '');
         }
       },
       error => {
-        var _error = <any> error;
+        let _error = <any> error;
 
-        if(_error != null){          
+        if (_error != null) {          
           this.eMsgRegister = JSON.parse(error._body).message;
           console.log(_error);
         }
@@ -113,7 +113,7 @@ export class AppComponent implements OnInit{
     );
   }
 
-  logout(){
+  logout() {
     localStorage.removeItem('identity');
     localStorage.removeItem('token');
     this.identity = null;
@@ -121,11 +121,11 @@ export class AppComponent implements OnInit{
     this._router.navigate(['/']);
   }
 
-  showRegister(){    
+  showRegister() {    
     this.showRegisterForm = true;
   }
   
-  hiddenRegister(){    
+  hiddenRegister() {    
     this.showRegisterForm = false;
   }
 

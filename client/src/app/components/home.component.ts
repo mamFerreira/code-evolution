@@ -3,7 +3,7 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 
 @Component({
-    selector: 'home',
+    selector: 'app-home',
     templateUrl: '../views/home.html'
 })
 
@@ -14,11 +14,11 @@ export class HomeComponent implements OnInit {
     constructor(
         private _route: ActivatedRoute,
         private _router: Router
-    ){
+    ) {
         this.title = 'Bienvenido a CodeEvolution';        
     }
 
-    ngOnInit(){
+    ngOnInit() {
         
     }
 

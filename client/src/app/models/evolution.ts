@@ -6,6 +6,5 @@ export class Evolution {
         public description: string,
         public image: string,
         public image_small: string
-    ){}
-
+    ) {}
 }

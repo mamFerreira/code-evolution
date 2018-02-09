@@ -9,19 +9,18 @@ export class EvolutionService {
 
     public url: string;
 
-    constructor (private _http: Http){
+    constructor (private _http: Http) {
         this.url = GLOBAL.url;
     }
 
-    getEvolutions(token){
+    getEvolutions(token) {
         let headers = new Headers({
-            'Content-Type' : "application/json",
+            'Content-Type' : 'application/json',
             'Authorization': token
         });
-        let options = new RequestOptions({headers:headers});
-        console.log("Token: " + token);
+        let options = new RequestOptions({headers: headers});        
 
-        return this._http.get(this.url+'evolutions',options).map(res=>res.json());
+        return this._http.get(this.url + 'evolutions', options).map(res => res.json());
     }
 
 }

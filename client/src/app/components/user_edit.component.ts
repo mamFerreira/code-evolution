@@ -6,7 +6,7 @@ import { User } from '../models/user';
 
 
 @Component({
-    selector: 'user_edit',
+    selector: 'app-user-edit',
     templateUrl: '../views/user_edit.html',
     providers: [UserService]
 })
@@ -24,7 +24,7 @@ export class UserEditComponent implements OnInit {
 
     constructor(
         private _userService: UserService
-    ){
+    ) {
         this.titulo = 'Actualizar mis datos';        
         this.identity = this._userService.getIdentity();
         this.token = this._userService.getToken();           
@@ -32,43 +32,43 @@ export class UserEditComponent implements OnInit {
         this.url = GLOBAL.url;
     }
 
-    ngOnInit(){             
+    ngOnInit() {             
     }
 
-    onSubmit(){
+    onSubmit() {
 
-        this.errorMessage = "";
-        this.successMessage = "";
+        this.errorMessage = '';
+        this.successMessage = '';
 
         this._userService.updateUser(this.user).subscribe(
             response => {
                 
-                if(!response.user){
-                    this.errorMessage = "Usuario no actualizado";
-                }else{                                        
-                    localStorage.setItem('identity',JSON.stringify(this.user));
-                    document.getElementById("nav_user_name").innerHTML = this.user.name;
+                if (!response.user) {
+                    this.errorMessage = 'Usuario no actualizado';
+                } else {                                        
+                    localStorage.setItem('identity', JSON.stringify(this.user));
+                    document.getElementById('nav_user_name').innerHTML = this.user.name;
 
-                    if(this.filesToUpload){
-                        this.makeFileRequest(this.url + 'user-upload',[],this.filesToUpload).then(
+                    if (this.filesToUpload) {
+                        this.makeFileRequest(this.url + 'user-upload', [], this.filesToUpload).then(
                             (result: any) => {
                                 this.user.image = result.image;
                                 let image_path = this.url + 'user-load/' + this.user.image;
 
-                                localStorage.setItem('identity',JSON.stringify(this.user));
-                                document.getElementById("nav_user_image").setAttribute('src',image_path);
+                                localStorage.setItem('identity', JSON.stringify(this.user));
+                                document.getElementById('nav_user_image').setAttribute('src', image_path);
                             }
                         );
                     }
 
-                    this.successMessage = "Usuario actualizado correctamente"
+                    this.successMessage = 'Usuario actualizado correctamente'
                 }
 
             },
             error => {                
-                var _error = <any> error;
+                let _error = <any> error;
     
-                if(_error != null){          
+                if (_error != null) {          
                     this.errorMessage = JSON.parse(error._body).message;
                     console.log(_error);
                 }                  
@@ -76,35 +76,34 @@ export class UserEditComponent implements OnInit {
         );
     }
 
-    fileChangeEvent(fileInput: any){     
+    fileChangeEvent(fileInput: any) {     
         this.filesToUpload = <Array<File>> fileInput.target.files;             
     }
 
     makeFileRequest(url: string, params: Array<string>, files:Array<File>){
 
-        var token = this.token;
+        let token = this.token;
         
-        return new Promise(function(resolve,reject){
-            var formData:any = new FormData();
-            var xhr = new XMLHttpRequest();
+        return new Promise(function(resolve, reject) {
+            let formData: any = new FormData();
+            let xhr = new XMLHttpRequest();
 
-            for(var i=0; i < files.length; i++){
-                formData.append('image',files[i],files[i].name);
+            for (let i = 0; i < files.length; i++) {
+                formData.append('image', files[i], files[i].name);
             }
 
-            xhr.onreadystatechange = function (){
-                if (xhr.readyState == 4){
-                    if(xhr.status == 200){
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if ( xhr.status === 200) {
                         resolve(JSON.parse(xhr.response));
-                    }                    
-                    else{
+                    } else {
                         reject(xhr.response);
                     }
                 }
-            }
+            };
 
-            xhr.open('POST',url,true);
-            xhr.setRequestHeader('Authorization',token);
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Authorization', token);
             xhr.send(formData);
         });
     }

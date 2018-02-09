@@ -32,8 +32,6 @@ function getEvolution (req, res){
  * @returns evolutions: Evoluciones registradas en el sistema
  */
 function getEvolutions (req,res){
-    
-    var aux = {};
 
     Evolution.find({}).sort('order').exec((err,evolutions) => {
         if (err){
@@ -41,22 +39,8 @@ function getEvolutions (req,res){
         }else{
             if(!evolutions){
                 res.status(404).send({message: 'No hay evoluciones'}); 
-            }else{                                            
-                evolutions.forEach(evolution => {        
-                    Level.find({"evolution" : evolution._id}).count( (err,count) => {
-                        if (err){
-                            res.status(500).send({message: 'Error en el servidor'});
-                        }else{
-                            
-                            if(!count){
-                                count=0;
-                            }
-                            aux[evolution._id] = count;                    
-                            console.log(aux);        
-                        }
-                    });                    
-                });                
-                res.status(200).send({evolutions,aux});
+            }else{                                                                         
+                res.status(200).send({evolutions});
             }
         }
     });

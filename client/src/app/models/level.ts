@@ -6,6 +6,5 @@ export class Level {
         public description: string,        
         public active: number,
         public evolution: string,
-    ){}
-
+    ) {}
 }
