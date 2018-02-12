@@ -20,7 +20,23 @@ function getEvolution (req, res){
             if(!evolution){
                 res.status(404).send({message: 'No existe la evolución'}); 
             }else{
-                res.status(200).send({evolution});
+                
+                //Verificar que el usuario logueado tiene permisos de acceso a dicha evolución
+                Evolution.findById(req.user.level.evolution).exec((err,evolutionUser)=>{
+                    if(err){
+                        res.status(500).send({message: 'Error en el servidor'});
+                    }else{
+                        if(!evolutionUser){
+                            res.status(404).send({message: 'No existe la evolución asociada al usuario'}); 
+                        }else{
+                            if(evolutionUser.order>=evolution.order){
+                                res.status(200).send({evolution});
+                            }else{
+                                res.status(401).send({message:"Sin permisos de acceso a la evolución"});
+                            }                            
+                        }
+                    }
+                });                
             }
         }
     });
@@ -203,40 +219,6 @@ function loadIEvolution (req,res){
     });
 }
 
-/**
- * Comprobar si el usuario pasado por token tiene permisos para jugar la evolución indicada en id
- * @returns verify: true o false dependiendo de si tiene o no permisos
- */
-function verifyEvolution (req,res){
-    var evolutionId = req.params.id;
-
-    Evolution.findById(evolutionId).exec((err,evolution)=>{
-        if (err){
-            res.status(500).send({message: 'Error en el servidor'});
-        }else{
-            if(!evolution){
-                res.status(404).send({message: 'No existe la evolución'}); 
-            }else{
-                Evolution.findById(req.user.level.evolution).exec(( err,evolutionUser)=>{
-                    if(err){
-                        res.status(500).send({message: 'Error en el servidor'});
-                    }else{
-                        if(!evolutionUser){
-                            res.status(404).send({message: 'No existe la evolución'});
-                        }else{
-                            if (parseInt(evolution.order) > parseInt(evolutionUser.order)){
-                                res.status(200).send({verify:'false'});                    
-                            }else{
-                                res.status(200).send({verify:'true'});                    
-                            }
-                        }
-                    }
-                });                
-            }
-        }
-    });
-}
-
 module.exports = {
     getEvolution,
     getEvolutions,
@@ -245,6 +227,5 @@ module.exports = {
     updateEvolution,
     uploadIEvolution,    
     uploadISEvolution,
-    loadIEvolution,
-    verifyEvolution
+    loadIEvolution
 };

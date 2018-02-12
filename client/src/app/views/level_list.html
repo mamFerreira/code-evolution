@@ -1,12 +1,9 @@
-<div *ngIf="identity && evolution && checkEvolution">    
+{{errorMessage}}
+<div *ngIf="identity && evolution">    
     <h1 class="head-title">{{title}} de {{evolution.name}}</h1>    
     <div *ngFor="let level of levels">
         <a [routerLink]="['/play/evolution/level',level._id]">
             {{level.title}}                 
         </a>     
     </div>        
-</div>
-
-<div *ngIf="!checkEvolution">
-    Tiene que completar antes las anteriores evoluciones
 </div>

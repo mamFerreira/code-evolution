@@ -22,7 +22,7 @@ export class LevelListComponent implements OnInit {
     public identity;
     public token;
     public url: string;
-    public checkEvolution: boolean;
+    public errorMessage: string;
     
     constructor(
         private _route: ActivatedRoute,
@@ -37,35 +37,9 @@ export class LevelListComponent implements OnInit {
         this.url = GLOBAL.url;          
     }
 
-    ngOnInit() {    
-        this.verifyEvolution();
+    ngOnInit() {            
         this.getEvolution();                
     }    
-
-    verifyEvolution(){
-        this._route.params.forEach((params:Params) => {
-            let id = params['id'];
-
-            this._evolutionService.verifyEvolution(this.token,id).subscribe(
-                response => {
-                    if(!response.verify){
-                        this._router.navigate(['/home']);
-                    }else{
-                        this.checkEvolution = response.verify === 'true';
-                        console.log(this.checkEvolution);
-                    }
-                },
-                error => {
-                    var errorMessage = <any> error;
-                    
-                    if(errorMessage != null){
-                        var body = JSON.parse(error._body);                        
-                        console.log(error);
-                    }
-                }
-            );
-        });
-    }
 
     getEvolution(){
         this._route.params.forEach((params:Params) => {
@@ -103,6 +77,7 @@ export class LevelListComponent implements OnInit {
                     if(errorMessage != null){
                         var body = JSON.parse(error._body);                        
                         console.log(error);
+                        this.errorMessage = body.message;
                     }
                 }
             );

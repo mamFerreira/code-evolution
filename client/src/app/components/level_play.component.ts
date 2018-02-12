@@ -20,6 +20,7 @@ export class LevelPlayComponent implements OnInit {
     public identity;
     public token;
     public url: string;
+    public errorMessage: string;
     
     constructor(
         private _route: ActivatedRoute,
@@ -57,6 +58,7 @@ export class LevelPlayComponent implements OnInit {
                     if(errorMessage != null){
                         var body = JSON.parse(error._body);                        
                         console.log(error);
+                        this.errorMessage = body.message;
                     }
                 }
             );        

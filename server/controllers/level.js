@@ -17,7 +17,24 @@ function getLevel (req, res){
                 res.status(404).send({message:'El nivel no existe'});
             }else{
                 var levelAux = level[0];
-                res.status(200).send({level:levelAux});
+
+                //Comprobar que el usuario puede acceder al nivel
+                Level.findById(req.user.level._id).populate({path:'evolution'}).exec((err,levelUser)=>{
+                    if (err){
+                        res.status(500).send({message:'Error en la petición'});
+                    }else{
+                        if(!levelUser){
+                            res.status(404).send({message:'El nivel asignado al usuario no existe'});
+                        }else{
+                            //Si la evolucion del usuario es mayor a la del nivel o misma y orden de nivel menor igual al del usuario
+                            if(levelUser.evolution.order>levelAux.evolution.order || (levelUser.evolution.order==levelAux.evolution.order && levelAux.order <= levelUser.order)){
+                                res.status(200).send({level:levelAux});
+                            }else{
+                                res.status(404).send({message:'Sin permisos de acceso al nivel'});
+                            }                                                
+                        }
+                    }
+                });                
             }
         }
     });   

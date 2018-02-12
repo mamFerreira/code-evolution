@@ -19,6 +19,5 @@ api.put('/evolution-update/:id', md_auth.ensureAuthAdmin ,EvolutionController.up
 api.post('/evolution-upload/:id', [md_auth.ensureAuthAdmin,md_upload], EvolutionController.uploadIEvolution);
 api.post('/evolution-upload_s/:id', [md_auth.ensureAuthAdmin,md_upload], EvolutionController.uploadISEvolution);
 api.get('/evolution-load/:imageFile',EvolutionController.loadIEvolution);
-api.get('/evolution-verify/:id',md_auth.ensureAuth,EvolutionController.verifyEvolution);
 
 module.exports = api;
