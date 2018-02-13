@@ -74,7 +74,7 @@ function loginUser (req, res){
             res.status(500).send({message:'Error en la petición'});   
         }else{
             if (!user){
-                res.status(404).send({message:'Usuario no existe'});
+                res.status(400).send({message:'Usuario no existe'});
             }else{
                 //Comprobamos la contraseña
                 bcrypt.compare(_password,user.password, (err,check) => {
@@ -84,20 +84,11 @@ function loginUser (req, res){
                             res.status(200).send({
                                 token: jwt.createToken(user)                                
                             });
-                        }else{
-                            //Devolver usuario logueado
-                            Level.populate(user.level,{"path":"evolution"},(err,userEvolution) => {
-                                if(err){
-                                    console.log(err);
-                                    res.status(500).send({message:'Error en la petición'});   
-                                }else{
-                                    res.status(200).send({user});
-                                }
-                            });
-                            
+                        }else{                           
+                            res.status(200).send({user});
                         }
                     }else{
-                        res.status(404).send({message:'Contraseña incorrecta'});
+                        res.status(400).send({message:'Contraseña incorrecta'});
                     }
                 });
             }

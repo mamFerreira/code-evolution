@@ -1,3 +1,4 @@
+// Importación de los elementos empleados por el componente
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -5,6 +6,11 @@ import { GLOBAL } from './services/global';
 import { UserService } from './services/user.service';
 import { User } from './models/user';
 
+// Decorador para definir distintas propiedades del componente
+// selector: Define la etiqueta html donde se renderiza el componente
+// templateUrl: Archivo html con la vista del componente
+// styleUrls: Archivo CSS con los estilos del componente
+// providers: Servicios de los que depende el componente
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
