@@ -1,0 +1,7 @@
+RAIZ
+- package.json: Dependencias del proyecto y nº de versión
+- node_modules/: Módulos Node JS
+- src/: Código de la aplicación
+
+src
+- index.html: página principal de la aplicación

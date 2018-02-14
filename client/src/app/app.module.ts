@@ -1,40 +1,42 @@
-// Importación de paquetes Angular y otros elementos externos
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+
 import { routing, appRoutingProviders } from './app.routing';
 
-import { AppComponent } from './app.component';
-import { HomeComponent } from './components/home.component';
-import { EvolutionListComponent } from './components/evolution_list.component';
-import { LevelListComponent } from './components/level_list.component';
-import { LevelPlayComponent } from './components/level_play.component';
-import { UserEditComponent } from './components/user_edit.component';
+import { GlobalService } from './services/global.service';
+import { UserService } from './services/user.service';
+import { EvolutionService } from './services/evolution.service';
 
-// Decorador que recibe un objeto de metadatos que define el módulo:
-// declarations: Vistas del módulo (componentes, directivas y pipes)
-// imports: paquetes que empleará este módulo
-// providers: servicios utilizados por el módulo
-// bootstrap: vista raíz de la aplicación
+import { AppComponent } from './app.component';
+import { LoginComponent } from './login/login.component';
+import { NavigationMenuComponent } from './navigation-menu/navigation-menu.component';
+import { UserUpdateComponent } from './user-update/user-update.component';
+import { HomeComponent } from './home/home.component';
+import { EvolutionListComponent } from './evolution-list/evolution-list.component';
+import { LevelListComponent } from './level-list/level-list.component';
+import { LevelPlayComponent } from './level-play/level-play.component';
+
+
 @NgModule({
   declarations: [
     AppComponent,
+    LoginComponent,
+    NavigationMenuComponent,
+    UserUpdateComponent,
     HomeComponent,
     EvolutionListComponent,
     LevelListComponent,
-    LevelPlayComponent,
-    UserEditComponent
+    LevelPlayComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule,
+    HttpClientModule,
     routing
   ],
-  providers: [appRoutingProviders],
+  providers: [GlobalService, UserService, EvolutionService, appRoutingProviders],
   bootstrap: [AppComponent]
 })
-
-// Exportación del módulo como una clase Angular
 export class AppModule { }

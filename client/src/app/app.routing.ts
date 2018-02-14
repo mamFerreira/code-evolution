@@ -1,19 +1,23 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { HomeComponent } from './components/home.component';
-import { EvolutionListComponent } from './components/evolution_list.component';
-import { LevelListComponent } from './components/level_list.component';
-import { LevelPlayComponent } from './components/level_play.component';
-import { UserEditComponent } from './components/user_edit.component';
+import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
+import { EvolutionListComponent } from './evolution-list/evolution-list.component';
+import { LevelPlayComponent } from './level-play/level-play.component';
+import { LevelListComponent } from './level-list/level-list.component';
+import { UserUpdateComponent } from './user-update/user-update.component';
+
+
+
 
 const appRoutes: Routes = [
     {path: '', component: HomeComponent},
     {path: 'home', component: HomeComponent},
-    {path: 'play', component: EvolutionListComponent},
-    {path: 'play/evolution/:id', component: LevelListComponent},
-    {path: 'play/evolution/level/:id', component: LevelPlayComponent},
-    {path: 'user-update', component: UserEditComponent},
+    {path: 'jugar', component: EvolutionListComponent},
+    {path: 'jugar/evolucion/:id', component: LevelListComponent},
+    {path: 'jugar/evolucion/nivel/:id', component: LevelPlayComponent},
+    {path: 'mis-datos', component: UserUpdateComponent},
     {path: '**', component: HomeComponent}
 ];
 

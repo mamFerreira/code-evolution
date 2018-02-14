@@ -1,0 +1,78 @@
+<!--Imagen y texto descriptivo del juego-->
+<div class="col-md-6 float-left"></div>
+
+<!--Formularios inico sesión y registro-->
+<div class="col-md-6 float-right">
+  <div class = "col-md-8">
+    <h1>Inicia sesión</h1>
+    <div *ngIf="errorLogin" class="alert alert-warning"> <strong>Error: </strong>{{errorLogin}}</div>
+    <form (ngSubmit)="onSubmitLogin()" #formlogin="ngForm">
+      <div class="form-group">
+        <label for="email"><strong>Email:</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="email.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="email.invalid && email.touched"></i>
+        <input type="text" class="form-control" ngModel name="email" required email #email="ngModel"/>
+        <p class="alert alert-danger" *ngIf="email.invalid && email.touched"> 
+          Por favor introduzca una dirección de correo correcta
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="pwd"><strong>Password:</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="password.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="password.invalid && password.touched"></i>
+        <input type="password" class="form-control" ngModel name="password" required #password="ngModel"/>
+        <p class="alert alert-danger" *ngIf="password.invalid && password.touched"> 
+          Por favor introduzca una contraseña
+        </p>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="!formlogin.valid">Entrar</button>
+    </form>
+  </div>
+  <div class = "col-md-8">
+    <h1>Registrate</h1>
+    <p>¿Es la primera vez que entras en Code-Evolution?</p>
+    <button type="button" class="btn btn-link" (click)="showRegisterForm=true;">Rellena el formulario</button>
+    <div *ngIf="errorRegister" class="alert alert-warning"> <strong>Error: </strong>{{errorRegister}}</div>
+    <div *ngIf="successRegister" class="alert alert-success">{{successRegister}}</div>
+    <form *ngIf="showRegisterForm" (ngSubmit)="onSubmitRegister()" #formregister="ngForm">
+      <div class="form-group">
+        <label for="name"><strong>Nombre (*):</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="name_r.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="name_r.invalid && name_r.touched"></i>
+        <input type="text" class="form-control" ngModel name="name_r" required #name_r="ngModel"/>
+        <p class="alert alert-danger" *ngIf="name_r.invalid && name_r.touched"> 
+          Por favor introduzca el nombre
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="surname"><strong>Apellidos (*):</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="surname_r.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="surname_r.invalid && surname_r.touched"></i>
+        <input type="text" class="form-control" ngModel name="surname_r" required #surname_r="ngModel"/>
+        <p class="alert alert-danger" *ngIf="surname_r.invalid && surname_r.touched"> 
+          Por favor introduzca los apellido
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="email"><strong>Email (*):</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="email_r.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="email_r.invalid && email_r.touched"></i>
+        <input type="text" class="form-control" ngModel name="email_r" required email #email_r="ngModel"/>
+        <p class="alert alert-danger" *ngIf="email_r.invalid && email_r.touched"> 
+          Por favor introduzca una dirección de correo correcta
+        </p>
+      </div>
+      <div class="form-group">
+        <label for="pwd"><strong>Password:</strong></label>
+        <i class="fa fa-check-circle check" *ngIf="password_r.valid"></i>
+        <i class="fa fa-exclamation-circle uncheck" *ngIf="password_r.invalid && password_r.touched"></i>
+        <input type="password" class="form-control" ngModel name="password_r" required #password_r="ngModel"/>
+        <p class="alert alert-danger" *ngIf="password_r.invalid && password_r.touched"> 
+          Por favor introduzca una contraseña
+        </p>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="!formregister.valid">Crear cuenta</button>
+      <button type="button" class="btn btn-link" (click)="showRegisterForm=false;">Cancelar</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="menu_navegation">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <!-- El logotipo y el icono que despliega el menú se agrupan para mostrarlos mejor en los dispositivos móviles -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+          <span class="sr-only">Desplegar navegación</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" [routerLink]="['home']" title="Página de inicio">
+          <img class="nav_image_logo" src="../../assets/image/logo.png"/>
+        </a>
+        <a class="navbar-brand" [routerLink]="['jugar']" title="Empezar a jugar"><span class="glyphicon glyphicon-globe"></span></a>
+      </div>
+      
+      <!-- Agrupar los enlaces de navegación, los formularios y cualquier otro elemento que se pueda ocultar al minimizar la barra -->
+      <div class="collapse navbar-collapse navbar-ex1-collapse"> 
+        <ul class="nav navbar-nav navbar-right">
+          <li>
+            <div class="nav_image">
+                <img src="../../assets/image/default.jpg" *ngIf="!identity.level.evolution"/>
+                <img src="{{url}}evolution-load-id/{{identity.level.evolution}}" *ngIf="identity.level.evolution"/>               
+            </div>            
+            <span class="navbar-text">Nivel {{identity.level.order}}</span>
+          </li>
+          <li> 
+            <div class="nav_image">
+                <img src="../../assets/image/default.jpg" id="navbar_user_image" *ngIf="!identity.image || identity.image=='null'"/>
+                <img src="{{url}}user-load/{{identity.image}}" id="navbar_user_image" *ngIf="identity.image && identity.image!='null'"/>
+            </div>
+            <p class="navbar-text" id="navbar_user_name">{{identity.name}}</p>            
+          </li>
+          <li><a [routerLink]="['mis-datos']" title="Modificar mis datos"><span class="glyphicon glyphicon-cog"></span></a></li>
+          <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>
+        </ul>
+      </div>
+    </nav>    
+</div>

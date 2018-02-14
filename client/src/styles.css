@@ -1,1 +1,20 @@
-/* You can add global styles to this file, and also import other style files */
+/*GLOBAL*/
+html, body{
+    margin: 0;
+    height: 100%;
+    background: #ffffff;         
+}
+
+h1, h2{
+    text-decoration-color: black;
+    font-family: 'Oswald', sans-serif;    
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+}
+ 
+h2{
+    font-size: 22px;    
+}

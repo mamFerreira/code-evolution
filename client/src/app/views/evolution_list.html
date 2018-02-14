@@ -1,8 +1,0 @@
-<h1 class="head-title">{{title}}</h1>
-<div *ngIf="identity">    
-    <div *ngFor="let evolution of evolutions">
-        <a [routerLink]="['/play/evolution',evolution._id]">
-            {{evolution.name}}                 
-        </a>     
-    </div>        
-</div>

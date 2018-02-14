@@ -1,35 +1,31 @@
 import { Injectable } from '@angular/core';
-import { Http, Response, Headers, RequestOptions } from '@angular/http';
-import 'rxjs/add/operator/map';
-import { Observable } from 'rxjs/Observable';
-import { GLOBAL } from './global';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {Observable} from 'rxjs/Observable';
+
+import { UserService } from './user.service';
+import { GlobalService } from './global.service';
 
 @Injectable()
 export class EvolutionService {
 
-    public url: string;
+    public httpOptions;
 
-    constructor (private _http: Http) {
-        this.url = GLOBAL.url;
+    constructor(
+        private _http: HttpClient,
+        private _globalService: GlobalService,
+        private _userService: UserService
+    ) {
+
+        this.httpOptions = {
+            headers: new HttpHeaders({
+              'Content-Type':  'application/json',
+              'Authorization': _userService.getToken()
+            })
+          };
     }
 
-    getEvolution (token, id: string){
-        let headers = new Headers({
-            'Content-Type' : "application/json",
-            'Authorization': token
-        });
-        let options = new RequestOptions({headers:headers});
-
-        return this._http.get(this.url+'evolution/'+id,options).map(res=>res.json());
+    getEvolutions(): Observable<any> {
+        return this._http.get(this._globalService.url + 'evolutions', this.httpOptions);
     }
 
-    getEvolutions(token) {
-        let headers = new Headers({
-            'Content-Type' : 'application/json',
-            'Authorization': token
-        });
-        let options = new RequestOptions({headers: headers});        
-
-        return this._http.get(this.url + 'evolutions', options).map(res => res.json());
-    }
 }

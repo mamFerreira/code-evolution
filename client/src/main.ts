@@ -8,6 +8,5 @@ if (environment.production) {
   enableProdMode();
 }
 
-// Define AppModule como el punto de entrada de la aplicación
 platformBrowserDynamic().bootstrapModule(AppModule)
   .catch(err => console.log(err));

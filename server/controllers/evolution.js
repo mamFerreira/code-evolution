@@ -219,6 +219,35 @@ function loadIEvolution (req,res){
     });
 }
 
+/**
+ * Cargar imagen de la evolución a partir de su ID
+ * @return imagen de evolución
+ */
+function loadIEvolutionId (req,res){
+    var evolutionId = req.params.id;
+
+    Evolution.findById(evolutionId).exec((err,evolution)=>{
+        if (err){
+            res.status(500).send({message: 'Error en el servidor'});
+        }else{
+            if(!evolution){
+                res.status(404).send({message: 'No existe la evolución'}); 
+            }else{                
+                var imageFile = evolution.image_small;
+                var path_file = GLOBAL.PATH_FILE_EVOLUTION + imageFile;
+            
+                fs.exists(path_file, (exists) => {
+                    if(exists){
+                        res.sendFile(path.resolve(path_file));
+                    }else{
+                        res.status(404).send({message:'La imagen no existe'}); 
+                    }
+                });            
+            }
+        }
+    });
+}
+
 module.exports = {
     getEvolution,
     getEvolutions,
@@ -227,5 +256,6 @@ module.exports = {
     updateEvolution,
     uploadIEvolution,    
     uploadISEvolution,
-    loadIEvolution
+    loadIEvolution,
+    loadIEvolutionId
 };
