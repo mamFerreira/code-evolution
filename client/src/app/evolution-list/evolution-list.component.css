@@ -1,0 +1,37 @@
+.evolution {       
+    float: left;
+    text-align: center;
+    margin-top: 20px;    
+}
+
+.evolution a {
+    color:black;
+    text-decoration:none;
+}
+
+.evolution h2{
+    font-weight: bold;
+}
+
+.evolution-image {
+    height: 250px;    
+    border: 2px solid black;
+    background-color: white;
+    border-radius: 40px;
+    overflow: hidden;  
+    position: relative; 
+}
+
+.evolution-image img{
+    height: 80%;
+    position:absolute;
+    left:0px;
+    right:0px;
+    top:10px;
+    margin:auto;
+}
+
+.evolution-text {
+    font-size: 15px;
+    margin-top: 10px;
+}

@@ -1,8 +1,15 @@
-<h1 class="head-title">{{title}}</h1>
-<div *ngIf="evolutions">    
-    <div *ngFor="let evolution of evolutions">
-        <a [routerLink]="['/play/evolution',evolution._id]">
-            {{evolution.name}}                 
-        </a>     
-    </div>        
+<div class="page-header">
+    <h1>{{title}}</h1>
+</div>
+<div *ngIf="errosMessagge" class="alert alert-warning"> <strong>Error: </strong>{{errosMessagge}}</div>
+<div *ngFor="let evolution of evolutions">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 evolution">
+        <a [routerLink]="['/jugar/evolución',evolution._id]">
+            <h2>{{evolution.name}}</h2>
+            <div class="evolution-image" *ngIf="evolution.image">
+                <img src="{{url}}evolution-load/{{evolution.image}}">
+            </div>
+            <p class = "evolution-text">Aprendizaje</p>
+        </a>        
+    </div>
 </div>
