@@ -24,6 +24,10 @@ export class EvolutionService {
           };
     }
 
+    getEvolution(id: string): Observable<any> {
+        return this._http.get(this._globalService.url + 'evolution/' + id, this.httpOptions);
+    }
+
     getEvolutions(): Observable<any> {
         return this._http.get(this._globalService.url + 'evolutions', this.httpOptions);
     }

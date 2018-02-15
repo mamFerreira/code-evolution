@@ -1,3 +1,14 @@
+.evolution_line {
+    height:1%; 
+    float:left;   
+    filter:contrast(5%);
+}
+
+
+.evolution_line_selected {
+    filter:contrast(100%);
+}
+
 .evolution {       
     float: left;
     text-align: center;

@@ -44,7 +44,7 @@ export class UserUpdateComponent implements OnInit {
         if(!res.user){
           this.errorUpdate = 'Error al actualizar el usuario';
         }else{
-          localStorage.setItem('identity',JSON.stringify(this.user));
+          localStorage.setItem('identity', JSON.stringify(this.user));
           document.getElementById('navbar_user_name').innerHTML = this.user.name;
           
           if (this.filesToUpload){
