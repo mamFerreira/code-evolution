@@ -3,11 +3,27 @@
     <div class="col-md-12">
       <div class="page-header">
         <h1>{{title}}</h1>              
-        <button class="btn btn-primary">Jugar</button>              
-      </div>  
-      <div *ngFor="let l of levels">
-        {{l.title}}
+        <button class="btn btn-primary" [routerLink]="['/jugar/nivel/' + level._id]">Jugar</button>             
+      </div> 
+      <div class="col-md-4 float-left" style="border: 1px solid black;width:50%;height:200px;">
+
       </div>
+      <div class="col-md-4 float-right" style="margin:0 0;">
+        <table class="table" cellspacing="0" width="100%">
+          <thead>
+              <tr>
+                  <th class="col-md-1">Orden</th>
+                  <th class="col-md-2">Titulo</th>
+              </tr>
+          </thead>
+          <tbody>
+              <tr *ngFor="let l of levels" [ngClass]="{'table-level-selected': l._id == level._id }" (click)="changeLevel(l)">
+                  <td>{{l.order}}</td>
+                  <td>{{l.title}}</td>
+              </tr>            
+          </tbody>
+        </table>
+      </div>       
     </div>
   </div>
 </div>

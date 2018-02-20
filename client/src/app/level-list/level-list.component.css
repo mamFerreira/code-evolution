@@ -1,0 +1,11 @@
+.page-header .btn{  
+    width: 12%;
+    min-width: 80px;
+    margin-left: 80%;
+    float:right;
+    margin-top: -10px;
+  }
+
+  .table-level-selected {
+      background-color: black;
+  }
