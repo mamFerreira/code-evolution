@@ -15,7 +15,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.token = this._userService.getToken();
-    //FALTA: Comprobar que el token es válido antes de almacenarlo en this.token
+    // FALTA: Comprobar que el token es válido antes de almacenarlo en this.token
   }
 
 }

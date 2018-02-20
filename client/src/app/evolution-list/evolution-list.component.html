@@ -2,14 +2,41 @@
     <div class="row">
         <div class="col-md-12">
             <div class="page-header">
-                <h1>{{title}}</h1>              
-                <button class="btn btn-primary" [routerLink]="['evolucion/'+evolution._id]">Jugar</button>              
-            </div>            
+                <h1>{{title}}</h1>                                        
+            </div>  
+            <div class="evolution-selected"> 
+                <div class="col-md-6 float-right contenedor-image">                    
+                    <img src="{{url}}evolution-load-id/{{evolution._id}}"/>                    
+                </div>
+                <div class="col-md-6 col-lg-6 float-right evolution-information"> 
+                    <table class="table table-evolution-information">
+                      <tbody>
+                        <tr>
+                          <td><strong>Nombre</strong></td>
+                          <td>{{evolution.name}}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Origen</strong></td>
+                          <td>{{evolution.origin}}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Descripción</strong></td>
+                          <td>{{evolution.description}}</td>
+                        </tr>         
+                        <tr>
+                            <td><strong>Aprendizaje</strong></td>
+                            <td>Sintáxis básica<br><br>Declaración de variables</td>
+                        </tr>                                                          
+                      </tbody>
+                    </table>                    
+                    <button class="btn btn-primary" [routerLink]="['evolucion/'+evolution._id]">Seleccionar</button>   
+                </div>
+            </div>          
             <div style="display:inline-block;width:100%;overflow-y:auto;">
                 <ul class="timeline timeline-horizontal">
                     <li class="timeline-item" *ngFor="let e of evolutions">
-                        <div class="timeline-badge"><img src="{{url}}evolution-load-id/{{e._id}}"/></div>
-                        <a class="timeline-panel"  [ngClass]="{'timeline-panel-selected': e._id == evolution._id }" (click)="changeEvolution(e)">
+                        <div class="timeline-badge" [ngClass]="{'timeline-selected': e._id == evolution._id }"><img src="{{url}}evolution-load-id/{{e._id}}"/></div>
+                        <a class="timeline-panel"  [ngClass]="{'timeline-selected': e._id == evolution._id }" (click)="changeEvolution(e)">
                             <div class="timeline-heading">
                                 <h4 class="timeline-title">{{e.name}}</h4>
                                 <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> {{e.origin}}</small></p>

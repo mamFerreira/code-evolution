@@ -1,11 +1,27 @@
-.page-header .btn{  
+
+
+.level-selected {    
+    width:50%;
+    height:500px;
+}
+
+
+.level-selected .level-image{
+    border: 1px solid black;
+    height: 300px;
+}
+
+.level-selected .btn{  
     width: 12%;
     min-width: 80px;
-    margin-left: 80%;
-    float:right;
-    margin-top: -10px;
-  }
+    margin-left: 44%;
+    margin-top: 10px;
+}
 
-  .table-level-selected {
-      background-color: black;
-  }
+.table-levels {
+    margin-left: 30%;
+}
+
+.table-level-selected {
+    background-color: #c0c0c0;
+}

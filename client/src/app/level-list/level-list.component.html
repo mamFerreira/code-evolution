@@ -1,15 +1,20 @@
+<div>
+  {{errosMessagge}}
+</div>
 <div class="container" *ngIf="level">
   <div class="row">
     <div class="col-md-12">
       <div class="page-header">
-        <h1>{{title}}</h1>              
-        <button class="btn btn-primary" [routerLink]="['/jugar/nivel/' + level._id]">Jugar</button>             
+        <h1>{{title}}</h1>                           
       </div> 
-      <div class="col-md-4 float-left" style="border: 1px solid black;width:50%;height:200px;">
-
+      <div class="col-md-4 float-left level-selected">
+        <div class="level-image">
+          <img />
+        </div>        
+        <button class="btn btn-primary" [routerLink]="['/jugar/nivel/' + level._id]">Jugar</button>        
       </div>
-      <div class="col-md-4 float-right" style="margin:0 0;">
-        <table class="table" cellspacing="0" width="100%">
+      <div class="col-md-4 float-right">
+        <table class="table table-levels" cellspacing="0" width="100%">
           <thead>
               <tr>
                   <th class="col-md-1">Orden</th>

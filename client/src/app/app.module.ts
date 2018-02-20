@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { AceEditorModule } from 'ng2-ace-editor';
 
 import { routing, appRoutingProviders } from './app.routing';
 
@@ -35,7 +36,8 @@ import { LevelPlayComponent } from './level-play/level-play.component';
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    routing
+    routing,
+    AceEditorModule
   ],
   providers: [GlobalService, UserService, EvolutionService, LevelService,  appRoutingProviders],
   bootstrap: [AppComponent]

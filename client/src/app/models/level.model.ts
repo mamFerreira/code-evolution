@@ -4,6 +4,7 @@ export class Level {
         public order: number,
         public title: string,
         public description: string,
-        public evolution: number
+        public evolution: number,
+        public image: string
     ) {}
 }
