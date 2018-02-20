@@ -16,7 +16,7 @@ const appRoutes: Routes = [
     {path: 'home', component: HomeComponent},
     {path: 'jugar', component: EvolutionListComponent},
     {path: 'jugar/evolucion/:id', component: LevelListComponent},
-    {path: 'jugar/evolucion/nivel/:id', component: LevelPlayComponent},
+    {path: 'jugar/nivel/:id', component: LevelPlayComponent},
     {path: 'mis-datos', component: UserUpdateComponent},
     {path: '**', component: HomeComponent}
 ];

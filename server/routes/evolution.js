@@ -12,12 +12,12 @@ var md_upload = multipart({uploadDir: global.PATH_FILE_EVOLUTION});
 
 
 api.get('/evolution/:id',md_auth.ensureAuth, EvolutionController.getEvolution);
-api.get('/evolutions',md_auth.ensureAuth, EvolutionController.getEvolutions);
+api.get('/evolutions/:order?',md_auth.ensureAuth, EvolutionController.getEvolutions);
 api.get('/evolution-num-levels/:id',md_auth.ensureAuth,EvolutionController.getNumLevels);
 api.post('/evolution-add', md_auth.ensureAuthAdmin, EvolutionController.addEvolution);
 api.put('/evolution-update/:id', md_auth.ensureAuthAdmin ,EvolutionController.updateEvolution);
-api.post('/evolution-upload/:id/:type', [md_auth.ensureAuthAdmin,md_upload], EvolutionController.uploadIEvolution);
+api.post('/evolution-upload/:id', [md_auth.ensureAuthAdmin,md_upload], EvolutionController.uploadIEvolution);
 api.get('/evolution-load/:imageFile',EvolutionController.loadIEvolution);
-api.get('/evolution-load/:id/:type',EvolutionController.loadIEvolution);
+api.get('/evolution-load-id/:id',EvolutionController.loadIEvolution);
 
 module.exports = api;

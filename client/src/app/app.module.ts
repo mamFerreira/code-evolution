@@ -8,6 +8,7 @@ import { routing, appRoutingProviders } from './app.routing';
 import { GlobalService } from './services/global.service';
 import { UserService } from './services/user.service';
 import { EvolutionService } from './services/evolution.service';
+import { LevelService } from './services/level.service';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './login/login.component';
@@ -36,7 +37,7 @@ import { LevelPlayComponent } from './level-play/level-play.component';
     HttpClientModule,
     routing
   ],
-  providers: [GlobalService, UserService, EvolutionService, appRoutingProviders],
+  providers: [GlobalService, UserService, EvolutionService, LevelService,  appRoutingProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

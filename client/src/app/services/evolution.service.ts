@@ -28,8 +28,8 @@ export class EvolutionService {
         return this._http.get(this._globalService.url + 'evolution/' + id, this.httpOptions);
     }
 
-    getEvolutions(): Observable<any> {
-        return this._http.get(this._globalService.url + 'evolutions', this.httpOptions);
+    getEvolutions(order?: string): Observable<any> {
+        return this._http.get(this._globalService.url + 'evolutions/' + order, this.httpOptions);
     }
 
 }

@@ -32,32 +32,36 @@ export class EvolutionListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getEvolution();
     this.getEvolutions();
   }
 
-  getEvolution() {
+
+  getEvolutions() {
+
     this._evolutionService.getEvolution(this.identity.level.evolution).subscribe(
       res => {
         if (!res.evolution) {
           this._router.navigate(['/']);
         } else {
           this.evolution = res.evolution;
-        }
-      },
-      err => {
-        this.errosMessagge = err.error.message;
-      }
-    );
-  }
+          let order = '';
 
-  getEvolutions() {
-    this._evolutionService.getEvolutions().subscribe(
-      res => {
-        if (!res.evolutions) {
-          this._router.navigate(['/']);
-        } else {
-          this.evolutions = res.evolutions;
+          if (this.identity.role === 'ROLE_USER') {
+            order = String(this.evolution.order);
+          }
+          // Obtener las evoluciones disponibles para jugar
+          this._evolutionService.getEvolutions(order).subscribe(
+            res => {
+              if (!res.evolutions) {
+                this._router.navigate(['/']);
+              } else {
+                this.evolutions = res.evolutions;
+              }
+            },
+            err => {
+              this.errosMessagge = err.error.message;
+            }
+          );
         }
       },
       err => {

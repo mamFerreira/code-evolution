@@ -1,23 +1,26 @@
-<div *ngIf="evolution">
-    <div class="page-header">
-        <h1>{{title}}</h1>
-    </div>
-    <div *ngFor="let e of evolutions">
-        <a title="{{e.origin}}" (click)="changeEvolution(e)">
-            <img class="evolution_line" [ngClass]="{'evolution_line_selected': e._id == evolution._id }" id="line_{{e._id}}" src="{{url}}evolution-load/{{e._id}}/2">            
-        </a>    
-    </div>
-    
-    <div *ngIf="errosMessagge" class="alert alert-warning"> <strong>Error: </strong>{{errosMessagge}}</div>
-    <div *ngFor="let evolution of evolutions">
-        <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 evolution">
-            <a [routerLink]="['/jugar/evolución',evolution._id]">
-                <h2>{{evolution.name}}</h2>
-                <div class="evolution-image" *ngIf="evolution.image">
-                    <img src="{{url}}evolution-load/{{evolution.image}}">
-                </div>
-                <p class = "evolution-text">Aprendizaje</p>
-            </a>        
+<div class="container" *ngIf="evolution">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h1>{{title}}</h1>              
+                <button class="btn btn-primary" [routerLink]="['evolucion/'+evolution._id]">Jugar</button>              
+            </div>            
+            <div style="display:inline-block;width:100%;overflow-y:auto;">
+                <ul class="timeline timeline-horizontal">
+                    <li class="timeline-item" *ngFor="let e of evolutions">
+                        <div class="timeline-badge"><img src="{{url}}evolution-load-id/{{e._id}}"/></div>
+                        <a class="timeline-panel"  [ngClass]="{'timeline-panel-selected': e._id == evolution._id }" (click)="changeEvolution(e)">
+                            <div class="timeline-heading">
+                                <h4 class="timeline-title">{{e.name}}</h4>
+                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> {{e.origin}}</small></p>
+                            </div>
+                            <div class="timeline-body">
+                                <p><!--aprendizaje--></p>
+                            </div>
+                        </a>
+                    </li>                
+                </ul>
+            </div>
         </div>
-    </div>
+    </div>  
 </div>

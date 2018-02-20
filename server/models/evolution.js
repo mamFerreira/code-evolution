@@ -8,9 +8,7 @@ var EvolutionSchema = new Schema({
     name: String,
     description: String,
     origin: String,
-    image: String,
-    image_small: String,
-    image_origin: String
+    image: String
 });
 
 module.exports = mongoose.model('Evolution',EvolutionSchema,'evolution');

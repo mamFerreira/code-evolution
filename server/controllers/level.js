@@ -17,9 +17,9 @@ function getLevel (req, res){
                 res.status(404).send({message:'El nivel no existe'});
             }else{
                 var levelAux = level[0];
-
+                res.status(200).send({level:levelAux});
                 //Comprobar que el usuario puede acceder al nivel
-                Level.findById(req.user.level._id).populate({path:'evolution'}).exec((err,levelUser)=>{
+                /*Level.findById(req.user.level._id).populate({path:'evolution'}).exec((err,levelUser)=>{
                     if (err){
                         res.status(500).send({message:'Error en la petición'});
                     }else{
@@ -34,7 +34,7 @@ function getLevel (req, res){
                             }                                                
                         }
                     }
-                });                
+                });  */              
             }
         }
     });   
@@ -46,16 +46,16 @@ function getLevel (req, res){
  */
 function getLevels (req, res){
     var evolutionId = req.params.evolution;
+    var query;
+    var order = req.params.order;
 
-    if(!evolutionId){
-        //Sacar todos los niveles de la BBDD
-        var find = Level.find({active: 1}).sort('order');
+    if (order){
+        query = {active: 1, evolution: evolutionId, 'order':{$lte:order}};
     }else{
-        //Sacar los albums asociados al artista de la bbdd
-        var find = Level.find({active: 1 , evolution: evolutionId}).sort('order');
+        query = {active: 1, evolution: evolutionId};
     }
 
-    find.exec((err,levels)=>{
+    Level.find(query).sort('order').exec((err,levels)=>{
         if (err){
             res.status(500).send({message: 'Error en el servidor'});
         }else{

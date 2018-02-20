@@ -1,9 +1,9 @@
-export class Evolution {
+export class Level {
     constructor(
         public _id: string,
         public order: number,
-        public name: string,
+        public title: string,
         public description: string,
-        public image: string
+        public evolution: number
     ) {}
 }

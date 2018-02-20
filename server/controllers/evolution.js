@@ -44,12 +44,21 @@ function getEvolution (req, res){
 }
 
 /**
- * Obtener todas las evoluciones
+ * Obtener todas las evoluciones o las de menor/igual orden al pasado por parámetro
  * @returns evolutions: Evoluciones registradas en el sistema
  */
 function getEvolutions (req,res){
 
-    Evolution.find({}).sort('order').exec((err,evolutions) => {
+    var query;
+    var order = req.params.order;
+
+    if (order){
+        query = {'order':{$lte:order}};
+    }else{
+        query = {};
+    }
+
+    Evolution.find(query).sort('order').exec((err,evolutions) => {
         if (err){
             res.status(500).send({message: 'Error en el servidor'});
         }else{
@@ -140,30 +149,14 @@ function updateEvolution (req,res){
  */
 function uploadIEvolution (req,res){
     var evolId = req.params.id;
-    var type = req.params.type;
     var file_name = 'No subido...';
     var field;
 
     if (req.files.image){
         var file_path = req.files.image.path;
         var file_name = file_path.split('\/')[2];
-        var ext = file_name.split('\.')[1];
-
-        switch (type){
-            case "0":
-                field = {image: file_name};
-                break;
-            case "1":
-                field = {image_small: file_name};
-                break;
-            case "2":
-                field = {image_origin: file_name};
-                break;
-            default:
-                return res.status(404).send({message: 'Tipo de imagen desconocida'});
-        }
-
-        
+        var ext = file_name.split('\.')[1];        
+        field = {image: file_name};        
 
         if (ext=='png' || ext=='jpg' || ext=='gif' || ext=='jpeg'){
             Evolution.findByIdAndUpdate(evolId, field, (err,evolUpdate) => {
@@ -197,8 +190,7 @@ function loadIEvolution (req,res){
     var path_file;
 
     if (!imageFile){
-        var evolutionId = req.params.id;
-        var type = req.params.type;
+        var evolutionId = req.params.id;        
 
         Evolution.findById(evolutionId).exec((err,evolution)=>{            
             if (err){
@@ -207,19 +199,7 @@ function loadIEvolution (req,res){
                 if(!evolution){
                     res.status(404).send({message: 'No existe la evolución'}); 
                 }else{        
-                    switch(type) {
-                        case "0":
-                            imageFile = evolution.image;
-                            break;
-                        case "1":
-                            imageFile = evolution.image_small;
-                            break;
-                        case "2":
-                            imageFile = evolution.image_origin;
-                            break;
-                        default:
-                            return res.status(404).send({message: 'Tipo de imagen desconocido'}); 
-                    }
+                    imageFile = evolution.image;
                     path_file = GLOBAL.PATH_FILE_EVOLUTION + imageFile;
                     fs.exists(path_file, (exists) => {
                         if(exists){

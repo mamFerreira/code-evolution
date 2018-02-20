@@ -1,3 +1,13 @@
-<p>
-  level-list works!
-</p>
+<div class="container" *ngIf="level">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="page-header">
+        <h1>{{title}}</h1>              
+        <button class="btn btn-primary">Jugar</button>              
+      </div>  
+      <div *ngFor="let l of levels">
+        {{l.title}}
+      </div>
+    </div>
+  </div>
+</div>
