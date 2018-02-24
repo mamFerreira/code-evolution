@@ -32,4 +32,9 @@ export class LevelService {
       return this._http.get(this._globalService.url + 'levels/' + evolution + '/' + order, this.httpOptions);
   }
 
+  translateCode(code: string): Observable<any> {
+    let json = JSON.stringify({code});
+    return this._http.post(this._globalService.url + 'translate', json, this.httpOptions);
+  }
+
 }

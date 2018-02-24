@@ -12,5 +12,6 @@ api.get('/levels/:evolution/:order?', md_auth.ensureAuth, LevelController.getLev
 api.post('/level-add', md_auth.ensureAuthAdmin, LevelController.addLevel);
 api.put('/level-update/:id',md_auth.ensureAuthAdmin,LevelController.updateLevel);
 api.put('/level-desactive/:id',md_auth.ensureAuthAdmin,LevelController.desactiveLevel);
+api.post('/translate', md_auth.ensureAuthAdmin, LevelController.translateCode);
 
 module.exports = api;

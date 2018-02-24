@@ -139,10 +139,17 @@ function desactiveLevel (req,res){
     });
 }
 
+function translateCode (req, res){
+    var code = req.body;    
+    var code_translate = code;
+    res.status(200).send({code : code_translate});
+}
+
 module.exports = {
     getLevel,
     getLevels,
     addLevel,
     updateLevel,
-    desactiveLevel
+    desactiveLevel,
+    translateCode
 };
