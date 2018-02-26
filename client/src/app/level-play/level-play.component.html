@@ -1,7 +1,8 @@
-<div class="col-md-6 float-right canvas">
-    <div id="phaser-game"></div>
+<div class="col-md-6 float-right">
+    <div id="phaser-game" class="canvas"></div>
 </div>
 <div class="col-md-6 float-right">
-    <ace-editor [(text)]="text" #editor style="height:384px; border: 2px solid black;"></ace-editor>
-    <button class="btn btn-primary" (click)="sendCode();" >Enviar</button>
+    <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
 </div>
+<button class="btn btn-primary" (click)="playLevel();" *ngIf="level && evolution">Enviar</button>
+

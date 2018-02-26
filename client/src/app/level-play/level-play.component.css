@@ -1,4 +1,6 @@
-.canvas{
+.canvas,
+.editor{
+    height:385px; 
     border: 2px solid black;
 }
 

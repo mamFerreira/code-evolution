@@ -1,14 +1,12 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-// Importación Phaser
-import {MainState} from './states/main-state';
-import 'phaser-ce/build/custom/pixi';
-import 'phaser-ce/build/custom/p2';
-import * as Phaser from 'phaser-ce/build/custom/phaser-split';
-// Importación servicios
-import {LevelService} from '../services/level.service';
-// Ejecución paralela
-import { createWorker, ITypedWorker } from 'typed-web-workers';
+import { ActivatedRoute, Params} from '@angular/router';
+import { Game } from '../game/game';
 
+import { LevelService } from '../services/level.service';
+import { EvolutionService } from '../services/evolution.service';
+
+import { Level } from '../models/level.model';
+import { Evolution } from '../models/evolution.model';
 
 @Component({
   selector: 'app-level-play',
@@ -17,24 +15,52 @@ import { createWorker, ITypedWorker } from 'typed-web-workers';
 })
 
 export class LevelPlayComponent implements OnInit {
-
+  
   @ViewChild('editor') editor;
-  public text: string;
-  public game: Phaser.Game;
-  public state: MainState;
+  public title: string;
+  public level: Level;
+  public evolution: Evolution;
+  public game: Game;
+  public code: string;
+  public codeTranslate: string;
+  public errorM: string;
 
   constructor(
-    private _levelService: LevelService
+    private _levelSercice: LevelService,
+    private _evolutionService: EvolutionService,
+    private _route: ActivatedRoute
   ) {
-    this.text = '#Alcanca la posición objetivo\nwhile true:\n\tplayer.moveRight()';
+    this.title = 'Disfrute del nivel';
   }
 
   ngOnInit() {
-    this.initEditor();
-    this.initGame();
+    this.load();    
   }
 
-  initEditor() {
+  load() {
+    this._route.params.forEach((params: Params) => {
+      let id = params['id'];
+      
+      this._levelSercice.getLevel(id).subscribe(
+        res => {
+          if (!res.level) {
+            this.errorM = 'Error en el servidor';
+          } else {
+            this.level = res.level;
+            this.evolution = res.level.evolution;
+            this.code = 'this.state.moveRight();'; // this.level.code;            
+            this.loadEditor();
+            this.loadCanvas();
+          }
+        },
+        err => {
+          this.errorM = err.error.message;          
+        }
+      );
+    });
+  }
+
+  loadEditor() {
     this.editor.setTheme('eclipse');
     this.editor.setMode('python');
 
@@ -42,55 +68,25 @@ export class LevelPlayComponent implements OnInit {
         enableBasicAutocompletion: true,
         fontSize: '14px'
     });
-
-    /*this.editor.getEditor().commands.addCommand({
-        name: 'showOtherCompletions',
-        bindKey: 'Ctrl-.',
-        exec: function (editor) {
-
-        }
-    });*/
   }
 
-  initGame() {
-    this.game = new Phaser.Game('100', 384, Phaser.CANVAS, 'phaser-game');
-    this.state = new MainState(this.game);
-    this.game.state.add('gameplay', this.state);
-    this.game.state.start('gameplay');
+  loadCanvas() {
+    this.game = new Game(this.level, this.evolution, 'phaser-game');
   }
 
-  sendCode() {
-    this._levelService.translateCode(this.text).subscribe(
+  playLevel () {
+    this._levelSercice.translateCode(this.code).subscribe(
       res => {
         if (!res.code) {
-          // Error
+          this.errorM = 'Error en el servidor';
         } else {
-          this.text = res.code;
-          // Ejecutar código dinámico:
-          // eval(res.code);
-          // Ejecutar código paralelo:
-          // const typedWorker: ITypedWorker<number, number> = createWorker(this.workFn, this.logFn);
-          // const typedWorker2: ITypedWorker<number, number> = createWorker(this.workFn, this.logFn);
-          // typedWorker.postMessage(1000);
-          // typedWorker2.postMessage(1000);
+          this.codeTranslate = res.code.code;
+          this.game.executeCode(this.codeTranslate);
         }
       },
       err => {
-        console.log(err);
+        this.errorM = err.error.message;
       }
     );
   }
-
-  workFn(x: number): number {
-    while (x > 0) {
-      console.log(x);
-      x--;
-    }
-    return 1;
-  }
-
-  logFn(result: number) {
-    console.log(`We received this response from the worker: ${result}`);
-  }
 }
-

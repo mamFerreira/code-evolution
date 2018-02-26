@@ -25,28 +25,28 @@ export class UserUpdateComponent implements OnInit {
   constructor(
     private _userService: UserService,
     private _globalService: GlobalService
-  ) { 
-    this.title = "Actualizar mi información personal";    
-    this.user = this._userService.getIdentity();   
-    this.token = this._userService.getToken(); 
+  ) {
+    this.title = 'Actualizar mi información personal';
+    this.user = this._userService.getIdentity();
+    this.token = this._userService.getToken();
     this.url = this._globalService.url;
   }
 
   ngOnInit() { }
 
-  onSubmit() {    
-    
+  onSubmit() {
+
     this.errorUpdate = '';
     this.successUpdate = '';
 
     this._userService.updateUser(this.user).subscribe(
       res => {
-        if(!res.user){
+        if (!res.user) {
           this.errorUpdate = 'Error al actualizar el usuario';
-        }else{
+        } else {
           localStorage.setItem('identity', JSON.stringify(this.user));
           document.getElementById('navbar_user_name').innerHTML = this.user.name;
-          
+
           if (this.filesToUpload){
             this.makeFileRequest(this.url + 'user-upload', [], this.filesToUpload).then(
               (result: any) => {
