@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
-import { Game } from '../game/game';
+import { Game } from '../class/game';
 import { LevelService } from '../services/level.service';
 import { EvolutionService } from '../services/evolution.service';
 import { Level } from '../models/level.model';

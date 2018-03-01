@@ -59,7 +59,7 @@ export class StateMain extends Phaser.State {
 
     reload() {        
         this._player.position.x = 75;
-        this._player.position.y = 225;
+        this._player.position.y = 160;
         this._player.body.velocity.x = 0;
         this._player.body.velocity.y = 0;
 

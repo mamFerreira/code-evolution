@@ -8,7 +8,7 @@ import { Interpreter } from '../../assets/js/acorn_interpreter';
 import { Level } from '../models/level.model';
 import { Evolution } from '../models/evolution.model';
 // Importación de los estados
-import { StateCell } from '../states/state-cell';
+import { StateCell } from './states/state-cell';
 
 let _state: any;
 let _interpreter: InterpreterJS;

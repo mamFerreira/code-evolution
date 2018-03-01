@@ -1,5 +1,5 @@
 import { StateMain } from './state-main';
-import { Level } from '../models/level.model';
+import { Level } from '../../models/level.model';
 
 
 export class StateCell extends StateMain {    
