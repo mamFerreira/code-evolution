@@ -48,7 +48,7 @@ export class LevelPlayComponent implements OnInit {
           } else {
             this.level = res.level;
             this.evolution = res.level.evolution;
-            this.code = 'this.state.moveRight();'; // this.level.code;            
+            this.code = 'imprimirValor("Hola Mundo!");'; // this.level.code;            
             this.loadEditor();
             this.loadCanvas();
           }

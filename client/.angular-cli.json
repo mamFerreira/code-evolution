@@ -29,7 +29,8 @@
         "../node_modules/ace-builds/src-min/mode-python.js",
         "../node_modules/phaser-ce/build/custom/pixi.min.js",
         "../node_modules/phaser-ce/build/custom/p2.min.js",
-        "../node_modules/phaser-ce/build/custom/phaser-split.min.js"
+        "../node_modules/phaser-ce/build/custom/phaser-split.min.js",
+        "./assets/js/acorn_interpreter.js"
       ],
       "environmentSource": "environments/environment.ts",
       "environments": {

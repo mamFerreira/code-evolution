@@ -5,10 +5,12 @@ import { Level } from '../models/level.model';
 export class StateCell extends StateMain {    
 
     private level: Level;
+    private x: string;
 
     constructor(game, level: Level) {
       super(game);      
       this.level = level;
+      this.x = 'Funciona correctamente';
     }
 
     preload() {
@@ -23,8 +25,16 @@ export class StateCell extends StateMain {
         super.update();
     }
 
-    moveRight(n) {
-        console.log ('moveRight: ' + n.toString());
+    position() {        
+        return super.player().body.position.x;
+    }
+
+    imprimirValor(x) {
+        console.log('El valor es: ' + x);
+    }
+
+    obtenerValor() {
+        return this.x;
     }
 
 }

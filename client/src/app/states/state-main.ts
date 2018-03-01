@@ -9,9 +9,10 @@ export class StateMain extends Phaser.State {
     private map: Phaser.Tilemap;
     private layer_surface;
     private layer_block;
-    private player;
+    private _player;
     private txt;
     private cursors;
+    private move;
     
     constructor(game) {
         super();
@@ -41,22 +42,44 @@ export class StateMain extends Phaser.State {
         this.map.setCollisionBetween(1, 10000, this.layer_block.layer.properties.collision, this.layer_block);
         this.layer_surface.resizeWorld();
         this.layer_block.resizeWorld();  
-        this.player = this._game.add.sprite(75, 225, 'player');
+        this._player = this._game.add.sprite(75, 225, 'player');
   
           
         // this.game.input.onDown.add(this.onTap, this);
         // this.game.input.onUp.add(this.onTap2, this);
         this.cursors = this._game.input.keyboard.createCursorKeys();
-        this._game.physics.enable(this.player);
-        this.player.body.collideWorldBounds = true;
+        this._game.physics.enable(this._player);
+        this._player.body.collideWorldBounds = true;
+
+        this.move = 'U';
+
+        this._game.paused = true;
       }
 
     update() {
-        console.log('update');
+        
+        if (this.move === 'D') {
+            this._player.body.velocity.y = 20;
+        }
+        if (this.move === 'U') {
+            this._player.body.velocity.y = -20;
+        }
+
+        if (this._player.body.position.y === 352) {
+            this.move = 'U';
+        }
+
+        if (this._player.body.position.y < 19) {
+            this.move = 'D';
+        }                
     }
 
     game(): Phaser.Game {
         return this._game;
+    }
+
+    player(): any {
+        return this._player;
     }
 
        
