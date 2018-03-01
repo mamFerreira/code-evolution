@@ -37,23 +37,31 @@ export class Game {
     }
 
     executeCode(code: string) {
-        // this.game.paused = false;
+        this.game.paused = false;
         _interpreter.run(code);    
+    }
+
+    stopExecution () {
+        _interpreter.stop();
+        _state.reload();
     }
 }
 
 export class InterpreterJS {
     _interpreter: Interpreter;
-    _locked: boolean;
-    _waiting: boolean;
+    _locked: boolean;    
     _time: number;
     _evolution: number;
+    _stopped: boolean;
 
     constructor(evolution: number) {
-        this._evolution = evolution;
+        this._evolution = evolution;                        
+    }
+
+    init () {
         this._locked = false;
-        this._waiting = false;
-        this._time = 0;        
+        this._stopped = false;        
+        this._time = 0;
     }
 
     get locked() {
@@ -62,14 +70,6 @@ export class InterpreterJS {
 
     set locked(value) {
         this._locked = value;
-    }
-
-    get waiting() {
-        return this._waiting;
-    }
-
-    set waiting(value) {
-        this._waiting = value;
     }
 
     get time() {
@@ -89,54 +89,85 @@ export class InterpreterJS {
     }
 
     run (code: string) {
+        this.init();               
         this._interpreter = new Interpreter(code, initApi);
-        this.nextStep();
+        this.nextStep();        
+    }
+
+    stop () {
+        this._stopped = true;        
+        delete this._interpreter;
     }
 
     nextStep() {
 
-        const timeDefault = 100;
-
-        if (this.waiting) {
-            setTimeout(() => {
-                this.nextStep();       
-            }, timeDefault);
-        } else {
-            if (this._interpreter.step()) {
-                if (this._locked) {
-                    setTimeout(() => {
-                        this._locked = false;
-                        this.nextStep();
-                    }, this._time);
-                } else {
-                    setTimeout(() => {                        
-                        this.nextStep();
-                    }, timeDefault);
-                }
-            }
-        }
+        const timeDefault = 100;        
+        if (!this._stopped) {
+            if (_state.locked ) {
+                setTimeout(() => {
+                    this.nextStep();       
+                }, timeDefault);
+            } else {                
+                try {
+                    if (this._interpreter.step()) {
+                        if (this._locked) {
+                            setTimeout(() => {
+                                this._locked = false;
+                                this.nextStep();
+                            }, this._time);
+                        } else {
+                            setTimeout(() => {                        
+                                this.nextStep();
+                            }, timeDefault);
+                        }
+                    }
+                } catch (error) {
+                    alert(error.message);                
+                }            
+            }   
+        }        
     }
 }
 
 
 function initApi(i, s) {
     let wrapper;
-  
+
     if (_interpreter.evolution > 0) {
         wrapper = function() {
             _interpreter.locked = true;
-            _interpreter.time = 10000;
-            return _state.obtenerValor();
+            _interpreter.time = 100;
+        return _state.moveDirection('U');
         };
-            i.setProperty(s, 'obtenerValor', i.createNativeFunction(wrapper));
-    }
+        i.setProperty(s, 'moveUp', i.createNativeFunction(wrapper));
 
-    if (_interpreter.evolution > 0) {
-        wrapper = function(value) {
+        wrapper = function() {
             _interpreter.locked = true;
             _interpreter.time = 100;
-        return _state.imprimirValor(value);
+        return _state.moveDirection('D');
         };
-        i.setProperty(s, 'imprimirValor', i.createNativeFunction(wrapper));
+        i.setProperty(s, 'moveDown', i.createNativeFunction(wrapper));
+
+        wrapper = function() {
+            _interpreter.locked = true;
+            _interpreter.time = 100;
+        return _state.moveDirection('R');
+        };
+        i.setProperty(s, 'moveRight', i.createNativeFunction(wrapper));
+
+        wrapper = function() {
+            _interpreter.locked = true;
+            _interpreter.time = 100;
+        return _state.moveDirection('L');
+        };
+        i.setProperty(s, 'moveLeft', i.createNativeFunction(wrapper));        
+
+        /*wrapper = function() {                         
+            let obj = i.createObject(i.OBJECT);
+            let enemy = _state.obtenerEnemigo();  
+            i.setProperty(obj, 'x', i.createPrimitive(enemy.x));
+            return obj;
+        };
+        i.setProperty(s, 'obtenerEnemigo', i.createNativeFunction(wrapper));*/
     }
 }

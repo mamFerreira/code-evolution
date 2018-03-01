@@ -8,15 +8,17 @@ export class StateMain extends Phaser.State {
     private _game: Phaser.Game;
     private map: Phaser.Tilemap;
     private layer_surface;
-    private layer_block;
-    private _player;
+    private layer_block;    
     private txt;
-    private cursors;
-    private move;
+    private cursors;    
+    private _player;
+    private _locked: boolean;
+    private _velocity: number;
     
     constructor(game) {
         super();
-        this._game = game;
+        this._game = game; 
+        this._velocity = 25;        
     }
 
     preload(e: string, l: string) {
@@ -42,45 +44,62 @@ export class StateMain extends Phaser.State {
         this.map.setCollisionBetween(1, 10000, this.layer_block.layer.properties.collision, this.layer_block);
         this.layer_surface.resizeWorld();
         this.layer_block.resizeWorld();  
-        this._player = this._game.add.sprite(75, 225, 'player');
-  
-          
+        this._player = this._game.add.sprite(0, 0, 'player');            
         // this.game.input.onDown.add(this.onTap, this);
         // this.game.input.onUp.add(this.onTap2, this);
         this.cursors = this._game.input.keyboard.createCursorKeys();
         this._game.physics.enable(this._player);
-        this._player.body.collideWorldBounds = true;
+        this._player.body.collideWorldBounds = true;        
 
-        this.move = 'U';
+        this.reload();
+    }
+
+    update() {             
+    }
+
+    reload() {        
+        this._player.position.x = 75;
+        this._player.position.y = 225;
+        this._player.body.velocity.x = 0;
+        this._player.body.velocity.y = 0;
 
         this._game.paused = true;
-      }
-
-    update() {
-        
-        if (this.move === 'D') {
-            this._player.body.velocity.y = 20;
-        }
-        if (this.move === 'U') {
-            this._player.body.velocity.y = -20;
-        }
-
-        if (this._player.body.position.y === 352) {
-            this.move = 'U';
-        }
-
-        if (this._player.body.position.y < 19) {
-            this.move = 'D';
-        }                
+        this._locked = false;
     }
 
     game(): Phaser.Game {
         return this._game;
     }
 
-    player(): any {
+    get player() {
         return this._player;
     }
 
-       
+    get locked() {
+        return this._locked;
+    }
+
+    moveDirection(direction: string) {        
+        this._locked = true;
+
+        switch (direction) {
+            case 'U':
+                console.log('Hola Mundo');
+                this._player.body.velocity.y = -this._velocity;
+                break;
+            case 'D':
+                this._player.body.velocity.y = this._velocity;
+                break;
+            case 'L':
+                this._player.body.velocity.x = -this._velocity;
+                break;
+            case 'R':
+                this._player.body.velocity.x = this._velocity;
+                break;
+            default:                
+        }
+
+        return true;
+
+    }       
 }

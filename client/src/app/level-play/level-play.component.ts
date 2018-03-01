@@ -1,10 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
 import { Game } from '../game/game';
-
 import { LevelService } from '../services/level.service';
 import { EvolutionService } from '../services/evolution.service';
-
 import { Level } from '../models/level.model';
 import { Evolution } from '../models/evolution.model';
 
@@ -48,7 +46,7 @@ export class LevelPlayComponent implements OnInit {
           } else {
             this.level = res.level;
             this.evolution = res.level.evolution;
-            this.code = 'imprimirValor("Hola Mundo!");'; // this.level.code;            
+            this.code = 'moveRight();'; // imprimirValor("Hola Mundo!");'; // this.level.code;            
             this.loadEditor();
             this.loadCanvas();
           }
@@ -64,8 +62,7 @@ export class LevelPlayComponent implements OnInit {
     this.editor.setTheme('eclipse');
     this.editor.setMode('python');
 
-    this.editor.getEditor().setOptions({
-        enableBasicAutocompletion: true,
+    this.editor.setOptions({        
         fontSize: '14px'
     });
   }
@@ -88,5 +85,9 @@ export class LevelPlayComponent implements OnInit {
         this.errorM = err.error.message;
       }
     );
+  }
+
+  stopLevel () {
+    this.game.stopExecution();
   }
 }

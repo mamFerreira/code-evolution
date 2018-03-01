@@ -5,4 +5,5 @@
     <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
 </div>
 <button class="btn btn-primary" (click)="playLevel();" *ngIf="level && evolution">Enviar</button>
+<button class="btn btn-primary" (click)="stopLevel();" *ngIf="level && evolution">Detener</button>
 
