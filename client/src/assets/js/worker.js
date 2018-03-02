@@ -93,10 +93,14 @@ function reply () {
 
 function nextStep() {                
     idInterval = setInterval(
-        () => {            
-            if (!myInterpreter.step()){                    
-                stopEjecución();
-            }
+        () => { 
+            try{
+                if (!myInterpreter.step()){                    
+                    stopEjecución();
+                }
+            }catch(e){                
+                reply('error',e.message);
+            }                         
         }, timeWait);
     myInterpreter.step();
 }
@@ -114,7 +118,11 @@ var queryableFunctions = {
 
     execute: (data) => {                            
         myInterpreter = new Interpreter(data, initApi);
-        nextStep();
+        try{
+            nextStep();
+        }catch(e){
+            console.log(e);
+        }        
     },
 
     loadValue: (data) => {                   
@@ -124,8 +132,12 @@ var queryableFunctions = {
 };
 
 self.addEventListener('message', (e) => {
-    if (e.data instanceof Object && e.data.hasOwnProperty("action") && e.data.hasOwnProperty("value")) {        
-        queryableFunctions[e.data.action].apply(self, e.data.value);
+    if (e.data instanceof Object && e.data.hasOwnProperty("action") && e.data.hasOwnProperty("value")) {         
+        if (queryableFunctions.hasOwnProperty(e.data.action)){
+            queryableFunctions[e.data.action].apply(self, e.data.value);
+        }else{
+            console.log('Función no declarada');
+        }             
         //Añadir acción para contemplar el caso de que la acción no este definida en queryableFunctions
     } else {
         reply("error", e.data);

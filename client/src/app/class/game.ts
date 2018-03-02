@@ -69,7 +69,7 @@ export class Game {
                     this.state.imprimirValor(e.data.value);
                     break;
                 case 'error':
-                    console.log('Error en el mensaje: ' + e.data.value);
+                    alert('Error: ' + e.data.value);
                     break;
                 default:
                     console.log('Error en worker: Acción no definida');

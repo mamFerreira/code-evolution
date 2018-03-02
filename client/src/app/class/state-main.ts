@@ -98,7 +98,7 @@ export class StateMain extends Phaser.State {
     }
 
     comprobarPosition(posP, posO) {
-        if (Math.round(posP.x) === posO.x && Math.round(posP.y) === posO.y) {
+        if (Math.round(posP.x) === Math.round(posO.x) && Math.round(posP.y) === Math.round(posO.y)) {
             return true;
         }
         return false;
@@ -108,8 +108,7 @@ export class StateMain extends Phaser.State {
         this._locked = true;
 
         switch (direction) {
-            case 'U':
-                console.log('Hola Mundo');
+            case 'U':                
                 this._player.body.velocity.y = -this._velocity;
                 break;
             case 'D':
@@ -122,7 +121,7 @@ export class StateMain extends Phaser.State {
                 this._player.body.velocity.x = this._velocity;
                 this._posO.x = this._player.position.x + 50;
                 this._posO.y = this._player.position.y;
-                this._posO._active = true;
+                this._posO._active = true;                
                 break;
             default:                
         }
