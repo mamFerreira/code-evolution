@@ -2,7 +2,6 @@ import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
-
 export class StateMain extends Phaser.State {
 
     private _game: Phaser.Game;
@@ -14,14 +13,21 @@ export class StateMain extends Phaser.State {
     private _player;
     private _locked: boolean;
     private _velocity: number;
+    private _orderLevel: number;
+    private _orderEvolution: number;
+    public _posO: Position = new Position();
     
-    constructor(game) {
+    constructor(game, level, evolution) {
         super();
         this._game = game; 
+        this._orderLevel = level;
+        this._orderEvolution = evolution;
         this._velocity = 25;        
     }
 
-    preload(e: string, l: string) {
+    preload() {
+        let e = this._orderLevel.toString();
+        let l = this._orderEvolution.toString();
         let url = '../../assets/tilemaps/';        
         // Carga del mapa
         this._game.load.tilemap('map', url + 'maps/map' + e + '_' + l + '.json', null, Phaser.Tilemap.TILED_JSON);
@@ -54,7 +60,8 @@ export class StateMain extends Phaser.State {
         this.reload();
     }
 
-    update() {             
+    update() {     
+        this.comprobarObjetivos();        
     }
 
     reload() {        
@@ -79,6 +86,24 @@ export class StateMain extends Phaser.State {
         return this._locked;
     }
 
+    comprobarObjetivos() {
+        // Objetivos posición
+        if (this._posO.active) {
+            if (this.comprobarPosition(this._player.position, this._posO)) {               
+                this._posO.active = false;
+                this._player.body.velocity.x = 0;
+                this._player.body.velocity.y = 0;
+            }             
+        }
+    }
+
+    comprobarPosition(posP, posO) {
+        if (Math.round(posP.x) === posO.x && Math.round(posP.y) === posO.y) {
+            return true;
+        }
+        return false;
+    }
+
     moveDirection(direction: string) {        
         this._locked = true;
 
@@ -95,11 +120,48 @@ export class StateMain extends Phaser.State {
                 break;
             case 'R':
                 this._player.body.velocity.x = this._velocity;
+                this._posO.x = this._player.position.x + 50;
+                this._posO.y = this._player.position.y;
+                this._posO._active = true;
                 break;
             default:                
         }
-
         return true;
-
-    }       
+    }     
+    
+    imprimirValor(value) {
+        console.log(value);
+    }
 }
+
+export class Position {
+    _x: number;
+    _y: number;
+    _active: boolean;
+
+    constructor() {}
+
+    get x(): number {
+        return this._x;
+    }
+    set x(value: number) {
+        this._x = value;
+    }
+
+    get y(): number {
+        return this._y;
+    }
+    set y(value: number) {
+        this._y = value;
+    }
+
+    get active(): boolean {
+        return this._active;
+    }
+    set active(value: boolean) {
+        this._active = value;
+    }
+
+    
+}
+
