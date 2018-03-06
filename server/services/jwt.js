@@ -14,10 +14,13 @@ exports.createToken = (user) => {
         surname: user.surname,
         email: user.email,
         role: user.role,
-        level: user.level,
+        level_id: user.level._id,
+        level_order: user.level.order,
+        evolution_id: user.level.evolution._id,
+        evolution_order: user.level.evolution.order,
         iat: moment().unix(),
         exp: moment().add(5,'hours').unix()
-    }
+    }    
 
     return jwt.encode(_payload,token_key);
 

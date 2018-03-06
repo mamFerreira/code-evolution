@@ -8,7 +8,11 @@ var EvolutionSchema = new Schema({
     name: String,
     description: String,
     origin: String,
-    image: String
+    image: String,
+    player: String,
+    health: Number,
+    tiledset_surface: String,
+    tiledset_block: String
 });
 
-module.exports = mongoose.model('Evolution',EvolutionSchema,'evolution');
+module.exports = mongoose.model('Evolution',EvolutionSchema);

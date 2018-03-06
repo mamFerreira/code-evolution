@@ -3,93 +3,11 @@
 var fs = require('fs');
 var path = require('path');
 var Evolution = require ('../models/evolution');
-var Level = require('../models/level');
+var Level = require ('../models/level');
+var LevelLearning = require ('../models/level_learning');
 var GLOBAL = require ('../services/global');
-
-/**
- * Obtener evolución a partir de id
- * @returns evolution: evolución asociada al id
- */
-function getEvolution (req, res){
-    var evolutionId = req.params.id;
-
-    Evolution.findById(evolutionId).exec((err,evolution)=>{
-        if (err){
-            res.status(500).send({message: 'Error en el servidor'});
-        }else{
-            if(!evolution){
-                res.status(404).send({message: 'No existe la evolución'}); 
-            }else{
-                
-                //Verificar que el usuario logueado tiene permisos de acceso a dicha evolución
-                Evolution.findById(req.user.level.evolution).exec((err,evolutionUser)=>{
-                    if(err){
-                        res.status(500).send({message: 'Error en el servidor'});
-                    }else{
-                        if(!evolutionUser){
-                            res.status(404).send({message: 'No existe la evolución asociada al usuario'}); 
-                        }else{
-                            if(evolutionUser.order>=evolution.order){
-                                res.status(200).send({evolution});
-                            }else{
-                                res.status(401).send({message:"Sin permisos de acceso a la evolución"});
-                            }                            
-                        }
-                    }
-                });                
-            }
-        }
-    });
-
-}
-
-/**
- * Obtener todas las evoluciones o las de menor/igual orden al pasado por parámetro
- * @returns evolutions: Evoluciones registradas en el sistema
- */
-function getEvolutions (req,res){
-
-    var query;
-    var order = req.params.order;
-
-    if (order){
-        query = {'order':{$lte:order}};
-    }else{
-        query = {};
-    }
-
-    Evolution.find(query).sort('order').exec((err,evolutions) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor'});
-        }else{
-            if(!evolutions){
-                res.status(404).send({message: 'No hay evoluciones'}); 
-            }else{                                                                         
-                res.status(200).send({evolutions});
-            }
-        }
-    });
-
-}
-
-/**
- * Obtener el número de niveles de la evolución indicada
- * @returns count: Número de niveles
- */
-function getNumLevels (req, res){
-    var evolutionId = req.params.id;
-
-    Level.find({evolution:evolutionId, active:1}).count((err,count) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor'});
-        }else{
-            if(!count){
-                count = 0;
-            }
-            res.status(200).send({count});
-        }
-    });
-}
+var table = 'evolution';
+var ObjectID = require('mongodb').ObjectID;
 
 /**
  * Registrar nueva evolución en BBDD
@@ -102,23 +20,88 @@ function addEvolution (req, res){
     evolution.order = params.order;
     evolution.name = params.name;
     evolution.description = params.description;    
+    evolution.origin = params.origin;
     evolution.image = '';
-    
-    if (evolution.order && evolution.name){
-        evolution.save((err,evolutionAdd) => {
-            if(err){
-                res.status(500).send({message:'Error al guardar evolución'});
+    evolution.player = '';
+    evolution.health = params.health;
+    evolution.tiledset_surface = '';
+    evolution.tiledset_block = '';
+
+
+    if (evolution.order && evolution.name && params.health){
+        Evolution.find({order:evolution.order},{_id: 1}).limit(1).exec( (err,tuple) => {
+            if (err){
+                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
             }else{
-                if(!evolutionAdd){
-                    res.status(404).send({message:'Evolución no registrada'});
+                if (tuple.length == 0) {
+                    evolution.save((err,tupleAdd) => {
+                        if (err){
+                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                        }else{
+                            if (!tupleAdd){
+                                res.status(404).send({message:'Tupla no registrada: ' + table});
+                            }else{
+                                res.status(200).send({evolution: tupleAdd});
+                            }
+                        }
+                    });
                 }else{
-                    res.status(200).send({evolution: evolutionAdd});
+                    res.status(200).send({message:'Ya existe una evolución registrada con orden ' + evolution.order});                    
                 }
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
+        res.status(200).send({message:'Rellena los campos obligatorios: ' + table});
     }
+}
+
+/**
+ * Obtener evolución a partir de id (controlar que el usuario tiene permiso de acceso)
+ * @returns evolution: evolución asociada al id
+ */
+function getEvolution (req, res){
+    var id = req.params.id;
+
+    Evolution.findById(id).exec((err,tuple)=>{
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(!tuple){
+                res.status(404).send({message: 'No existe tupla con dicho identificador: ' + table});  
+            }else{
+                if (req.user.role != 'ROLE_ADMIN' && tuple.order > req.user.evolution_order){
+                    res.status(401).send({message:"Sin permisos de acceso a la evolución"});
+                }else{
+                    res.status(200).send({evolution: tuple});
+                }              
+            }
+        }
+    });
+}
+
+/**
+ * Obtener todas las evoluciones disponibles para el usuario (Administrados con acceso a todas)
+ * @returns evolutions: Evoluciones registradas en el sistema
+ */
+function getEvolutions (req, res){
+    var query = {};
+
+    if (req.user.role != 'ROLE_ADMIN'){
+        query = {'order':{$lte:req.user.evolution_order}};        
+    }    
+
+    Evolution.find(query).sort('order').exec((err,tuples) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(tuples.length==0){
+                res.status(404).send({message: 'Ninguna evolución cumple los requisitos'}); 
+            }else{                                                                         
+                res.status(200).send({evolutions:tuples});
+            }
+        }
+    });
+
 }
 
 /**
@@ -126,53 +109,303 @@ function addEvolution (req, res){
  * @returns evolution: Evolución antes de la actualización
  */
 function updateEvolution (req,res){
-    var evolId = req.params.id;
+    var id = req.params.id;
     var update = req.body;     
 
-    Evolution.findByIdAndUpdate(evolId,update,(err,evolUpdate) => {
+    Evolution.findByIdAndUpdate( id, update, (err,tupleUpdate) => {
         if (err){
-            console.log(err);
-            res.status(500).send({message:'Error al actualizar la evolución'}); 
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
-            if(!evolUpdate){
-                res.status(404).send({message: 'No se ha podido actualizar la evolución'});
+            if(!tupleUpdate){
+                res.status(404).send({message: 'Error al actualizar: ' + table});
             }else{
-                res.status(200).send({evolution:evolUpdate});
+                res.status(200).send({evolution:tupleUpdate});
             }
         }
     })
 }
 
+
 /**
- * Subir imágen de la evolución
- * @returns image: Nombre de la imagen. Evolutión: Evolución antes de la actualización
+ * Eliminar evolución
+ * @param id: Identificador de la evolución a eliminar
+ * @param evolution: Evolución elimada
+ */
+function removeEvolution (req, res){
+    var id = req.params.id;
+
+    Evolution.findByIdAndRemove(id,(err,tupleRemove) => {
+        if (err){
+            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+        }else{
+            if(!tupleRemove){
+                res.status(404).send({message: 'Error al eliminar: ' + table});
+            }else{            
+                res.status(200).send({evolution:tupleRemove});
+            }
+        }
+    });
+}
+
+/**
+ * Obtener el número de niveles de la evolución indicada
+ * @returns count: Número de niveles
+ */
+function getNumLevels (req, res){
+    var id = req.params.id;
+
+    Level.find({evolution:id, active:1}, {_id: 1}).count((err,count) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor: ' + table, messageError: err.message}); 
+        }else{
+            if(!count){
+                count = 0;
+            }
+            res.status(200).send({count});
+        }
+    });
+}
+
+ /**
+  * Obtener listado con el aprendizaje asociado a la evolución
+  * @returns learnings: Listado de aprendizaje asociado a la evolución
+  */
+function getEvolutionLearning (req, res) {    
+    var parama_id = new ObjectID(req.params.id);
+
+    Level.aggregate([
+        {$match:
+            {'evolution': parama_id}
+        },
+        {$lookup:
+            {
+                from: 'level_learning',
+                localField: '_id',
+                foreignField: 'level',
+                as: 'tmp'
+            }
+        },
+        {
+            $unwind: "$tmp"
+        },
+        {
+            $lookup:{
+                from: 'learnings',
+                localField: "tmp.learning",
+                foreignField: '_id',
+                as: 'tmp2'
+            }
+        },
+        {
+            $project: {
+                "_id": 0,
+                "tmp2": 1
+            }
+        },
+        {
+            $group: {_id: null, uniqueValues: {$addToSet: "$tmp2"}}
+        }
+               
+    ]).exec ((err,tuples) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor: ' + table, messageError: err.message});
+        }else{
+            if(!tuples){
+                res.status(404).send({message: 'Error al obtener el aprendizaje asociado a la evolución'}); 
+            }else{
+                if (tuples.length == 0){
+                    res.status(404).send({message: 'No existe aprendizaje asociado a la evolución'});
+                }else{
+                    var list = tuples[0].uniqueValues;
+                    var json = [];                                
+
+                    list.forEach(element => {
+                        json.push(element[0]);
+                    });
+                    res.status(200).send({learnings: json});
+                }                
+            }
+        } 
+    });
+    
+}
+
+ /**
+  * Obtener listado con las funcionalidades disponibles en la evolución
+  * @returns actions: Listado de acciones disponibles en la evolución
+  */
+function getEvolutionAction (req, res){
+    var parama_id = new ObjectID(req.params.id);
+
+    Level.aggregate([
+        {$match:
+            {'evolution': parama_id}
+        },
+        {$lookup:
+            {
+                from: 'level_action',
+                localField: '_id',
+                foreignField: 'level',
+                as: 'tmp'
+            }
+        },
+        {
+            $unwind: "$tmp"
+        },
+        {
+            $lookup:{
+                from: 'actions',
+                localField: "tmp.action",
+                foreignField: '_id',
+                as: 'tmp2'
+            }
+        },
+        {
+            $project: {
+                "_id": 0,
+                "tmp2": 1
+            }
+        },
+        {
+            $group: {_id: null, uniqueValues: {$addToSet: "$tmp2"}}
+        }
+               
+    ]).exec ((err,tuples) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor: ' + table, messageError: err.message});
+        }else{
+            if(!tuples){
+                res.status(404).send({message: 'Error al obtener las acciones asociadas a la evolución'}); 
+            }else{
+                if (tuples.length == 0){
+                    res.status(404).send({message: 'No existen acciones asociadas a la evolución'});
+                }else{
+                    var list = tuples[0].uniqueValues;
+                    var json = [];                                
+
+                    list.forEach(element => {
+                        json.push(element[0]);
+                    });
+                    res.status(200).send({actions: json});
+                }                
+            }
+        } 
+    });
+}
+
+/**
+ * Subir imágen de la evolución a partir de su id
+ * @returns image: Nombre de la imagen. 
+ *          evolution: Evolución antes de la actualización.
  */
 function uploadIEvolution (req,res){
-    var evolId = req.params.id;
+    var id = req.params.id;
     var file_name = 'No subido...';
     var field;
 
     if (req.files.image){
         var file_path = req.files.image.path;
-        var file_name = file_path.split('\/')[2];
+        var file_name = file_path.split('\/')[3];
         var ext = file_name.split('\.')[1];        
-        field = {image: file_name};        
-
-        if (ext=='png' || ext=='jpg' || ext=='gif' || ext=='jpeg'){
-            Evolution.findByIdAndUpdate(evolId, field, (err,evolUpdate) => {
+        field = {image: file_name};                   
+        if (ext=='png'){
+            Evolution.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
                 if (err){
-                    console.log(err);
-                    res.status(500).send({message:'Error al actualizar la imagen de la evolución'}); 
+                    res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: err.message});
                 }else{
-                    if(!evolUpdate){
+                    if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
                     }else{
-                        res.status(200).send({image:file_name, evolution:evolUpdate});
+                        res.status(200).send({image:file_name, evolution:tupleUpdate});
                     }
                 }
             });
         }else{
-            res.status(200).send({message:'Extensión del archivo no valida (.png .jpg .gif .jpeg)'});
+            res.status(200).send({message:'Extensión del archivo no válida (.png)'});
+        }        
+    }else{
+        res.status(200).send({message:'Imagen no subida'});
+    }
+}
+
+/**
+ * Subir imágen jugador de la evolución a partir de su id
+ * @returns image: Nombre de la imagen.
+ *          evolution: Evolución antes de la actualización.
+ */
+function uploadPEvolution (req,res){
+    var id = req.params.id;
+    var file_name = 'No subido...';
+    var field;
+
+    if (req.files.image){
+        var file_path = req.files.image.path;
+        var file_name = file_path.split('\/')[3];
+        var ext = file_name.split('\.')[1];        
+        field = {player: file_name};        
+
+        if (ext=='png'){
+            Evolution.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
+                if (err){
+                    res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: err.message});
+                }else{
+                    if(!tupleUpdate){
+                        res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
+                    }else{
+                        res.status(200).send({image:file_name, evolution:tupleUpdate});
+                    }
+                }
+            });
+        }else{
+            res.status(200).send({message:'Extensión del archivo no válida (.png)'});
+        }        
+    }else{
+        res.status(200).send({message:'Imagen no subida'});
+    }
+}
+
+/**
+ * Subir imágen tiledset (block o surface) de la evolución a partir de su id
+ * @returns image: Nombre de la imagen. 
+ *          evolution: Evolución antes de la actualización.
+ */
+function uploadTEvolution (req,res){
+    var id = req.params.id;
+    var type = req.params.type;
+    var file_name = 'No subido...';
+    var field;
+
+    if (req.files.image){
+        var file_path = req.files.image.path;
+        var file_name = file_path.split('\/')[3];
+        var ext = file_name.split('\.')[1];   
+        
+        switch (type){
+            case 'S':
+                field = {tiledset_surface: file_name};        
+                break;
+            case 'B':
+                field = {tiledset_block: file_name};        
+                break;
+            default:
+                return res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: 'Tipo de imágen desconocido'});
+        }
+        
+
+        if (ext=='png'){
+            Evolution.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
+                if (err){
+                    res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: err.message});
+                }else{
+                    if(!tupleUpdate){
+                        res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
+                    }else{
+                        res.status(200).send({image:file_name, evolution:tupleUpdate});
+                    }
+                }
+            });
+        }else{
+            res.status(200).send({message:'Extensión del archivo no válida (.png)'});
         }        
     }else{
         res.status(200).send({message:'Imagen no subida'});
@@ -183,24 +416,55 @@ function uploadIEvolution (req,res){
  * Cargar imagen de evolución
  * @return imagen de evolución
  */
-function loadIEvolution (req,res){
+function loadEvolution (req,res){
 
     //Obtener parametros
     var imageFile = req.params.imageFile;
+    var type = req.params.type;
     var path_file;
+    var global_path;
+    var field;
+    
+    switch(type){
+        case 'I':
+            global_path = GLOBAL.PATH_FILE_EVOLUTION_I;            
+            break;
+        case 'P':
+            global_path = GLOBAL.PATH_FILE_EVOLUTION_P;            
+            break;
+        case 'TS':
+        case 'TB':
+            global_path = GLOBAL.PATH_FILE_EVOLUTION_T;            
+            break;
+        default:
+            return res.status(500).send({message: 'Error al cargar imágen: tipo indicado desconocido'});
+    }
+
 
     if (!imageFile){
-        var evolutionId = req.params.id;        
+        var id = req.params.id;        
 
-        Evolution.findById(evolutionId).exec((err,evolution)=>{            
+        Evolution.findById(id).exec((err,evolution)=>{            
             if (err){
-                res.status(500).send({message: 'Error en el servidor'});
+                res.status(500).send({message:'Error en la carga de la imágen: ' + table, messageError: err.message});
             }else{
                 if(!evolution){
                     res.status(404).send({message: 'No existe la evolución'}); 
                 }else{        
-                    imageFile = evolution.image;
-                    path_file = GLOBAL.PATH_FILE_EVOLUTION + imageFile;
+                    
+                    if (type == 'I'){
+                        imageFile = evolution.image;
+                    }
+                    if (type == 'P'){
+                        imageFile = evolution.player;
+                    }
+                    if (type == 'TS'){
+                        imageFile = evolution.tiledset_surface;
+                    }
+                    if (type == 'TB'){
+                        imageFile = evolution.tiledset_block;
+                    }                    
+                    path_file = global_path + imageFile;                    
                     fs.exists(path_file, (exists) => {
                         if(exists){
                             res.sendFile(path.resolve(path_file));
@@ -212,7 +476,7 @@ function loadIEvolution (req,res){
             }
         });
     }else{
-        path_file = GLOBAL.PATH_FILE_EVOLUTION + imageFile;
+        path_file = global_path + imageFile;
         fs.exists(path_file, (exists) => {
             if(exists){
                 res.sendFile(path.resolve(path_file));
@@ -225,12 +489,18 @@ function loadIEvolution (req,res){
     
 }
 
+
 module.exports = {
+    addEvolution,
     getEvolution,
     getEvolutions,
-    getNumLevels,
-    addEvolution,
     updateEvolution,
-    uploadIEvolution,        
-    loadIEvolution
+    removeEvolution,
+    getNumLevels,
+    getEvolutionLearning,
+    getEvolutionAction,
+    uploadIEvolution,
+    uploadPEvolution,
+    uploadTEvolution,
+    loadEvolution
 };

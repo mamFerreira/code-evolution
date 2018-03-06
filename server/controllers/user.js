@@ -7,6 +7,7 @@ var User = require ('../models/user');
 var Level = require ('../models/level');
 var GLOBAL = require ('../services/global');
 var jwt = require ('../services/jwt');
+var table = 'User';
 
 /**
  * Añadir nuevo usuario
@@ -19,14 +20,14 @@ function addUser (req, res){
     user.name = params.name;
     user.surname = params.surname;
     user.email = params.email;    
-    user.image = 'null';
+    user.image = '';
     
     if (user.name && user.surname && user.email && params.password){
 
         //Comprobamos si existe usuario con mismo email
         User.findOne({email:user.email.toLowerCase()},(err,user_db) => {
             if(err){                
-                res.status(500).send({message:'Error en la petición'});   
+                res.status(500).send({message: 'Error en el servidor', messageError: err.message});  
             }else{
                 if (user_db){
                     res.status(404).send({message:'Ya existe un usuario con el email ' + user.email});
@@ -39,7 +40,7 @@ function addUser (req, res){
                             user.password = result;                
                             user.save((err,userAdd) => {
                                 if(err){
-                                    res.status(500).send({message:'Error al guardar el usuario'});
+                                    res.status(500).send({message:'Error al guardar el usuario',messageError: err.message});
                                 }else{
                                     if(!userAdd){
                                         res.status(404).send({message:'Usuario no registrado'});
@@ -68,10 +69,9 @@ function loginUser (req, res){
     var _email = params.email;
     var _password = params.password;
 
-    User.findOne({email:_email.toLowerCase()}).populate({path:'level'}).exec((err,user) => {
+    User.findOne({email:_email.toLowerCase(), active:1}).populate({path : 'level', populate : {path : 'evolution'}}).exec((err,user) => {            
         if(err){
-            console.log(err);
-            res.status(500).send({message:'Error en la petición'});   
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
         }else{
             if (!user){
                 res.status(400).send({message:'Usuario no existe'});
@@ -97,20 +97,106 @@ function loginUser (req, res){
 }
 
 /**
- * Actualizar usuario
+ * Obtener todos los usuarios registrados en el sistema
+ * @returns users: Listado de usuario
+ */
+function getUsers (req, res){
+    User.find({}).exec((err,tuples) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
+        }else{
+            if (tuples.length==0){
+                res.status(404).send({message: 'Ningun usuario registrado'});
+            }else{
+                res.status(200).send({users: tuples});
+            }
+        }
+    });
+}
+
+/**
+ * Actualizar usuario indicado por parámetro (o en req si es el propio)
  * @returns user: Usuario antes de actualizar
  */
 function updateUser (req, res){
-    var userId = req.params.id || req.user.sub;
-    var update = req.body;     
+    var id = req.params.id || req.user.sub;
+    var update = req.body; 
 
-    User.findByIdAndUpdate(userId,update,(err,userUpdate) => {
+
+    // Eliminanos la propiedad para que los usuarios normales no puedan modificar su rol
+    if (!req.params.id && update.role){
+        delete update.role
+    }
+
+    User.findByIdAndUpdate(id,update,(err,userUpdate) => {
         if (err){
-            console.log(err);
-            res.status(500).send({message:'Error al actualizar el usuario'}); 
+            res.status(500).send({message: 'Error al actulizar el usuario', messageError: err.message});
         }else{
             if(!userUpdate){
                 res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+            }else{
+                res.status(200).send({user:userUpdate});
+            }
+        }
+    })
+}
+
+/**
+ * Eliminar usuario
+ * @param id: Identificador del usuario a eliminar
+ * @param user: Usuario elimado
+ */
+function removeUser (req, res){
+    var id = req.params.id;
+
+    User.findByIdAndRemove(id,(err,tupleRemove) => {
+        if (err){
+            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+        }else{
+            if(!tupleRemove){
+                res.status(404).send({message: 'Error al eliminar: ' + table});
+            }else{                
+                res.status(200).send({user:tupleRemove});
+            }
+        }
+    });
+}
+
+/**
+ * Activar un usuario
+ * @returns user: Usuario antes de actualizar
+ */
+function activateUser (req, res) {
+    var id = req.params.id;
+    var query = {active:1};
+
+    User.findByIdAndUpdate(id,query,(err,userUpdate) => {
+        if (err){
+            res.status(500).send({message: 'Error al activar el usuario', messageError: err.message});
+        }else{
+            if(!userUpdate){
+                res.status(404).send({message: 'No se ha podido activar el usuario'});
+            }else{
+                res.status(200).send({user:userUpdate});
+            }
+        }
+    })
+}
+
+/**
+ * Desactivar un usuario
+ * @returns user: Usuario antes de actualizar
+ */
+function desactivateUser (req, res) {
+    var id = req.params.id;
+    var query = {active:0};
+
+    User.findByIdAndUpdate(id,query,(err,userUpdate) => {
+        if (err){
+            res.status(500).send({message: 'Error al desactivar el usuario', messageError: err.message});
+        }else{
+            if(!userUpdate){
+                res.status(404).send({message: 'No se ha podido desactivar el usuario'});
             }else{
                 res.status(200).send({user:userUpdate});
             }
@@ -134,8 +220,7 @@ function uploadIUser (req, res){
         if (ext=='png' || ext=='jpg' || ext=='gif'){
             User.findByIdAndUpdate(userId,{image:file_name}, (err,userUpdate) => {
                 if (err){
-                    console.log(err);
-                    res.status(500).send({message:'Error al actualizar la imagen del usuario'}); 
+                    res.status(500).send({message: 'Error al subir imagen de usuario', messageError: err.message}); 
                 }else{
                     if(!userUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen del usuario'});
@@ -172,7 +257,11 @@ function loadIUser (req, res){
 module.exports = {    
     addUser,
     loginUser,
+    getUsers,
     updateUser,
+    removeUser,
+    activateUser,
+    desactivateUser,
     uploadIUser,
     loadIUser
 };

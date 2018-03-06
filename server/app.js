@@ -6,6 +6,9 @@ var bodyParser = require('body-parser');
 var app = express();
 
 //Cargar ficheros de rutas: var entity_routes = require('./routes/entity');
+var goal_routes = require ('./routes/goal');
+var learning_routes = require ('./routes/learning');
+var action_routes = require ('./routes/action');
 var user_routes = require('./routes/user');
 var evolution_routes = require('./routes/evolution');
 var level_routes = require('./routes/level');
@@ -24,6 +27,9 @@ app.use((req, res, next)=>{
 });
 
 //Cargar rutas base de ficheros: app.use('/api',entity_routes);
+app.use('/api', goal_routes);
+app.use('/api', learning_routes);
+app.use('/api', action_routes);
 app.use('/api',user_routes);
 app.use('/api',evolution_routes);
 app.use('/api',level_routes);
