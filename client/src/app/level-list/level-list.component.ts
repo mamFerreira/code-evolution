@@ -36,34 +36,14 @@ export class LevelListComponent implements OnInit {
   getLevels() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];
-      let order = '';
-      // Comprobamos si la evolucion seleccionada es la actual del jugador
-      if (id === this.identity.level.evolution && this.identity.role === 'ROLE_USER') {
-        order = String(this.identity.level.order);
-      }
 
-      this._levelSercice.getLevels(id, order).subscribe(
+      this._levelSercice.getLevels(id).subscribe(
         res => {
           if (!res.levels) {
             this._router.navigate(['/']);
           } else {
             this.levels = res.levels;
-            let level_id = this.levels[0]._id;
-            if (id === this.identity.level.evolution) {
-              level_id = this.identity.level._id;
-            }
-            this._levelSercice.getLevel(level_id).subscribe(
-              res => {
-                if (!res.level) {
-                  this._router.navigate(['/']);
-                } else {
-                  this.level = res.level;
-                }
-              },
-              err => {
-                this.errosMessagge = err.error.message;
-              }
-            );
+            this.level = res.levels[0];
           }
         },
         err => {

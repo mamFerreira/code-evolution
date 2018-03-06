@@ -28,8 +28,8 @@ export class LevelService {
       return this._http.get(this._globalService.url + 'level/' + id, this.httpOptions);
   }
 
-  getLevels(evolution: string, order?: string): Observable<any> {
-      return this._http.get(this._globalService.url + 'levels/' + evolution + '/' + order, this.httpOptions);
+  getLevels(evolution: string): Observable<any> {
+      return this._http.get(this._globalService.url + 'levels/' + evolution, this.httpOptions);
   }
 
   translateCode(code: string): Observable<any> {

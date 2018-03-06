@@ -6,7 +6,7 @@
             </div>  
             <div class="evolution-selected"> 
                 <div class="col-md-6 float-right contenedor-image">                    
-                    <img src="{{url}}evolution-load-id/{{evolution._id}}"/>                    
+                    <img src="{{url}}evolution-load/{{evolution.image}}/I"/>            
                 </div>
                 <div class="col-md-6 col-lg-6 float-right evolution-information"> 
                     <table class="table table-evolution-information">
@@ -35,7 +35,7 @@
             <div style="display:inline-block;width:100%;overflow-y:auto;">
                 <ul class="timeline timeline-horizontal">
                     <li class="timeline-item" *ngFor="let e of evolutions">
-                        <div class="timeline-badge" [ngClass]="{'timeline-selected': e._id == evolution._id }"><img src="{{url}}evolution-load-id/{{e._id}}"/></div>
+                        <div class="timeline-badge" [ngClass]="{'timeline-selected': e._id == evolution._id }"><img src="{{url}}evolution-load/{{e.image}}/I"/></div>
                         <a class="timeline-panel"  [ngClass]="{'timeline-selected': e._id == evolution._id }" (click)="changeEvolution(e)">
                             <div class="timeline-heading">
                                 <h4 class="timeline-title">{{e.name}}</h4>
