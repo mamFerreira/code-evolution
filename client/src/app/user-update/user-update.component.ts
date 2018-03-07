@@ -65,8 +65,7 @@ export class UserUpdateComponent implements OnInit {
       err => {
         this.errorUpdate = err.error.message;
       }
-    )
-
+    );
   }
 
   fileChangeEvent(fileInput: any) {     

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from './services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -8,14 +9,28 @@ import { UserService } from './services/user.service';
 })
 export class AppComponent implements OnInit {
   public token;
+  public errorMessage;
 
   constructor(
-    private _userService: UserService
+    private _userService: UserService,
+    private _router: Router
   ) {}
 
-  ngOnInit() {
-    this.token = this._userService.getToken();
-    // FALTA: Comprobar que el token es válido antes de almacenarlo en this.token
+  ngOnInit() {        
+    // Comprobar que el token es válido y no ha expirado
+    this._userService.checkToken().subscribe(
+      res => {
+        if (res.check) {
+          this.token = this._userService.getToken(); 
+        } else {
+          this._router.navigate(['/']);
+        }       
+      },
+      err => {  
+        this._router.navigate(['/']);
+        console.log(err.message);              
+      }
+    );
   }
 
 }

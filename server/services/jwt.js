@@ -18,7 +18,7 @@ exports.createToken = (user) => {
         level_order: user.level.order,
         evolution_id: user.level.evolution._id,
         evolution_order: user.level.evolution.order,
-        iat: moment().unix(),
+        iat: moment().unix(),        
         exp: moment().add(5,'hours').unix()
     }    
 

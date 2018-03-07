@@ -7,7 +7,11 @@ var User = require ('../models/user');
 var Level = require ('../models/level');
 var GLOBAL = require ('../services/global');
 var jwt = require ('../services/jwt');
+var jwt_simple = require('jwt-simple');
+var moment = require('moment');
+var token_key = 'C0D3-3V0LUT10N';
 var table = 'User';
+
 
 /**
  * Añadir nuevo usuario
@@ -94,6 +98,29 @@ function loginUser (req, res){
             }
         }
     });
+}
+
+/**
+ * Comprobar si el token es correcto y no ha expirado
+ * @returns check: True si es correcto, false en caso contrario
+ */
+function checkToken (req, res){    
+    
+    var token = req.headers.authorization.replace(/['"]+/g,'');    
+
+    try{
+        var _payload = jwt_simple.decode(token,token_key);
+
+        if (_payload.exp <= moment().unix()){
+            return res.status(200).send({check:false, message: 'Token expirado'});
+        }
+
+    }catch(ex){                
+        return res.status(200).send({check:false, message: ex.message});        
+    }
+
+    res.status(200).send({check:true});
+
 }
 
 /**
@@ -257,6 +284,7 @@ function loadIUser (req, res){
 module.exports = {    
     addUser,
     loginUser,
+    checkToken,
     getUsers,
     updateUser,
     removeUser,

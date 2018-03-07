@@ -42,7 +42,7 @@ export class UserService {
       })
     };
 
-    return this._http.put(this._globalService.url+'user-update',json,httpOptionsAuth);
+    return this._http.put(this._globalService.url + 'user-update', json, httpOptionsAuth);
   }
 
   getToken() {
@@ -54,7 +54,19 @@ export class UserService {
     return token;
   }
 
-  getIdentity(){
+  checkToken(): Observable<any> {
+
+    let httpOptionsAuth = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json',
+        'Authorization': this.getToken()
+      })
+    };
+
+    return this._http.get(this._globalService.url + 'user-check-token', httpOptionsAuth);
+  }
+
+  getIdentity() {
     let identity = JSON.parse(localStorage.getItem('identity'));
 
     if (identity === 'undefined') {
