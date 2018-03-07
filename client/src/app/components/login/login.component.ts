@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { UserService } from '../services/user.service';
-import { User } from '../models/user.model';
+import { UserService } from '../../services/user.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit {
     private _router: Router,
     private _userService: UserService
   ) {
-    this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', null);
+    this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
     this.showRegisterForm = false;
   }
 
@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
                 this.errorLogin = 'Error en la generación del token';
               } else {
                 localStorage.setItem('token', res.token);
-                this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', null);
+                this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
                 this._router.navigate(['/']);
                 window.location.reload();
               }
@@ -73,13 +73,13 @@ export class LoginComponent implements OnInit {
     this.successRegister = '';
     this.errorRegister = '';
 
-    this._userService.registerUser(this.user).subscribe(
+    this._userService.addUser(this.user).subscribe(
       res => {
         if (!res.user._id) {
           this.errorRegister = 'Error al registrarse';
         } else {
           this.successRegister = 'Registro realizado correctamente, identificate con ' + this.user.email;
-          this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', null);
+          this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
           this.formregister.reset();
         }
       },

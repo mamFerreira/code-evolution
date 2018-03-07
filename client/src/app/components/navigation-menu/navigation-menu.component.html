@@ -32,7 +32,8 @@
             <p class="navbar-text" id="navbar_user_name">{{identity.name}}</p>            
           </li>
           <li><a [routerLink]="['mis-datos']" title="Modificar mis datos"><span class="glyphicon glyphicon-cog"></span></a></li>
-          <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>
+          <li *ngIf="identity.role=='ROLE_ADMIN'"><a [routerLink]="['admin']" title="Administrar sistema"><span class="glyphicon glyphicon-wrench"></span></a></li>          
+          <li><a (click)="logout()" class="btn-logout" title="Cerrar sesión"><span class="glyphicon glyphicon-log-out"></span></a></li>          
         </ul>
       </div>
     </nav>    

@@ -12,7 +12,8 @@ var EvolutionSchema = new Schema({
     player: String,
     health: Number,
     tiledset_surface: String,
-    tiledset_block: String
+    tiledset_block: String,
+    numLevels: {type: Number, default: 0},
 });
 
 module.exports = mongoose.model('Evolution',EvolutionSchema);

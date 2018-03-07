@@ -81,10 +81,29 @@ function getLevel (req, res){
 }
 
 /**
- * Obtener todos los niveles o los asociados a una determinada evolución
+ * Obtener todos los niveles
  * @returns levels: Niveles solicitados
  */
 function getLevels (req, res){
+
+    Level.find({}).populate({path:'evolution'}).sort({evolution: 1, order: 1}).exec((err,tuples) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(tuples.length==0){
+                res.status(404).send({message: 'Ningún nivel cumple los requisitos'}); 
+            }else{                                                                         
+                res.status(200).send({levels:tuples});
+            }
+        }
+    });
+}
+
+/**
+ * Obtener todos los niveles o los asociados a una determinada evolución
+ * @returns levels: Niveles solicitados
+ */
+function getLevelsByEvolution (req, res){
     var id = req.params.evolution;
     var query = {active: 1, evolution: id};
 
@@ -866,6 +885,7 @@ module.exports = {
     addLevel,
     getLevel,
     getLevels,
+    getLevelsByEvolution,
     updateLevel,
     removeLevel,
     activeLevel,

@@ -10,7 +10,7 @@ var LevelSchema = new Schema({
     evolution: {type: Schema.ObjectId, ref: 'Evolution'},
     active: {type: Number, default: 1},
     image: String,
-    time: Number,
+    time: {type: Number, default:0},
     code_default: String,
     map: String
 });

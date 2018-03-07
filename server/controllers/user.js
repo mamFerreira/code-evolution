@@ -128,7 +128,7 @@ function checkToken (req, res){
  * @returns users: Listado de usuario
  */
 function getUsers (req, res){
-    User.find({}).exec((err,tuples) => {
+    User.find({}).populate({path : 'level', populate : {path : 'evolution'}}).exec((err,tuples) => {
         if (err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
         }else{

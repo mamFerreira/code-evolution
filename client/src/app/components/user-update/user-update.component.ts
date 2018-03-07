@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
-import { UserService } from '../services/user.service';
-import { GlobalService } from '../services/global.service';
-import { User } from '../models/user.model';
+import { UserService } from '../../services/user.service';
+import { GlobalService } from '../../services/global.service';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-user-update',
@@ -47,7 +47,7 @@ export class UserUpdateComponent implements OnInit {
           localStorage.setItem('identity', JSON.stringify(this.user));
           document.getElementById('navbar_user_name').innerHTML = this.user.name;
 
-          if (this.filesToUpload){
+          if (this.filesToUpload) {
             this.makeFileRequest(this.url + 'user-upload', [], this.filesToUpload).then(
               (result: any) => {
                   this.user.image = result.image;

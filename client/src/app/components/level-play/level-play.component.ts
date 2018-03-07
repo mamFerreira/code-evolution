@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
-import { Game } from '../class/game';
-import { LevelService } from '../services/level.service';
-import { EvolutionService } from '../services/evolution.service';
-import { Level } from '../models/level.model';
-import { Evolution } from '../models/evolution.model';
+import { Game } from '../../class/game';
+import { LevelService } from '../../services/level.service';
+import { EvolutionService } from '../../services/evolution.service';
+import { Level } from '../../models/level.model';
+import { Evolution } from '../../models/evolution.model';
 
 @Component({
   selector: 'app-level-play',
@@ -72,7 +72,7 @@ export class LevelPlayComponent implements OnInit {
   }
 
   playLevel () {
-    this._levelSercice.translateCode(this.code).subscribe(
+    this._levelSercice.translateCode(this.code, this.level._id).subscribe(
       res => {
         if (!res.code) {
           this.errorM = 'Error en el servidor';

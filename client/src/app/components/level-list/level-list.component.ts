@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
-import { UserService } from '../services/user.service';
-import { LevelService } from '../services/level.service';
-import { Level } from '../models/level.model';
+import { UserService } from '../../services/user.service';
+import { LevelService } from '../../services/level.service';
+import { Level } from '../../models/level.model';
 
 @Component({
   selector: 'app-level-list',
@@ -37,7 +37,7 @@ export class LevelListComponent implements OnInit {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];
 
-      this._levelSercice.getLevels(id).subscribe(
+      this._levelSercice.getLevelsEvolution(id).subscribe(
         res => {
           if (!res.levels) {
             this._router.navigate(['/']);

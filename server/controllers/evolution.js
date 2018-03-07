@@ -2,12 +2,14 @@
 
 var fs = require('fs');
 var path = require('path');
+var async = require('async');
+var ObjectID = require('mongodb').ObjectID;
 var Evolution = require ('../models/evolution');
 var Level = require ('../models/level');
 var LevelLearning = require ('../models/level_learning');
 var GLOBAL = require ('../services/global');
 var table = 'evolution';
-var ObjectID = require('mongodb').ObjectID;
+
 
 /**
  * Registrar nueva evolución en BBDD
@@ -80,7 +82,7 @@ function getEvolution (req, res){
 }
 
 /**
- * Obtener todas las evoluciones disponibles para el usuario (Administrados con acceso a todas)
+ * Obtener todas las evoluciones disponibles para el usuario (Administrados con acceso a todas) añadiendo la información sobre el número de niveles asociados
  * @returns evolutions: Evoluciones registradas en el sistema
  */
 function getEvolutions (req, res){
@@ -96,8 +98,19 @@ function getEvolutions (req, res){
         }else{
             if(tuples.length==0){
                 res.status(404).send({message: 'Ninguna evolución cumple los requisitos'}); 
-            }else{                                                                         
-                res.status(200).send({evolutions:tuples});
+            }else{                   
+                async.forEachOf(tuples, (element, key, callback) => {
+                    Level.find({evolution:element._id, active:1}, {_id: 1}).count((err,count) => {
+                        if(err){
+                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                        }else{
+                            element.numLevels = count;
+                        }                                                                                            
+                        callback();     
+                    });
+                }, (err) => {
+                    res.status(200).send({evolutions:tuples});
+                });
             }
         }
     });

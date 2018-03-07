@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { UserService } from '../services/user.service';
-import { GlobalService } from '../services/global.service';
+import { UserService } from '../../services/user.service';
+import { GlobalService } from '../../services/global.service';
 
 @Component({
   selector: 'app-navigation-menu',

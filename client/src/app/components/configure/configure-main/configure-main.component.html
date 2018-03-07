@@ -1,0 +1,124 @@
+<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">
+    <div class="page-header">
+        <h1>{{title}}</h1>
+    </div>     
+    <div class="btn-group btn-group-lg">  
+        <button type="button" class="btn btn-default" (click)="changeOption('user');">Usuarios</button>
+        <button type="button" class="btn btn-default" (click)="changeOption('evolution');">Evoluciones</button>
+        <button type="button" class="btn btn-default" (click)="changeOption('level');">Niveles</button>
+        <button type="button" class="btn btn-default" (click)="changeOption('goal');">Objetivos</button>
+        <button type="button" class="btn btn-default" (click)="changeOption('learning');">Aprendizaje</button>
+        <button type="button" class="btn btn-default" (click)="changeOption('action');">Acciones</button>        
+    </div> 
+    <!--Listados del apartado marcado-->
+    <div *ngIf="option.length>0">
+      <!--Listado de usuarios-->
+      <div *ngIf="option=='user'">
+          <h2>Listado de usuarios</h2>
+          <table class="table">
+            <thead class="thead-inverse">
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Evolution</th>
+                <th>Level</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let element of list; let i = index">
+                <th scope="row">{{i+1}}</th>
+                <td>{{element.name}}</td>
+                <td>{{element.surname}}</td>
+                <td>{{element.email}}</td>
+                <td>{{element.role}}</td>
+                <td>{{element.level.evolution.order}}-{{element.level.evolution.name}}</td>
+                <td>{{element.level.order}}-{{element.level.title}}</td>
+                <td>{{element.active}}</td>
+                <td>
+                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+      <!--Listado de evoluciones-->
+      <div *ngIf="option=='evolution'">
+          <h2>Listado de evoluciones</h2>     
+          <table class="table">
+            <thead class="thead-inverse">
+              <tr>
+                <th>#</th>
+                <th>Order</th>
+                <th>Name</th>
+                <th>Health</th>
+                <th>Num. Levels</th>                
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let element of list; let i = index">
+                <th scope="row">{{i+1}}</th>
+                <td>{{element.order}}</td>
+                <td>{{element.name}}</td>
+                <td>{{element.health}}</td>
+                <td>{{element.numLevels}}</td>
+                <td>
+                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>     
+      </div>
+      <!--Listado de niveles-->
+      <div *ngIf="option=='level'">
+          <h2>Listado de niveles</h2>
+          <table class="table">
+            <thead class="thead-inverse">
+              <tr>
+                <th>#</th>
+                <th>Evolution</th>
+                <th>Order</th>
+                <th>Title</th>
+                <th>Time</th>                
+                <th>Active</th>                
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let element of list; let i = index">
+                <th scope="row">{{i+1}}</th>
+                <td>{{element.evolution.order}}-{{element.evolution.name}}</td>
+                <td>{{element.order}}</td>
+                <td>{{element.title}}</td>
+                <td>{{element.time}}</td>
+                <td>{{element.active}}</td>
+                <td>
+                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                </td>
+              </tr>
+            </tbody>
+          </table> 
+      </div>
+      <!--Listado de objetivos-->
+      <div *ngIf="option=='goal'">
+          <h2>Listado de objetivos</h2>
+      </div>
+      <!--Listado de aprendizajes-->
+      <div *ngIf="option=='learning'">
+          <h2>Listado de aprendizaje</h2>
+      </div>
+      <!--Listado de acciones-->
+      <div *ngIf="option=='action'">
+          <h2>Listado de acciones</h2>
+      </div>
+      <button type="button" class="btn btn-primary">Añadir</button>
+    </div>
+</div>

@@ -12,11 +12,11 @@ function addAction (req, res){
     var tuple = new Action();
     var params = req.body; //Recogemos los datos que llegan por POST
 
-    tuple.function = params.function;
+    tuple.method = params.method;
     tuple.description = params.description;
     tuple.example = params.example;
     
-    if (tuple.function && tuple.description && tuple.example){
+    if (tuple.method && tuple.description && tuple.example){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});

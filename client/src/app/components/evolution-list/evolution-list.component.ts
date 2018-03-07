@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { GlobalService } from '../services/global.service';
-import { EvolutionService } from '../services/evolution.service';
-import { UserService } from '../services/user.service';
-import { Evolution } from '../models/evolution.model';
+import { GlobalService } from '../../services/global.service';
+import { EvolutionService } from '../../services/evolution.service';
+import { UserService } from '../../services/user.service';
+import { Evolution } from '../../models/evolution.model';
 
 @Component({
   selector: 'app-evolution-list',

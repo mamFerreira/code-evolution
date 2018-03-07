@@ -16,7 +16,8 @@ var api = express.Router();
 // Operaciones CRUD
 api.post('/level-add', md_auth.ensureAuthAdmin, LevelController.addLevel);
 api.get('/level/:id',md_auth.ensureAuth, LevelController.getLevel);
-api.get('/levels/:evolution',md_auth.ensureAuth, LevelController.getLevels);
+api.get('/levels',md_auth.ensureAuthAdmin, LevelController.getLevels);
+api.get('/levels/:evolution',md_auth.ensureAuth, LevelController.getLevelsByEvolution);
 api.put('/level-update/:id', md_auth.ensureAuthAdmin ,LevelController.updateLevel);
 api.delete('/level-remove/:id', md_auth.ensureAuthAdmin ,LevelController.removeLevel);
 // Operaciones Especiales
