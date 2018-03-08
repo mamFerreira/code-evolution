@@ -1,7 +1,7 @@
 // Rutas Evolución
 var PATH_FILE_EVOLUTION_I = './uploads/evolutions/image/';
 var PATH_FILE_EVOLUTION_P = './uploads/evolutions/player/';
-var PATH_FILE_EVOLUTION_T = './uploads/evolutions/image/';
+var PATH_FILE_EVOLUTION_T = './uploads/evolutions/tiledset/';
 
 // Rutas Nivel
 var PATH_FILE_LEVEL_I = './uploads/levels/image/';
