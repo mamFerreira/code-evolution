@@ -27,6 +27,11 @@ import { LevelPlayComponent } from './components/level-play/level-play.component
 // Importación de componentes de configuración
 import { ConfigureMainComponent } from './components/configure/configure-main/configure-main.component';
 import { ConfigureUserComponent } from './components/configure/configure-user/configure-user.component';
+import { ConfigureEvolutionComponent } from './components/configure/configure-evolution/configure-evolution.component';
+import { ConfigureLevelComponent } from './components/configure/configure-level/configure-level.component';
+import { ConfigureGoalComponent } from './components/configure/configure-goal/configure-goal.component';
+import { ConfigureLearningComponent } from './components/configure/configure-learning/configure-learning.component';
+import { ConfigureActionComponent } from './components/configure/configure-action/configure-action.component';
 
 
 
@@ -42,7 +47,12 @@ import { ConfigureUserComponent } from './components/configure/configure-user/co
     LevelListComponent,
     LevelPlayComponent,
     ConfigureMainComponent,
-    ConfigureUserComponent
+    ConfigureUserComponent,
+    ConfigureEvolutionComponent,
+    ConfigureLevelComponent,
+    ConfigureGoalComponent,
+    ConfigureLearningComponent,
+    ConfigureActionComponent
   ],
   imports: [
     BrowserModule,

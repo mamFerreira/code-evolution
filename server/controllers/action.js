@@ -29,7 +29,7 @@ function addAction (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: ' + table});
+        res.status(200).send({message:'rellene los campos obligatorios'});
     }
 }
 
@@ -98,17 +98,21 @@ function updateAction (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    Action.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
-        if (err){
-            res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
-        }else{
-            if(!tupleUpdate){
-                res.status(404).send({message: 'Error al actualizar: ' + table});
+    if (update.method.length > 0 && update.description.length > 0 && update.example.length > 0) {
+        Action.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
+            if (err){
+                res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
             }else{
-                res.status(200).send({action:tupleUpdate});
+                if(!tupleUpdate){
+                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                }else{
+                    res.status(200).send({action:tupleUpdate});
+                }
             }
-        }
-    })
+        });
+    }else{
+        res.status(200).send({message:'Rellena los campos obligatorios: método, descripción, ejemplo'});
+    }    
 }
 
 /**

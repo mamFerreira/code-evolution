@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var GLOBAL = require ('../services/global');
 
 var UserSchema = new Schema({
     name: String,
@@ -10,7 +11,7 @@ var UserSchema = new Schema({
     password: String,
     role: {type: String, default: 'ROLE_USER'},    
     image: String,
-    level: {type: Schema.ObjectId, ref: 'Level', default: '5a7c987d3e62ed6ebe9431d5'},
+    level: {type: Schema.ObjectId, ref: 'Level', default: GLOBAL.ID_FIRST_LEVEL},
     active: {type: Number, default: 1}
 });
 

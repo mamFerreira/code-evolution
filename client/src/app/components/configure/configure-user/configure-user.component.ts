@@ -20,7 +20,8 @@ export class ConfigureUserComponent implements OnInit {
   public user: User;
   public levels: Level[];
   public roles: string[];
-  public errorMessage: string;   
+  public errorMessage: string;
+  public successMessage: string;   
 
   constructor(
     private _userService: UserService,
@@ -31,6 +32,7 @@ export class ConfigureUserComponent implements OnInit {
     this.title = 'Editar usuario';
     this.identity = this._userService.getIdentity();
     this.errorMessage = '';  
+    this.successMessage = '';
     this.roles = ['ROLE_USER', 'ROLE_ADMIN'];
   }
 
@@ -71,7 +73,20 @@ export class ConfigureUserComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log(this.user);    
+    this.successMessage = '';
+    this.errorMessage = '';
+    this._userService.updateUserById(this.user).subscribe(
+      res => {
+        if (!res.user) {
+          this.errorMessage = 'Error al actualizar el usuario: ' + res.message;
+        } else {        
+          this.successMessage = 'Usuario actualizado correctamente';
+        }
+      },
+      err => {
+        this.errorMessage = err.error.message;
+      }
+    );    
   }
 
 }

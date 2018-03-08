@@ -176,17 +176,21 @@ function updateUser (req, res){
         delete update.role
     }
 
-    User.findByIdAndUpdate(id,update,(err,userUpdate) => {
-        if (err){
-            res.status(500).send({message: 'Error al actulizar el usuario', messageError: err.message});
-        }else{
-            if(!userUpdate){
-                res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+    if (update.name.length>0 && update.email.length>0){
+        User.findByIdAndUpdate(id,update,(err,userUpdate) => {
+            if (err){
+                res.status(500).send({message: 'Error al actulizar el usuario', messageError: err.message});
             }else{
-                res.status(200).send({user:userUpdate});
+                if(!userUpdate){
+                    res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+                }else{
+                    res.status(200).send({user:userUpdate});
+                }
             }
-        }
-    })
+        });
+    } else {
+        res.status(200).send({message:'Los campos nombre y email son obligatorios'});
+    }
 }
 
 /**

@@ -171,17 +171,21 @@ function updateLevel (req, res){
 function removeLevel (req, res){
     var id = req.params.id;
 
-    Level.findByIdAndRemove(id,(err,tupleRemove) => {
-        if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
-        }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table});
-            }else{            
-                res.status(200).send({level:tupleRemove});
+    if (id !== GLOBAL.ID_FIRST_LEVEL){
+        Level.findByIdAndRemove(id,(err,tupleRemove) => {
+            if (err){
+                res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+            }else{
+                if(!tupleRemove){
+                    res.status(404).send({message: 'Error al eliminar: ' + table});
+                }else{            
+                    res.status(200).send({level:tupleRemove});
+                }
             }
-        }
-    });
+        });
+    }else{
+        res.status(500).send({message:'Error al eliminar nivel: este nivel no se puede borrar'}); 
+    }
 }
 
 /**

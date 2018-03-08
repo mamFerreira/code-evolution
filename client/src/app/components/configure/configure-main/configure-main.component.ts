@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 // Importar servicios
 import { UserService } from '../../../services/user.service';
@@ -29,7 +30,8 @@ export class ConfigureMainComponent implements OnInit {
     private _levelService: LevelService,
     private _goalService: GoalService,
     private _learningService: LearningService,
-    private _actionService: ActionService
+    private _actionService: ActionService,
+    private _router: Router
   ) { 
     this.title = 'Menú configuración';
     this.identity = this._userService.getIdentity();
@@ -67,6 +69,30 @@ export class ConfigureMainComponent implements OnInit {
     }
   }
 
+  addElement() {
+
+    switch (this.option) {
+      case 'evolution':
+        this._router.navigate(['/admin/addEvolution']);
+        break;
+      case 'level':
+        this._router.navigate(['/admin/addLevel']);
+        break;
+      case 'goal':
+        this._router.navigate(['/admin/addGoal']);
+        break;
+      case 'learning':
+        this._router.navigate(['/admin/addLearning']);
+        break;
+      case 'action':
+        this._router.navigate(['/admin/addAction']);
+        break;
+      default:
+        this.errorMessage = 'Error: Opción incorrecta';
+    }
+
+  }
+
   /**
    * GENERACIÓN DE LISTADOS
    */
@@ -82,6 +108,7 @@ export class ConfigureMainComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -97,6 +124,7 @@ export class ConfigureMainComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -112,6 +140,7 @@ export class ConfigureMainComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -127,6 +156,7 @@ export class ConfigureMainComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -142,6 +172,7 @@ export class ConfigureMainComponent implements OnInit {
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -150,13 +181,14 @@ export class ConfigureMainComponent implements OnInit {
     this._actionService.getActions().subscribe(
       res => {
         if (!res.actions) {
-          this.errorMessage = 'Error al obtener listado de acciones';
+          this.errorMessage = 'Error al obtener listado de acciones';          
         } else {
           this.list = res.actions;
         }
       },
       err => {
         this.errorMessage = err.error.message;
+        this.list = [];
       }
     );
   }
@@ -253,12 +285,5 @@ export class ConfigureMainComponent implements OnInit {
         this.errorMessage = err.error.message;
       }
     );
-  }
-
-
-  
-
-  editElement(id) {
-    alert(id);
   }
 }

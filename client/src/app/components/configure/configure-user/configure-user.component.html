@@ -2,10 +2,11 @@
   <div class="page-header">
     <h1>{{title}}</h1>
     <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
-    <div *ngIf="user && levels" class="col-lg-6 col-md-6" style="margin-top:50px;">
+    <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
+    <div *ngIf="user && levels" class="col-lg-8 col-md-8" style="margin-top:50px;">
         <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
           <div class="form-group">
-            <label for="name" class="control-label col-sm-2">Name:</label>
+            <label for="name" class="control-label col-sm-2">Name (*):</label>
             <div class="col-sm-10">
                 <input type="text" class="form-control" [(ngModel)]="user.name" name="name" required #name="ngModel">
             </div>            
@@ -17,13 +18,13 @@
             </div>            
           </div>
           <div class="form-group">
-            <label for="email" class="control-label col-sm-2">Email:</label>
+            <label for="email" class="control-label col-sm-2">Email (*) :</label>
             <div class="col-sm-10">
                 <input type="text" class="form-control" [(ngModel)]="user.email" name="email" required #email="ngModel">
             </div>            
           </div>
           <div class="form-group">
-              <label for="level" class="control-label col-sm-2">Role:</label>
+              <label for="level" class="control-label col-sm-2">Role (*):</label>
               <div class="col-sm-10">
                   <select  class="form-control" [(ngModel)]="user.role" name="role">
                     <option *ngFor="let r of roles" [ngValue]="r">{{r}}</option>
@@ -31,7 +32,7 @@
               </div>            
           </div>
           <div class="form-group">
-              <label for="level" class="control-label col-sm-2">Level:</label>
+              <label for="level" class="control-label col-sm-2">Level (*):</label>
               <div class="col-sm-10">
                   <select  class="form-control" [(ngModel)]="user.level" name="level">
                     <option *ngFor="let l of levels" [ngValue]="l._id">{{l.evolution.name}}-{{l.order}}-{{l.title}}</option>
@@ -40,6 +41,7 @@
           </div> 
           <div class="col-sm-offset-2 col-sm-10">
               <button type="submit" class="btn btn-default">Guardar</button>
+              <a [routerLink]="['/admin']" class="btn btn-default">Volver</a>
           </div>                         
         </form>
     </div>

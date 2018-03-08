@@ -15,6 +15,9 @@ var PATH_FILE_USER = './uploads/users/';
 var PORT = 3977;
 var PORT_BBDD = 27017;
 
+// Otros parámetros
+var ID_FIRST_LEVEL = '5a7c987d3e62ed6ebe9431d5';
+
 module.exports = {
     PATH_FILE_EVOLUTION_I,
     PATH_FILE_EVOLUTION_P,
@@ -24,5 +27,6 @@ module.exports = {
     PATH_FILE_LEVEL_M,
     PATH_FILE_USER,    
     PORT,
-    PORT_BBDD
+    PORT_BBDD,
+    ID_FIRST_LEVEL
 };

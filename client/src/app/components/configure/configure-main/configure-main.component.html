@@ -70,7 +70,7 @@
                 <td>{{element.health}}</td>
                 <td>{{element.numLevels}}</td>
                 <td>
-                    <a (click)="editEvolution(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a [routerLink]="['editEvolution/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                     <a (click)="removeEvolution(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
@@ -101,7 +101,7 @@
                 <td>{{element.time}}</td>
                 <td>{{element.active}}</td>
                 <td>
-                    <a (click)="editLevel(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a [routerLink]="['editLevel/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                     <a (click)="removeLevel(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
@@ -124,7 +124,7 @@
                 <th scope="row">{{i+1}}</th>
                 <td>{{element.title}}</td>
                 <td>
-                    <a (click)="editGoal(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a [routerLink]="['editGoal/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                     <a (click)="removeGoal(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
@@ -149,7 +149,7 @@
                   <td>{{element.title}}</td>
                   <td>{{element.description}}</td>
                   <td>
-                      <a (click)="editLearning(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                      <a [routerLink]="['editLearning/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                       <a (click)="removeLearning(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                   </td>
                 </tr>
@@ -174,13 +174,13 @@
                   <td>{{element.method}}</td>
                   <td>{{element.description}}</td>
                   <td>
-                      <a (click)="editAction(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                      <a [routerLink]="['editAction/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                       <a (click)="removeAction(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                   </td>
                 </tr>
               </tbody>
             </table>
       </div>
-      <button *ngIf="option !== 'user'" type="button" class="btn btn-primary">Añadir</button>
+      <button *ngIf="option !== 'user'" (click)="addElement();" type="button" class="btn btn-primary">Añadir</button>
     </div>
 </div>

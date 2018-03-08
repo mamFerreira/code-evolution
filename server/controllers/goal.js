@@ -27,7 +27,7 @@ function addGoal (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: ' + table});
+        res.status(200).send({message:'rellene los campos obligatorios'});
     }
 }
 
@@ -65,7 +65,7 @@ function getGoals (req, res){
             if (err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
-                if (!tuples){
+                if (tuples.length==0){
                     res.status(404).send({message: 'Ningún objetivo asociado al nivel'})
                 }else{
                     res.status(200).send({goals: tuples});
@@ -77,7 +77,7 @@ function getGoals (req, res){
             if (err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
-                if (!tuples){
+                if (tuples.length==0){
                     res.status(404).send({message: 'Ningún objetivo registrado'});
                 }else{
                     res.status(200).send({goals: tuples});
@@ -96,17 +96,21 @@ function updateGoal (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    Goal.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
-        if (err){
-            res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
-        }else{
-            if(!tupleUpdate){
-                res.status(404).send({message: 'Error al actualizar: ' + table});
+    if (update.title.length > 0) {
+        Goal.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
+            if (err){
+                res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
             }else{
-                res.status(200).send({goal:tupleUpdate});
+                if(!tupleUpdate){
+                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                }else{
+                    res.status(200).send({goal:tupleUpdate});
+                }
             }
-        }
-    })
+        })
+    }else{
+        res.status(200).send({message:'Rellena los campos obligatorios: nombre'});
+    }
 }
 
 /**

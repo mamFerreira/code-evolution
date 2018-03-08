@@ -51,7 +51,7 @@ export class ActionService {
     }
 
     // Actualizar acción
-    updateLevel (action_to_update: Action): Observable<any> {
+    updateAction (action_to_update: Action): Observable<any> {
         let json = JSON.stringify(action_to_update);
         return this._http.put(this._globalService.url + 'action-update/' + action_to_update._id, json, this.httpOptions);
     }

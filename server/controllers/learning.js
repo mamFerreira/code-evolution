@@ -16,7 +16,7 @@ function addLearning (req, res){
     tuple.description = params.description;
     tuple.example = params.example;
     
-    if (tuple.title && tuple.description){
+    if (tuple.title && tuple.description && tuple.example){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -29,7 +29,7 @@ function addLearning (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: ' + table});
+        res.status(200).send({message:'rellene los campos obligatorios'});
     }
 }
 
@@ -67,7 +67,7 @@ function getLearnings (req, res){
             if (err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
-                if (!tuples){
+                if (tuples.length==0){
                     res.status(404).send({message: 'Ningún aprendizaje asociado al nivel'})
                 }else{
                     res.status(200).send({learnings: tuples});
@@ -79,7 +79,7 @@ function getLearnings (req, res){
             if (err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
-                if (!tuples){
+                if (tuples.length==0){
                     res.status(404).send({message: 'Ningún aprendizaje registrado'});
                 }else{
                     res.status(200).send({learnings: tuples});
@@ -98,17 +98,21 @@ function updateLearning (req, res){
     var id = req.params.id;
     var update = req.body;     
     
-    Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
-        if (err){
-            res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
-        }else{
-            if(!tupleUpdate){
-                res.status(404).send({message: 'Error al actualizar: ' + table});
+    if (update.title.length > 0 && update.description.length > 0 && update.example.length > 0) {
+        Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
+            if (err){
+                res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
             }else{
-                res.status(200).send({learning:tupleUpdate});
+                if(!tupleUpdate){
+                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                }else{
+                    res.status(200).send({learning:tupleUpdate});
+                }
             }
-        }
-    })
+        });
+    }else{
+        res.status(200).send({message:'Rellena los campos obligatorios: nombre, descripción, ejemplo'});
+    }
 }
 
 /**
