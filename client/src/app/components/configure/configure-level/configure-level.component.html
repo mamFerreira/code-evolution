@@ -1,3 +1,76 @@
-<p>
-  configure-level works!
-</p>
+<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">
+    <div class="page-header">
+      <h1>{{title}}</h1>
+      <button *ngIf="boolEdit && level.active==0" (click)='activateLevel();' class="btn btn-success">Activar</button>
+      <button *ngIf="boolEdit && level.active==1" (click)='desactivateLevel();' class="btn btn-danger">Desactivar</button>
+    </div>
+    <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
+    <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div>
+    <div *ngIf="level && evolutions" class="col-lg-10 col-md-10" style="margin-top:10px;">                
+        <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
+            <div class="form-group">
+              <label for="name" class="control-label col-sm-2">Order (*):</label>
+              <div class="col-sm-5">
+                  <input type="text" class="form-control" [(ngModel)]="level.order" name="order" required #order="ngModel">
+              </div>            
+            </div>
+            <div class="form-group">
+              <label for="name" class="control-label col-sm-2">Title (*):</label>
+              <div class="col-sm-10">
+                  <input type="text" class="form-control" [(ngModel)]="level.title" name="title" required #title="ngModel">
+              </div>            
+            </div>
+            <div class="form-group">
+              <label for="name" class="control-label col-sm-2">Description:</label>
+              <div class="col-sm-10">
+                  <textarea rows="5" class="form-control" [(ngModel)]="level.description" name="description" required #description="ngModel"></textarea>
+              </div>            
+            </div>  
+            <div class="form-group">
+                <label for="evolution" class="control-label col-sm-2">Evolution (*):</label>
+                <div class="col-sm-10">
+                    <select  class="form-control" [(ngModel)]="level.evolution" name="evolution">
+                      <option *ngFor="let e of evolutions" [ngValue]="e._id">{{e.order}}-{{e.name}}</option>
+                    </select>
+                </div>            
+            </div>
+            <div class="form-group">
+              <label for="name" class="control-label col-sm-2">Time seg (*):</label>
+              <div class="col-sm-5">
+                  <input type="text" class="form-control" [(ngModel)]="level.time" name="time" required #time="ngModel">
+              </div>            
+            </div> 
+            <div class="form-group" *ngIf="boolEdit">
+              <label for="name" class="control-label col-sm-2">Image:</label>
+              <div class="col-sm-6 float-right">
+                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'image')"/>               
+              </div>            
+              <div class="col-sm-2 float-right" *ngIf="level.image && level.image != ''" >
+                  <a class="btn" href="{{url}}level-load/{{level.image}}/I" download="img">Descargar</a>                   
+              </div>
+            </div>
+            <div class="form-group" *ngIf="boolEdit">
+              <label for="name" class="control-label col-sm-2">Code Default:</label>
+              <div class="col-sm-6 float-right">
+                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'code_default')"/>               
+              </div>            
+              <div class="col-sm-2 float-right" *ngIf="level.code_default && level.code_default != ''" >
+                  <a class="btn" href="{{url}}level-load/{{level.code_default}}/C" download="img">Descargar</a>                   
+              </div>
+            </div>  
+            <div class="form-group" *ngIf="boolEdit">
+              <label for="name" class="control-label col-sm-2">Map JSON:</label>
+              <div class="col-sm-6 float-right">
+                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'map')"/>               
+              </div>            
+              <div class="col-sm-2 float-right" *ngIf="level.map && level.map != ''" >
+                  <a class="btn" href="{{url}}level-load/{{level.map}}/M" download="img">Descargar</a>                   
+              </div>
+            </div> 
+            <div class="col-sm-offset-2 col-sm-10 group-btn">                
+                <button type="submit" class="btn btn-default">Guardar</button>
+                <a [routerLink]="['/admin']" class="btn btn-default">Volver</a>                
+            </div> 
+        </form>
+    </div>
+</div>

@@ -63,7 +63,7 @@ function addLevel (req, res){
 function getLevel (req, res){
     var id = req.params.id;
 
-    Level.findById(id).populate({path:'evolution'}).exec((err,tuple)=>{
+    Level.findById(id).exec((err,tuple)=>{
         if(err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
@@ -150,17 +150,21 @@ function updateLevel (req, res){
     var levelId = req.params.id;
     var update = req.body;
 
-    Level.findByIdAndUpdate(levelId,update,(err,tupleUpdate)=>{
-        if(err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tupleUpdate){
-                res.status(404).send({message: 'Error al actualizar el nivel'}); 
+    if (update.order>0 && update.title.length>0 && update.evolution.length>0 && update.time>0){
+        Level.findByIdAndUpdate(levelId,update,(err,tupleUpdate)=>{
+            if(err){
+                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
             }else{
-                res.status(200).send({level: tupleUpdate}); 
+                if(!tupleUpdate){
+                    res.status(404).send({message: 'Error al actualizar el nivel'}); 
+                }else{
+                    res.status(200).send({level: tupleUpdate}); 
+                }
             }
-        }
-    });
+        });
+    }else{
+        res.status(200).send({message:'rellene los campos obligatorios'});
+    }
 }
 
 /**
@@ -304,7 +308,7 @@ function uploadCode (req, res){
     var file_name = 'No subido...';
     var field;
 
-    if (req.files){
+    if (req.files.file){
         var file_path = req.files.file.path;
         var file_name = file_path.split('\/')[3];
         var ext = file_name.split('\.')[1];        
@@ -317,7 +321,7 @@ function uploadCode (req, res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar el fichero del nivel'});
                     }else{
-                        res.status(200).send({code_default:file_name, level:tupleUpdate});
+                        res.status(200).send({file:file_name, level:tupleUpdate});
                     }
                 }
             });
@@ -836,6 +840,9 @@ function loadFileLevel (req, res){
             break;
         case 'M':
             global_path = GLOBAL.PATH_FILE_LEVEL_M;            
+            break;
+        case 'C':
+            global_path = GLOBAL.PATH_FILE_LEVEL_C;            
             break;
         default:
             return res.status(500).send({message: 'Error al cargar fichero: tipo indicado desconocido'});

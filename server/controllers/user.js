@@ -201,17 +201,21 @@ function updateUser (req, res){
 function removeUser (req, res){
     var id = req.params.id;
 
-    User.findByIdAndRemove(id,(err,tupleRemove) => {
-        if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
-        }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table});
-            }else{                
-                res.status(200).send({user:tupleRemove});
+    if (id !== GLOBAL.ID_USER_ADMIN){
+        User.findByIdAndRemove(id,(err,tupleRemove) => {
+            if (err){
+                res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+            }else{
+                if(!tupleRemove){
+                    res.status(404).send({message: 'Error al eliminar: ' + table});
+                }else{                
+                    res.status(200).send({user:tupleRemove});
+                }
             }
-        }
-    });
+        });
+    }else{
+        res.status(500).send({message:'Error al eliminar usuario: no se puede eliminar el usuario administrador'}); 
+    }
 }
 
 /**

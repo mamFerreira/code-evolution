@@ -72,7 +72,7 @@ export class UserUpdateComponent implements OnInit {
     this.filesToUpload = <Array<File>> fileInput.target.files;             
   }
 
-  makeFileRequest(url: string, params: Array<string>, files:Array<File>){
+  makeFileRequest(url: string, params: Array<string>, files: Array<File>) {
 
     let token = this.token;
     
@@ -98,6 +98,6 @@ export class UserUpdateComponent implements OnInit {
         xhr.setRequestHeader('Authorization', token);
         xhr.send(formData);
     });
-}
+  }
 
 }

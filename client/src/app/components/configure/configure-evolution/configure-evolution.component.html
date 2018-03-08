@@ -2,10 +2,10 @@
   <div class="page-header">
     <h1>{{title}}</h1>
   </div>
-  <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
+  <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
   <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
   <div *ngIf="evolution" class="col-lg-10 col-md-10" style="margin-top:50px;">
-      <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
+      <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">        
         <div class="form-group">
           <label for="name" class="control-label col-sm-2">Order (*):</label>
           <div class="col-sm-5">
@@ -19,7 +19,7 @@
           </div>            
         </div> 
         <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Description (*):</label>
+          <label for="name" class="control-label col-sm-2">Description:</label>
           <div class="col-sm-10">
               <textarea rows="5" class="form-control" [(ngModel)]="evolution.description" name="description" required #description="ngModel"></textarea>
           </div>            
@@ -30,48 +30,48 @@
               <input type="text" class="form-control" [(ngModel)]="evolution.health" name="health" required #health="ngModel">
           </div>            
         </div>  
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Image (*):</label>
+        <div class="form-group" *ngIf="boolEdit">
+          <label for="name" class="control-label col-sm-2">Image:</label>
           <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event)"/>               
+            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'image')"/>               
           </div>            
           <div class="col-sm-2 float-right" *ngIf="evolution.image && evolution.image != ''" >
               <a class="btn" href="{{url}}evolution-load/{{evolution.image}}/I" download="img">Descargar</a>                   
           </div>
         </div>    
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Player (*):</label>
+        <div class="form-group" *ngIf="boolEdit">
+          <label for="name" class="control-label col-sm-2">Player:</label>
           <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event)"/>               
+            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'player')"/>               
           </div>            
           <div class="col-sm-2 float-right" *ngIf="evolution.player && evolution.player != ''" >
               <a class="btn" href="{{url}}evolution-load/{{evolution.player}}/P" download="img">Descargar</a>                   
           </div>
         </div>  
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">TS Surface (*):</label>
+        <div class="form-group" *ngIf="boolEdit">
+          <label for="name" class="control-label col-sm-2">TS Surface:</label>
           <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event)"/>               
+            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'ts_surface')"/>               
           </div>            
           <div class="col-sm-2 float-right" *ngIf="evolution.tiledset_surface && evolution.tiledset_surface != ''" >
               <a class="btn" href="{{url}}evolution-load/{{evolution.tiledset_surface}}/TS" download="img">Descargar</a>                   
           </div>
         </div>  
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">TS Block (*):</label>
+        <div class="form-group" *ngIf="boolEdit">
+          <label for="name" class="control-label col-sm-2">TS Block:</label>
           <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event)"/>               
+            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'ts_block')"/>               
           </div>            
           <div class="col-sm-2 float-right" *ngIf="evolution.tiledset_block && evolution.tiledset_block != ''" >
               <a class="btn" href="{{url}}evolution-load/{{evolution.tiledset_block}}/TB" download="img">Descargar</a>                   
           </div>
-        </div>     
+        </div>  
         <div class="col-sm-offset-2 col-sm-10 group-btn">
             <button type="submit" class="btn btn-default">Guardar</button>
             <a [routerLink]="['/admin']" class="btn btn-default">Volver</a>
-        </div>                         
+        </div>                                    
       </form>
-      <div class="list_levels">      
+      <div class="list_levels" *ngIf="boolEdit">      
         <h2>Listado de niveles asociados</h2>
         <div *ngIf="errorLevels" class="alert alert-warning"> {{errorLevels}}</div>
         <table *ngIf="levels" class="table">

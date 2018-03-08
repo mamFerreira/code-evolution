@@ -72,6 +72,37 @@ export class ConfigureUserComponent implements OnInit {
     );
   }
 
+  activateUser() {
+    this._userService.activateUser(this.user._id).subscribe(
+      res => {
+        if (!res.user) {
+          this.errorMessage = 'No se ha podido activar el usuario';
+        } else {
+          this.user.active = 1;                  
+        }
+      },
+      err => {
+        this.errorMessage = 'err.error.message';
+      }
+    );
+  }
+
+  desactivateUser() {
+    this._userService.desactivateUser(this.user._id).subscribe(
+      res => {
+        if (!res.user) {
+          this.errorMessage = 'No se ha podido desactivar el usuario';
+        } else {
+          this.user.active = 0;                  
+        }
+      },
+      err => {
+        this.errorMessage = err.error.message;
+      }
+    );
+  }
+
+
   onSubmit() {
     this.successMessage = '';
     this.errorMessage = '';

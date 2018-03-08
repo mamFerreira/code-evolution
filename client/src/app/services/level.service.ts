@@ -50,7 +50,7 @@ export class LevelService {
   }
 
   // Obtener todos los nivel asociadas a una evolución
-  getLevelsEvolution(idEvolution: number): Observable<any> {
+  getLevelsEvolution(idEvolution: string): Observable<any> {
       return this._http.get(this._globalService.url + 'levels/' + idEvolution, this.httpOptions);
   }
 

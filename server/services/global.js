@@ -17,6 +17,7 @@ var PORT_BBDD = 27017;
 
 // Otros parámetros
 var ID_FIRST_LEVEL = '5a7c987d3e62ed6ebe9431d5';
+var ID_USER_ADMIN = '5a7432e8426ca91f60bafc6a';
 
 module.exports = {
     PATH_FILE_EVOLUTION_I,
@@ -28,5 +29,6 @@ module.exports = {
     PATH_FILE_USER,    
     PORT,
     PORT_BBDD,
-    ID_FIRST_LEVEL
+    ID_FIRST_LEVEL,
+    ID_USER_ADMIN
 };

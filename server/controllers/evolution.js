@@ -53,7 +53,7 @@ function addEvolution (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: ' + table});
+        res.status(200).send({message:'Rellena los campos obligatorios: order, name, health'});
     }
 }
 
@@ -123,19 +123,23 @@ function getEvolutions (req, res){
  */
 function updateEvolution (req,res){
     var id = req.params.id;
-    var update = req.body;     
-
-    Evolution.findByIdAndUpdate( id, update, (err,tupleUpdate) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tupleUpdate){
-                res.status(404).send({message: 'Error al actualizar: ' + table});
+    var update = req.body; 
+    
+    if (update.order != 'null' && update.name.length>0 && update.health != 'null'){
+        Evolution.findByIdAndUpdate( id, update, (err,tupleUpdate) => {
+            if (err){
+                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
             }else{
-                res.status(200).send({evolution:tupleUpdate});
+                if(!tupleUpdate){
+                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                }else{
+                    res.status(200).send({evolution:tupleUpdate});
+                }
             }
-        }
-    })
+        });
+    } else {
+        res.status(200).send({message:'Rellena los campos obligatorios: order, name, health'});
+    }
 }
 
 

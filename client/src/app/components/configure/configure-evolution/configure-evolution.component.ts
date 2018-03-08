@@ -23,7 +23,11 @@ export class ConfigureEvolutionComponent implements OnInit {
   public identity;
   public evolution: Evolution;
   public levels: Level[];
-  public errorMessage: string;
+  public fileImage: Array<File>;
+  public filePlayer: Array<File>;
+  public fileSurface: Array<File>;
+  public fileBlock: Array<File>;
+  public errorMessage: Array<string>;
   public errorLevels: string;
   public successMessage: string;
   public boolEdit: boolean;
@@ -38,7 +42,7 @@ export class ConfigureEvolutionComponent implements OnInit {
   ) { 
     this.title = 'Editar evolución';
     this.identity = this._userService.getIdentity();
-    this.errorMessage = '';  
+    this.errorMessage = new Array<string> ();  
     this.successMessage = '';
     this.boolEdit = true;
     this.url = this._globalService.url;
@@ -52,27 +56,27 @@ export class ConfigureEvolutionComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir evolución';
-        this.evolution = new Evolution (null, -1, '', '', '', '', '', 0 , '', '');
+        this.evolution = new Evolution (null, null, '', '', '', '', '', null , '', '');
       }      
     });    
   }
 
-  getEvolution (id) {    
+  getEvolution (id: string) {    
     this._evolutionService.getEvolution(id).subscribe(
       res => {
         if (!res.evolution) {
-          this.errorMessage = 'Error: No se ha podido obtener la evolución deseada';
+          this.errorMessage.push('Error: No se ha podido obtener la evolución deseada');
         } else {
           this.evolution = res.evolution;                      
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this.errorMessage.push(err.error.message);
       }
     );
   }
 
-  getLevels (id) {
+  getLevels (id: string) {
     this._levelService.getLevelsEvolution(id).subscribe(
       res => {
         if (!res.levels) {
@@ -83,6 +87,142 @@ export class ConfigureEvolutionComponent implements OnInit {
       },
       err => {
         this.errorLevels = err.error.message;
+      }
+    );
+  }
+
+  fileChangeEvent(fileInput: any, type: string) {     
+    switch (type) {
+      case 'image':
+        this.fileImage = <Array<File>> fileInput.target.files;   
+        break;
+      case 'player':
+        this.filePlayer = <Array<File>> fileInput.target.files;   
+        break;
+      case 'ts_surface':
+        this.fileSurface = <Array<File>> fileInput.target.files;   
+        break;
+      case 'ts_block':
+        this.fileBlock = <Array<File>> fileInput.target.files;   
+        break;
+      default:
+        this.errorMessage.push('Tipo de imagen desconocido');
+    }           
+  }
+
+  makeFileRequest(url: string, params: Array<string>, files: Array<File>) {
+
+    let token = this._userService.getToken();
+    
+    return new Promise((resolve, reject) => {
+        let formData: any = new FormData();
+        let xhr = new XMLHttpRequest();
+
+        for (let i = 0; i < files.length; i++) {
+            formData.append('image', files[i], files[i].name);
+        }
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if ( xhr.status === 200) {
+                    resolve(JSON.parse(xhr.response));
+                } else {
+                    reject(xhr.response);
+                }
+            }
+        };
+
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Authorization', token);
+        xhr.send(formData);
+    });
+  }
+
+  onSubmit() {
+    this.errorMessage = [];
+    this.successMessage = '';
+
+    if (this.boolEdit) {
+      this.editEvolution();
+    } else {
+      this.addEvolution();
+    }
+
+
+  }
+
+  editEvolution() {
+    
+
+    this._evolutionService.updateEvolution(this.evolution).subscribe(
+      res => {
+        if (!res.evolution) {
+          this.errorMessage.push('Operación no completada con éxito: ' + res.message);
+        } else {        
+          if (this.fileImage) {
+            this.makeFileRequest(this.url + 'evolution-upload-I/' +  this.evolution._id, [], this.fileImage).then(
+              (res: any) => {
+                  if (res.image) {
+                    this.evolution.image = res.image;
+                  } else {
+                    this.errorMessage.push('Subida de Image no realizada: ' + res.message);
+                  }                       
+              }
+          ); }
+
+          if (this.filePlayer) {
+            this.makeFileRequest(this.url + 'evolution-upload-P/' +  this.evolution._id, [], this.filePlayer).then(
+              (res: any) => {
+                  if (res.image) {
+                    this.evolution.player = res.image;
+                  } else {
+                    this.errorMessage.push('Subida de Player no realizada: ' + res.message);
+                  }                       
+              }
+          ); }
+
+          if (this.fileSurface) {
+            this.makeFileRequest(this.url + 'evolution-upload-T/' +  this.evolution._id + '/S', [], this.fileSurface).then(
+              (res: any) => {
+                  if (res.image) {
+                    this.evolution.tiledset_surface = res.image;
+                  } else {
+                    this.errorMessage.push('Subida de TS Surface no realizada: ' + res.message);
+                  }                       
+              }
+          ); }
+
+          if (this.fileBlock) {
+            this.makeFileRequest(this.url + 'evolution-upload-T/' +  this.evolution._id + '/B', [], this.fileBlock).then(
+              (res: any) => {
+                  if (res.image) {
+                    this.evolution.tiledset_block = res.image;
+                  } else {
+                    this.errorMessage.push('Subida de TS Block no realizada: ' + res.message);
+                  }                       
+              }
+          ); }
+
+          this.successMessage = 'Evolución actualizada correctamente';
+        }
+      },
+      err => {
+        this.errorMessage.push(err.error.message);
+      }
+    );
+  }
+
+  addEvolution () {
+    this._evolutionService.addEvolution(this.evolution).subscribe(
+      res => {
+        if (!res.evolution) {
+          this.errorMessage.push('Error al añadir evolución: ' + res.message);
+        } else {            
+          this.successMessage = 'Evolución añadida correctamente';          
+        }
+      },
+      err => {
+        this.errorMessage.push(err.error.message);
       }
     );
   }
