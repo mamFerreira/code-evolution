@@ -58,6 +58,11 @@ export class UserService {
   }
 
   // Obtener usuarios registrados
+  getUser (idUser: string): Observable<any> {    
+    return this._http.get(this._globalService.url + 'user/' + idUser, this.httpOptionsToken);
+  }
+
+  // Obtener usuarios registrados
   getUsers (): Observable<any> {    
     return this._http.get(this._globalService.url + 'users', this.httpOptionsToken);
   }

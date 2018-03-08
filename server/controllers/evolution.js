@@ -147,15 +147,28 @@ function updateEvolution (req,res){
 function removeEvolution (req, res){
     var id = req.params.id;
 
-    Evolution.findByIdAndRemove(id,(err,tupleRemove) => {
+    Level.find({evolution:id}, {_id: 1}).count((err,count) => {
         if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+            res.status(500).send({message:'Error en el servidor: ' + table, messageError: err.message}); 
         }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table});
-            }else{            
-                res.status(200).send({evolution:tupleRemove});
+            if(!count){
+                count = 0;
             }
+            if (count > 0){
+                res.status(404).send({message: 'Error al eliminar evolución: debe eliminar antes sus niveles asociados'});
+            }else{
+                Evolution.findByIdAndRemove(id,(err,tupleRemove) => {
+                    if (err){
+                        res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+                    }else{
+                        if(!tupleRemove){
+                            res.status(404).send({message: 'Error al eliminar: ' + table});
+                        }else{            
+                            res.status(200).send({evolution:tupleRemove});
+                        }
+                    }
+                });
+            }            
         }
     });
 }

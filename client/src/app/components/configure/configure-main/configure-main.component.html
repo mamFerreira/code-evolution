@@ -10,6 +10,7 @@
         <button type="button" class="btn btn-default" (click)="changeOption('learning');">Aprendizaje</button>
         <button type="button" class="btn btn-default" (click)="changeOption('action');">Acciones</button>        
     </div> 
+    <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
     <!--Listados del apartado marcado-->
     <div *ngIf="option.length>0">
       <!--Listado de usuarios-->
@@ -40,7 +41,7 @@
                 <td>{{element.level.order}}-{{element.level.title}}</td>
                 <td>{{element.active}}</td>
                 <td>
-                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a [routerLink]="['editUser/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                     <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
@@ -69,8 +70,8 @@
                 <td>{{element.health}}</td>
                 <td>{{element.numLevels}}</td>
                 <td>
-                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
-                    <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                    <a (click)="editEvolution(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeEvolution(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
             </tbody>
@@ -100,8 +101,8 @@
                 <td>{{element.time}}</td>
                 <td>{{element.active}}</td>
                 <td>
-                    <a (click)="editElement(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
-                    <a (click)="removeUser(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                    <a (click)="editLevel(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeLevel(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                 </td>
               </tr>
             </tbody>
@@ -110,15 +111,76 @@
       <!--Listado de objetivos-->
       <div *ngIf="option=='goal'">
           <h2>Listado de objetivos</h2>
+          <table class="table">
+            <thead class="thead-inverse">
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Actions</th>                 
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let element of list; let i = index">
+                <th scope="row">{{i+1}}</th>
+                <td>{{element.title}}</td>
+                <td>
+                    <a (click)="editGoal(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <a (click)="removeGoal(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                </td>
+              </tr>
+            </tbody>
+          </table> 
       </div>
       <!--Listado de aprendizajes-->
       <div *ngIf="option=='learning'">
           <h2>Listado de aprendizaje</h2>
+          <table class="table">
+              <thead class="thead-inverse">
+                <tr>
+                  <th>#</th>
+                  <th>Title</th>
+                  <th>Description</th>   
+                  <th>Actions</th>                                
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let element of list; let i = index">
+                  <th scope="row">{{i+1}}</th>
+                  <td>{{element.title}}</td>
+                  <td>{{element.description}}</td>
+                  <td>
+                      <a (click)="editLearning(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                      <a (click)="removeLearning(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
       </div>
       <!--Listado de acciones-->
       <div *ngIf="option=='action'">
-          <h2>Listado de acciones</h2>
+          <h2>Listado de acciones</h2>          
+          <table class="table">
+              <thead class="thead-inverse">
+                <tr>
+                  <th>#</th>
+                  <th>Method</th>
+                  <th>Description</th> 
+                  <th>Actions</th>                 
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let element of list; let i = index">
+                  <th scope="row">{{i+1}}</th>
+                  <td>{{element.method}}</td>
+                  <td>{{element.description}}</td>
+                  <td>
+                      <a (click)="editAction(element._id);" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
+                      <a (click)="removeAction(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
       </div>
-      <button type="button" class="btn btn-primary">Añadir</button>
+      <button *ngIf="option !== 'user'" type="button" class="btn btn-primary">Añadir</button>
     </div>
 </div>

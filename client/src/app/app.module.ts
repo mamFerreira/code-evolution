@@ -26,6 +26,7 @@ import { LevelListComponent } from './components/level-list/level-list.component
 import { LevelPlayComponent } from './components/level-play/level-play.component';
 // Importación de componentes de configuración
 import { ConfigureMainComponent } from './components/configure/configure-main/configure-main.component';
+import { ConfigureUserComponent } from './components/configure/configure-user/configure-user.component';
 
 
 
@@ -40,7 +41,8 @@ import { ConfigureMainComponent } from './components/configure/configure-main/co
     EvolutionListComponent,
     LevelListComponent,
     LevelPlayComponent,
-    ConfigureMainComponent
+    ConfigureMainComponent,
+    ConfigureUserComponent
   ],
   imports: [
     BrowserModule,

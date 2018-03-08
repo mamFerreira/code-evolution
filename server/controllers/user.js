@@ -124,6 +124,27 @@ function checkToken (req, res){
 }
 
 /**
+ * Obtener usuario
+ * @param id: Identificador del usuario deseado
+ * @returns user: Usuario solicitado
+ */
+function getUser (req,res){
+    var id = req.params.id;
+
+    User.findById(id).exec((err,tuple)=>{
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(!tuple){
+                res.status(404).send({message: 'No existe tupla con dicho identificador: ' + table}); 
+            }else{                
+                res.status(200).send({user: tuple});              
+            }
+        }
+    });
+}
+
+/**
  * Obtener todos los usuarios registrados en el sistema
  * @returns users: Listado de usuario
  */
@@ -285,6 +306,7 @@ module.exports = {
     addUser,
     loginUser,
     checkToken,
+    getUser,
     getUsers,
     updateUser,
     removeUser,

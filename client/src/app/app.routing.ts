@@ -10,6 +10,7 @@ import { LevelListComponent } from './components/level-list/level-list.component
 import { UserUpdateComponent } from './components/user-update/user-update.component';
 // Importación de componentes de configuración
 import { ConfigureMainComponent } from './components/configure/configure-main/configure-main.component';
+import { ConfigureUserComponent } from './components/configure/configure-user/configure-user.component';
 
 
 
@@ -22,6 +23,7 @@ const appRoutes: Routes = [
     {path: 'jugar/nivel/:id', component: LevelPlayComponent},
     {path: 'mis-datos', component: UserUpdateComponent},
     {path: 'admin', component: ConfigureMainComponent},
+    {path: 'admin/editUser/:id', component: ConfigureUserComponent},
     {path: '**', component: HomeComponent}
 ];
 

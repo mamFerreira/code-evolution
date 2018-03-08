@@ -10,7 +10,7 @@ var UserSchema = new Schema({
     password: String,
     role: {type: String, default: 'ROLE_USER'},    
     image: String,
-    level: {type: Schema.ObjectId, ref: 'Level', default: '5a7431738fc4071e7a94f4d4'},
+    level: {type: Schema.ObjectId, ref: 'Level', default: '5a7c987d3e62ed6ebe9431d5'},
     active: {type: Number, default: 1}
 });
 

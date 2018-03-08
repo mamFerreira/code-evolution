@@ -13,6 +13,7 @@ var md_upload = multipart({uploadDir: global.PATH_FILE_USER});
 api.post('/user-add', UserController.addUser);
 api.post('/user-login', UserController.loginUser);
 api.get('/user-check-token', UserController.checkToken)
+api.get('/user/:id', md_auth.ensureAuthAdmin, UserController.getUser);
 api.get('/users', md_auth.ensureAuthAdmin, UserController.getUsers);
 api.put('/user-update/:id', md_auth.ensureAuthAdmin ,UserController.updateUser);
 api.put('/user-update', md_auth.ensureAuth ,UserController.updateUser);
