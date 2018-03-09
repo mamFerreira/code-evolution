@@ -74,10 +74,10 @@
                 <a [routerLink]="['/admin']" class="btn btn-warning">Volver</a>                
             </div> 
         </form>
-        <div *ngIf="boolEdit" class="lists_property col-lg-10 col-md-10">
+        <div *ngIf="boolEdit" class="lists_property">
             <h2>Gestión de objetivos</h2>
-            <div *ngIf="errorGoals" class="alert alert-warning"> {{errorGoals}}</div>  
-            <table *ngIf="goalsLevel.length>0" class="table">
+            <div *ngIf="errorProperty[0]" class="alert alert-warning"> {{errorProperty[0]}}</div>  
+            <table *ngIf="levelGoals.length>0" class="table">
                 <thead class="thead-inverse">
                     <tr>
                         <th>#</th>              
@@ -88,36 +88,36 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let element of goalsLevel; let i = index">
+                    <tr *ngFor="let element of levelGoals; let i = index">
                         <th scope="row">{{i+1}}</th>              
                         <td>{{element.goal.title}}</td>
                         <td>{{element.value1}}</td>
                         <td>{{element.value2}}</td>
                         <td>
-                            <a (click)="removeGoal(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                            <a (click)="removeGoal(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                         </td>
                     </tr>
                 </tbody>
             </table> 
             <form *ngIf="goals" (ngSubmit)="addGoal()" #form="ngForm" class="form-inline">
                 <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="goalLevel.goal" name="goal">
+                    <select  class="form-control" [(ngModel)]="levelGoal.goal" name="goal">
                         <option *ngFor="let g of goals" [ngValue]="g">{{g.title}}</option>
                     </select>
                 </div>
                 <div class="form-group mb-2">
                     <label for="name" class="control-label">Value 1:</label>
-                    <input type="text" class="form-control" [(ngModel)]="goalLevel.value1" name="value1" required #value1="ngModel">           
+                    <input type="text" class="form-control" [(ngModel)]="levelGoal.value1" name="value1" required #value1="ngModel">           
                 </div>
                 <div class="form-group mb-2">
                     <label for="name" class="control-label">Value 2:</label>
-                    <input type="text" class="form-control" [(ngModel)]="goalLevel.value2" name="value2" required #value2="ngModel">          
+                    <input type="text" class="form-control" [(ngModel)]="levelGoal.value2" name="value2" required #value2="ngModel">          
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Añadir</button>
             </form>                     
             <h2>Gestión de aprendizaje</h2>
-            <div *ngIf="errorLearnings" class="alert alert-warning"> {{errorLearnings}}</div>
-            <table *ngIf="learningsLevel.length>0" class="table">
+            <div *ngIf="errorProperty[1]" class="alert alert-warning"> {{errorProperty[1]}}</div> 
+            <table *ngIf="levelLearnings.length>0" class="table">
                 <thead class="thead-inverse">
                     <tr>
                         <th>#</th>              
@@ -126,26 +126,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let element of learningsLevel; let i = index">
+                    <tr *ngFor="let element of levelLearnings; let i = index">
                         <th scope="row">{{i+1}}</th>              
                         <td>{{element.learning.title}}</td>
                         <td>
-                            <a (click)="removeLearning(element._id,i);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                            <a (click)="removeLearning(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                         </td>
                     </tr>
                 </tbody>
             </table>
             <form *ngIf="learnings" (ngSubmit)="addLearning()" #form="ngForm" class="form-inline">
                 <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="learning" name="learning">
+                    <select  class="form-control" [(ngModel)]="levelLearning.learning" name="learning">
                         <option *ngFor="let l of learnings" [ngValue]="l">{{l.title}}</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Añadir</button>
             </form>
             <h2>Gestión de acciones</h2>
-            <div *ngIf="errorActions" class="alert alert-warning"> {{errorActions}}</div>
-            <table *ngIf="actionsLevel.length>0" class="table">
+            <div *ngIf="errorProperty[2]" class="alert alert-warning"> {{errorProperty[2]}}</div> 
+            <table *ngIf="levelActions.length>0" class="table">
                 <thead class="thead-inverse">
                     <tr>
                         <th>#</th>              
@@ -154,25 +154,56 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let element of actionsLevel; let i = index">
+                    <tr *ngFor="let element of levelActions; let i = index">
                         <th scope="row">{{i+1}}</th>              
                         <td>{{element.action.method}}</td>
                         <td>
-                            <a (click)="removeAction(element._id,i);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                            <a (click)="removeAction(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                         </td>
                     </tr>
                 </tbody>
             </table>
             <form *ngIf="actions" (ngSubmit)="addAction()" #form="ngForm" class="form-inline">
                 <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="action" name="action">
+                    <select  class="form-control" [(ngModel)]="levelAction.action" name="action">
                         <option *ngFor="let a of actions" [ngValue]="a">{{a.method}}</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Añadir</button>
             </form>
             <h2>Gestión de posiciones</h2>
-            <div *ngIf="errorPositions" class="alert alert-warning"> {{errorPositions}}</div>            
+            <div *ngIf="errorProperty[3]" class="alert alert-warning"> {{errorProperty[3]}}</div>
+            <table *ngIf="levelPositions.length>0" class="table">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>#</th>              
+                        <th>Coord. X</th>
+                        <th>Coord. Y</th>                        
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let element of levelPositions; let i = index">
+                        <th scope="row">{{i+1}}</th>              
+                        <td>{{element.value_x}}</td>
+                        <td>{{element.value_y}}</td>                    
+                        <td>
+                            <a (click)="removePosition(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table> 
+            <form (ngSubmit)="addPosition()" #form="ngForm" class="form-inline">
+                <div class="form-group mb-2">
+                    <label for="name" class="control-label">Cood. X:</label>
+                    <input type="text" class="form-control" [(ngModel)]="position.value_x" name="value_x" required #value_x="ngModel">           
+                </div>
+                <div class="form-group mb-2">
+                    <label for="name" class="control-label">Cood. Y:</label>
+                    <input type="text" class="form-control" [(ngModel)]="position.value_y" name="value_y" required #value_y="ngModel">          
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+            </form> 
         </div>
     </div>
 </div>

@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 })
 export class AppComponent implements OnInit {
   public token;
-  public errorMessage;
+  public errorMessage;  
 
   constructor(
     private _userService: UserService,
@@ -19,17 +19,19 @@ export class AppComponent implements OnInit {
   ngOnInit() {        
     // Comprobar que el token es válido y no ha expirado
     this.token = this._userService.getToken(); 
+
     /*this._userService.checkToken().subscribe(
       res => {
         if (res.check) {
-          this.token = this._userService.getToken(); 
+          this.tokenValid = true;
         } else {
-          this._router.navigate(['/']);
+          this.tokenValid = true;
+          this.errorMessage = res.message;
         }       
       },
       err => {  
-        this._router.navigate(['/']);
-        console.log(err.message);              
+        this.tokenValid = true;
+        this.errorMessage = err.message;             
       }
     );*/
   }

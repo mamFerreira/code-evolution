@@ -16,7 +16,7 @@ function addLearning (req, res){
     tuple.description = params.description;
     tuple.example = params.example;
     
-    if (tuple.title && tuple.description && tuple.example){
+    if (tuple.title && tuple.description){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -98,7 +98,7 @@ function updateLearning (req, res){
     var id = req.params.id;
     var update = req.body;     
     
-    if (update.title.length > 0 && update.description.length > 0 && update.example.length > 0) {
+    if (update.title.length > 0 && update.description.length > 0) {
         Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
             if (err){
                 res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 

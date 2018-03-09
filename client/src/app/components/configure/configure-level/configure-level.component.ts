@@ -31,36 +31,32 @@ export class ConfigureLevelComponent implements OnInit {
   public title: string;
   public url: string;
   public identity;
+  public boolEdit: boolean;  
   public level: Level;
   public evolutions: Evolution[];
-  // Propiedades gestión propiedad aprendizaje
-  public goalsLevel: LevelGoal[];
-  public goals: Goal[];
-  public goalLevel: LevelGoal;
-  // Propiedades gestión propiedad aprendizaje
-  public learningsLevel: LevelLearning[];
-  public learningLevel: LevelLearning;
-  public learnings: Learning[];
-  public learning: Learning;  
-  // Propiedades gestión propiedad acción
-  public actionsLevel: LevelAction[];
-  public actionLevel: LevelAction;
+  // Propiedades gestión mensajes de error y éxito
+  public errorMessage: Array<string>;  
+  public successMessage: string;
+  public errorProperty: Array<string> = ['', '', '', ''];  
+  // Propiedades gestión aprendizaje
+  public goals: Goal[];  
+  public levelGoal: LevelGoal;
+  public levelGoals: LevelGoal[];  
+  // Propiedades gestión aprendizaje
+  public learnings: Learning[];  
+  public levelLearning: LevelLearning;  
+  public levelLearnings: LevelLearning[];  
+  // Propiedades gestión acción
   public actions: Action[];
-  public action: Action; 
-
-  public positionsLevel: Position[];
-  public boolEdit: boolean;
-  // Variables de ficheros
+  public levelActions: LevelAction[];
+  public levelAction: LevelAction;
+  // Propiedades gestión posición
+  public levelPositions: Position[];
+  public position: Position;  
+  // Propiedades gestión subida de ficheros
   public fileImage: Array<File>;
   public fileCode: Array<File>;
-  public fileMap: Array<File>;
-  // Variables con mensajes de información
-  public errorMessage: Array<string>;
-  public successMessage: string;
-  public errorGoals: string;
-  public errorLearnings: string;
-  public errorActions: string;
-  public errorPositions: string;
+  public fileMap: Array<File>;   
 
   constructor(
     private _globalService: GlobalService,
@@ -72,37 +68,49 @@ export class ConfigureLevelComponent implements OnInit {
     private _actionService: ActionService,
     private _route: ActivatedRoute,
     private _router: Router
-  ) { 
-    this.boolEdit = true;
+  ) {     
     this.title = 'Editar nivel';
     this.identity = this._userService.getIdentity();
     this.url = this._globalService.url;
-    this.errorMessage = new Array<string> ();  
+    this.boolEdit = true;
     this.successMessage = '';
-    this.goalsLevel = new Array<LevelGoal> ();
-    this.learningsLevel = new Array<LevelLearning> ();
-    this.actionsLevel = new Array<LevelAction> ();    
+    this.errorMessage = new Array<string> ();       
   }
 
   ngOnInit() {
-
-    this.getEvolutions();
-
     this._route.params.forEach((params: Params) => {              
-      if (params['id']) {      
-        this.goalLevel = new LevelGoal(null, params['id'] , null, null, null);  
+      if (params['id']) {              
         this.getLevel(params['id']);
-        this.getGoals(params['id']);
-        this.getLearnings(params['id']);        
-        this.getActions(params['id']);
+        this.getGoals(params['id'], true);
+        this.getLearnings(params['id'], true);        
+        this.getActions(params['id'], true);
         this.getPositions(params['id']);
+        this.init(params['id']);        
       } else {
         this.boolEdit = false;
         this.title = 'Añadir nivel';
         this.level = new Level (null, null, '', '', null, null, '', null, '', '');
       }      
     });
+    this.getEvolutions();
   }
+
+  init(id) {
+    this.levelGoal = new LevelGoal (null, id, null, null, null);
+    this.levelLearning = new LevelLearning (null, id, null);
+    this.levelAction = new LevelAction (null, id, null);
+    this.position = new Position (null, id, null, null);
+    // Array    
+    this.levelGoals = new Array<LevelGoal>(); 
+    this.levelLearnings = new Array<LevelLearning>();
+    this.levelActions = new Array<LevelAction>();
+    this.levelPositions = new Array<Position>();
+  }
+
+
+  /**
+   * Métodos para añadir/editar nivel
+   */
 
   getLevel (id: string) {
     this._levelService.getLevel(id).subscribe(
@@ -134,97 +142,15 @@ export class ConfigureLevelComponent implements OnInit {
     );
   }
 
-  getGoals (id: string) {
-    this.errorGoals = '';    
+  onSubmit() {
+    this.errorMessage.length = 0;
+    this.successMessage = '';
 
-    this._goalService.getGoalsLevel(id).subscribe(
-      res => {
-        if (!res.goals) {
-          this.errorGoals = 'Ningún objetivo asociado al nivel';
-          this.goalsLevel.length = 0;
-        } else {
-          this.goalsLevel = res.goals;                      
-        }
-      },
-      err => {
-        this.errorGoals = err.error.message;
-      }
-    );
-
-    this._goalService.getGoals().subscribe(
-      res => {
-        if (res.goals) {
-          this.goals = res.goals;
-        }
-      }
-    );
-  }
-
-  getLearnings (id: string) {
-    this.errorLearnings = '';      
-
-    this._learningService.getLearningsLevel(id).subscribe(
-      res => {
-        if (!res.learnings) {
-          this.errorLearnings = 'Ningún aprendizaje asociado al nivel';
-        } else {
-          this.learningsLevel = res.learnings;                      
-        }
-      },
-      err => {
-        this.errorLearnings = err.error.message;
-      }
-    );
-
-    this._learningService.getLearnings().subscribe(
-      res => {
-        if (res.learnings) {
-          this.learnings = res.learnings;
-        }
-      }
-    );
-  }
-
-  getActions (id: string) {
-    this.errorActions = '';    
-
-    this._actionService.getActionsLevel(id).subscribe(
-      res => {
-        if (!res.actions) {
-          this.errorActions = 'Ninguna acción asociada al nivel';
-        } else {
-          this.actionsLevel = res.actions;                      
-        }
-      },
-      err => {
-        this.errorActions = err.error.message;
-      }
-    );
-
-    this._actionService.getActions().subscribe(
-      res => {
-        if (res.actions) {
-          this.actions = res.actions;
-        }
-      }
-    );
-  }
-
-  getPositions (id: string) {
-    this.errorPositions = '';    
-
-    this._levelService.getPositions(id).subscribe(
-      res => {
-        if (!res.positions) {
-          this.errorPositions = 'Ninguna posición marcada en el nivel';
-        } else {
-          this.positionsLevel = res.positions;                      
-        }
-      },
-      err => {
-        this.errorPositions = err.error.message;
-      }
-    );
+    if (this.boolEdit) {
+      this.editLevel();
+    } else {
+      this.addLevel();
+    }
   }
 
   editLevel() {
@@ -247,8 +173,7 @@ export class ConfigureLevelComponent implements OnInit {
 
           if (this.fileCode) {
             this.makeFileRequest(this.url + 'level-upload-code/' +  this.level._id, [], this.fileCode, 'file').then(
-              (res: any) => {
-                console.log(res);
+              (res: any) => {                
                   if (res.file) {
                     this.level.code_default = res.file;                    
                   } else {
@@ -268,6 +193,21 @@ export class ConfigureLevelComponent implements OnInit {
               }
           ); }
           this.successMessage = 'Nivel actualizado correctamente';
+        }
+      },
+      err => {
+        this.errorMessage.push(err.error.message);
+      }
+    );
+  }
+
+  addLevel () {
+    this._levelService.addLevel(this.level).subscribe(
+      res => {
+        if (!res.level) {
+          this.errorMessage.push('Error al añadir nivel: ' + res.message);
+        } else {            
+          this.successMessage = 'Nivel añadido correctamente';          
         }
       },
       err => {
@@ -306,154 +246,9 @@ export class ConfigureLevelComponent implements OnInit {
     );
   }
 
-  onSubmit() {
-    this.errorMessage = [];
-    this.successMessage = '';
-
-    if (this.boolEdit) {
-      this.editLevel();
-    } else {
-      this.addLevel();
-    }
-
-
-  }
-
-  addLevel () {
-    this._levelService.addLevel(this.level).subscribe(
-      res => {
-        if (!res.level) {
-          this.errorMessage.push('Error al añadir nivel: ' + res.message);
-        } else {            
-          this.successMessage = 'Nivel añadido correctamente';          
-        }
-      },
-      err => {
-        this.errorMessage.push(err.error.message);
-      }
-    );
-  }
-
-  addGoal () {
-    if (this.goalLevel) {      
-      this._levelService.addGoalLevel(this.goalLevel).subscribe(
-        res => {
-          if (!res.level_goal) {
-            this.errorGoals = 'Error: ' + res.message;
-          } else {
-            this.getGoals(this.level._id);                     
-          }
-        },
-        err => {
-          this.errorGoals = err.error.message;
-        }
-      );
-    } else {
-      this.errorGoals = 'No ha seleccionado ningún valor';
-    }
-  }
-
-  addLearning () {
-
-    this.errorLearnings = '';
-
-    if (this.learning) {
-      this.learningLevel = new LevelLearning(null, this.level._id, this.learning);
-
-      this._levelService.addLearningLevel(this.learningLevel).subscribe(
-        res => {
-          if (!res.level_learning) {
-            this.errorLearnings = 'Error: ' + res.message;
-          } else {   
-            this.learningLevel._id = res.level_learning._id;          
-            this.learningsLevel.push(this.learningLevel);                     
-          }
-        },
-        err => {
-          this.errorLearnings = err.error.message;
-        }
-      );
-
-    } else {
-      this.errorLearnings = 'No ha seleccionado ningún valor';
-    }
-  }
-
-  addAction () {
-
-    this.errorActions = '';
-
-    if (this.action) {
-      this.actionLevel = new LevelAction(null, this.level._id, this.action);
-
-      this._levelService.addActionLevel(this.actionLevel).subscribe(
-        res => {
-          if (!res.level_action) {
-            this.errorActions = 'Error: ' + res.message;
-          } else {   
-            this.actionLevel._id = res.level_action._id;          
-            this.actionsLevel.push(this.actionLevel);                     
-          }
-        },
-        err => {
-          this.errorActions = err.error.message;
-        }
-      );
-
-    } else {
-      this.errorActions = 'No ha seleccionado ningún valor';
-    }
-  }
-
-  removeGoal (id: string) {
-    this.errorGoals = '';
-    this._levelService.removeGoalLevel(id).subscribe(
-      res => {
-        if (!res.level_goal) {
-          this.errorGoals = 'Error: ' + res.message;
-        } else {   
-          this.getGoals(this.level._id);                                   
-        }
-      },
-      err => {
-        this.errorGoals = err.error.message;
-      }
-    );
-  }
-
-  removeLearning (id: string, index: number) {
-    this.errorLearnings = '';
-    this._levelService.removeLearningLevel(id).subscribe(
-      res => {
-        if (!res.level_learning) {
-          this.errorLearnings = 'Error: ' + res.message;
-        } else {            
-          this.learningsLevel.splice(index, 1);                     
-        }
-      },
-      err => {
-        this.errorLearnings = err.error.message;
-      }
-    );
-  }
-
-  removeAction (id: string, index: number) {
-    this.errorActions = '';
-    this._levelService.removeActionLevel(id).subscribe(
-      res => {
-        if (!res.level_action) {
-          this.errorActions = 'Error: ' + res.message;
-        } else {            
-          this.actionsLevel.splice(index, 1);                     
-        }
-      },
-      err => {
-        this.errorActions = err.error.message;
-      }
-    );
-  }
-
- 
+  /**
+   * Métodos para la subida de ficheros
+   */
 
   fileChangeEvent(fileInput: any, type: string) {     
     switch (type) {
@@ -497,6 +292,252 @@ export class ConfigureLevelComponent implements OnInit {
         xhr.setRequestHeader('Authorization', token);
         xhr.send(formData);
     });
+  }
+
+
+  /**
+   * Métodos para la edición de propiedades del nivel
+   */
+
+  getGoals (id: string, all: boolean) {
+    this.errorProperty[0] = '';    
+
+    this._goalService.getGoalsLevel(id).subscribe(
+      res => {
+        if (!res.goals) {
+          this.errorProperty[0] = 'Ningún objetivo asociado al nivel';          
+          this.levelGoals.length = 0;
+        } else {
+          this.levelGoals = res.goals;                      
+        }
+      },
+      err => {
+        this.errorProperty[0] = err.error.message;
+      }
+    );
+
+    if (all) {
+      this._goalService.getGoals().subscribe(
+        res => {
+          if (res.goals) {
+            this.goals = res.goals;
+          }
+        }
+      );
+    } 
+  }
+
+  getLearnings (id: string, all: boolean) {
+    this.errorProperty[1] = '';    
+
+    this._learningService.getLearningsLevel(id).subscribe(
+      res => {
+        if (!res.learnings) {
+          this.errorProperty[1] = 'Ningún aprendizaje asociado al nivel';          
+          this.levelLearnings.length = 0;
+        } else {
+          this.levelLearnings = res.learnings;                      
+        }
+      },
+      err => {
+        this.errorProperty[1] = err.error.message;
+      }
+    );
+
+    if (all) {
+      this._learningService.getLearnings().subscribe(
+        res => {
+          if (res.learnings) {
+            this.learnings = res.learnings;
+          }
+        }
+      );
+    } 
+  }
+
+  getActions (id: string, all: boolean) {
+    this.errorProperty[2] = '';    
+
+    this._actionService.getActionsLevel(id).subscribe(
+      res => {
+        if (!res.actions) {
+          this.errorProperty[2] = 'Ninguna acción asociada al nivel';
+          this.levelActions.length = 0;
+        } else {
+          this.levelActions = res.actions;                      
+        }
+      },
+      err => {
+        this.errorProperty[2] = err.error.message;
+      }
+    );
+
+    if (all) {
+      this._actionService.getActions().subscribe(
+        res => {
+          if (res.actions) {
+            this.actions = res.actions;
+          }
+        }
+      );
+    } 
+  }
+
+  getPositions (id: string) {
+    this.errorProperty[3] = '';    
+
+    this._levelService.getPositions(id).subscribe(
+      res => {
+        if (!res.positions) {
+          this.errorProperty[3] = 'Ninguna posición marcada en el nivel';
+          this.levelPositions.length = 0;
+        } else {
+          this.levelPositions = res.positions;                      
+        }
+      },
+      err => {
+        this.errorProperty[3] = err.error.message;
+      }
+    );
+  }
+ 
+  addGoal () {      
+    this._levelService.addGoalLevel(this.levelGoal).subscribe(
+      res => {
+        if (!res.level_goal) {
+          this.errorProperty[0] = 'Error: ' + res.message;
+        } else {      
+          this.errorProperty[0] = '';   
+          this.levelGoal._id = null;
+          this.levelGoal.goal = null;
+          this.levelGoal.value1 = null;
+          this.levelGoal.value2 = null;   
+          this.getGoals(this.level._id, false);                              
+        }
+      },
+      err => {
+        this.errorProperty[0] = err.error.message;
+      }
+    );
+  }
+
+  addLearning () {      
+    this._levelService.addLearningLevel(this.levelLearning).subscribe(
+      res => {
+        if (!res.level_learning) {
+          this.errorProperty[1] = 'Error: ' + res.message;
+        } else {      
+          this.errorProperty[1] = '';
+          this.levelLearning._id = null;
+          this.levelLearning.learning = null;      
+          this.getLearnings(this.level._id, false);                              
+        }
+      },
+      err => {
+        this.errorProperty[1] = err.error.message;
+      }
+    );
+  }
+
+  addAction () {      
+    this._levelService.addActionLevel(this.levelAction).subscribe(
+      res => {
+        if (!res.level_action) {
+          this.errorProperty[2] = 'Error: ' + res.message;
+        } else {      
+          this.errorProperty[2] = '';      
+          this.levelAction._id = null;
+          this.levelAction.action = null;     
+          this.getActions(this.level._id, false);                              
+        }
+      },
+      err => {
+        this.errorProperty[2] = err.error.message;
+      }
+    );
+  }
+
+  addPosition () {      
+    this._levelService.addPosition(this.position, this.level._id).subscribe(
+      res => {
+        if (!res.position) {
+          this.errorProperty[3] = 'Error: ' + res.message;
+        } else {      
+          this.errorProperty[3] = '';  
+          this.position._id = null;    
+          this.position.value_x = null;
+          this.position.value_y = null;
+          this.getPositions(this.level._id);                              
+        }
+      },
+      err => {
+        this.errorProperty[3] = err.error.message;
+      }
+    );
+  }
+
+  removeGoal (id: string) {    
+    this._levelService.removeGoalLevel(id).subscribe(
+      res => {
+        if (!res.level_goal) {
+          this.errorProperty[0] = 'Error: ' + res.message;
+        } else { 
+          this.errorProperty[0] = '';  
+          this.getGoals(this.level._id, false);                                   
+        }
+      },
+      err => {
+        this.errorProperty[0] = err.error.message;
+      }
+    );
+  }
+
+  removeLearning (id: string) {    
+    this._levelService.removeLearningLevel(id).subscribe(
+      res => {
+        if (!res.level_learning) {
+          this.errorProperty[1] = 'Error: ' + res.message;
+        } else { 
+          this.errorProperty[1] = '';  
+          this.getLearnings(this.level._id, false);                                   
+        }
+      },
+      err => {
+        this.errorProperty[1] = err.error.message;
+      }
+    );
+  }
+
+  removeAction (id: string) {    
+    this._levelService.removeActionLevel(id).subscribe(
+      res => {
+        if (!res.level_action) {
+          this.errorProperty[2] = 'Error: ' + res.message;
+        } else { 
+          this.errorProperty[2] = '';  
+          this.getActions(this.level._id, false);                                   
+        }
+      },
+      err => {
+        this.errorProperty[2] = err.error.message;
+      }
+    );
+  }
+
+  removePosition (id: string) {    
+    this._levelService.removePosition(id).subscribe(
+      res => {
+        if (!res.position) {
+          this.errorProperty[3] = 'Error: ' + res.message;
+        } else { 
+          this.errorProperty[3] = '';  
+          this.getPositions(this.level._id);                                   
+        }
+      },
+      err => {
+        this.errorProperty[3] = err.error.message;
+      }
+    );
   }
 
 }
