@@ -82,8 +82,7 @@ export class ConfigureActionComponent implements OnInit {
           this.errorMessage = err.error.message;
         }
       ); 
-    } else {
-      console.log('Añadir');
+    } else {      
       this._actionService.addAction(this.action).subscribe(
         res => {
           if (!res.action) {

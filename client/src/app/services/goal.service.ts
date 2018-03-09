@@ -46,7 +46,7 @@ export class GoalService {
     }
 
     // Obtener todos los objetivos asociadas a un nivel
-    getGoalsLevel(idLevel: number): Observable<any> {
+    getGoalsLevel(idLevel: string): Observable<any> {
         return this._http.get(this._globalService.url + 'goals/' + idLevel, this.httpOptions);
     }
 

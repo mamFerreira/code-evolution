@@ -68,7 +68,7 @@ function getLearnings (req, res){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
                 if (tuples.length==0){
-                    res.status(404).send({message: 'Ningún aprendizaje asociado al nivel'})
+                    res.status(200).send({message: 'Ningún aprendizaje asociado al nivel'})
                 }else{
                     res.status(200).send({learnings: tuples});
                 }

@@ -46,7 +46,7 @@ export class ActionService {
     }
 
     // Obtener todas las acciones asociadas a un nivel
-    getActionsLevel(idLevel: number): Observable<any> {
+    getActionsLevel(idLevel: string): Observable<any> {
         return this._http.get(this._globalService.url + 'actions/' + idLevel, this.httpOptions);
     }
 

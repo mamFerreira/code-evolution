@@ -66,7 +66,7 @@ function getGoals (req, res){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
                 if (tuples.length==0){
-                    res.status(404).send({message: 'Ningún objetivo asociado al nivel'})
+                    res.status(200).send({message: 'Ningún objetivo asociado al nivel'})
                 }else{
                     res.status(200).send({goals: tuples});
                 }
@@ -78,7 +78,7 @@ function getGoals (req, res){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
                 if (tuples.length==0){
-                    res.status(404).send({message: 'Ningún objetivo registrado'});
+                    res.status(200).send({message: 'Ningún objetivo registrado'});
                 }else{
                     res.status(200).send({goals: tuples});
                 }

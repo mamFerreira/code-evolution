@@ -46,7 +46,7 @@ export class LearningService {
     }
 
     // Obtener todos los aprendizaje asociadas a un nivel
-    getLearningsLevel(idLevel: number): Observable<any> {
+    getLearningsLevel(idLevel: string): Observable<any> {
         return this._http.get(this._globalService.url + 'learnings/' + idLevel, this.httpOptions);
     }
 

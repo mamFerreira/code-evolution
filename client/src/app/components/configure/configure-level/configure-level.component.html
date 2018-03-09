@@ -1,8 +1,10 @@
 <div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">
     <div class="page-header">
-      <h1>{{title}}</h1>
-      <button *ngIf="boolEdit && level.active==0" (click)='activateLevel();' class="btn btn-success">Activar</button>
-      <button *ngIf="boolEdit && level.active==1" (click)='desactivateLevel();' class="btn btn-danger">Desactivar</button>
+      <h1>{{title}}</h1> 
+      <div *ngIf="level">
+        <button *ngIf="boolEdit && level.active==0" (click)='activateLevel();' class="btn btn-success btn-active">Activar</button>
+        <button *ngIf="boolEdit && level.active==1" (click)='desactivateLevel();' class="btn btn-danger btn-active">Desactivar</button>
+      </div>           
     </div>
     <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
     <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div>
@@ -67,10 +69,110 @@
                   <a class="btn" href="{{url}}level-load/{{level.map}}/M" download="img">Descargar</a>                   
               </div>
             </div> 
-            <div class="col-sm-offset-2 col-sm-10 group-btn">                
-                <button type="submit" class="btn btn-default">Guardar</button>
-                <a [routerLink]="['/admin']" class="btn btn-default">Volver</a>                
+            <div class="col-sm-offset-2 col-sm-10">                
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <a [routerLink]="['/admin']" class="btn btn-warning">Volver</a>                
             </div> 
         </form>
+        <div *ngIf="boolEdit" class="lists_property col-lg-10 col-md-10">
+            <h2>Gestión de objetivos</h2>
+            <div *ngIf="errorGoals" class="alert alert-warning"> {{errorGoals}}</div>  
+            <table *ngIf="goalsLevel.length>0" class="table">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>#</th>              
+                        <th>Goal</th>
+                        <th>Value 1</th>
+                        <th>Value 2</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let element of goalsLevel; let i = index">
+                        <th scope="row">{{i+1}}</th>              
+                        <td>{{element.goal.title}}</td>
+                        <td>{{element.value1}}</td>
+                        <td>{{element.value2}}</td>
+                        <td>
+                            <a (click)="removeGoal(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table> 
+            <form *ngIf="goals" (ngSubmit)="addGoal()" #form="ngForm" class="form-inline">
+                <div class="form-group mb-2">                    
+                    <select  class="form-control" [(ngModel)]="goalLevel.goal" name="goal">
+                        <option *ngFor="let g of goals" [ngValue]="g">{{g.title}}</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label for="name" class="control-label">Value 1:</label>
+                    <input type="text" class="form-control" [(ngModel)]="goalLevel.value1" name="value1" required #value1="ngModel">           
+                </div>
+                <div class="form-group mb-2">
+                    <label for="name" class="control-label">Value 2:</label>
+                    <input type="text" class="form-control" [(ngModel)]="goalLevel.value2" name="value2" required #value2="ngModel">          
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+            </form>                     
+            <h2>Gestión de aprendizaje</h2>
+            <div *ngIf="errorLearnings" class="alert alert-warning"> {{errorLearnings}}</div>
+            <table *ngIf="learningsLevel.length>0" class="table">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>#</th>              
+                        <th>Title</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let element of learningsLevel; let i = index">
+                        <th scope="row">{{i+1}}</th>              
+                        <td>{{element.learning.title}}</td>
+                        <td>
+                            <a (click)="removeLearning(element._id,i);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <form *ngIf="learnings" (ngSubmit)="addLearning()" #form="ngForm" class="form-inline">
+                <div class="form-group mb-2">                    
+                    <select  class="form-control" [(ngModel)]="learning" name="learning">
+                        <option *ngFor="let l of learnings" [ngValue]="l">{{l.title}}</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+            </form>
+            <h2>Gestión de acciones</h2>
+            <div *ngIf="errorActions" class="alert alert-warning"> {{errorActions}}</div>
+            <table *ngIf="actionsLevel.length>0" class="table">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>#</th>              
+                        <th>Method</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let element of actionsLevel; let i = index">
+                        <th scope="row">{{i+1}}</th>              
+                        <td>{{element.action.method}}</td>
+                        <td>
+                            <a (click)="removeAction(element._id,i);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <form *ngIf="actions" (ngSubmit)="addAction()" #form="ngForm" class="form-inline">
+                <div class="form-group mb-2">                    
+                    <select  class="form-control" [(ngModel)]="action" name="action">
+                        <option *ngFor="let a of actions" [ngValue]="a">{{a.method}}</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+            </form>
+            <h2>Gestión de posiciones</h2>
+            <div *ngIf="errorPositions" class="alert alert-warning"> {{errorPositions}}</div>            
+        </div>
     </div>
 </div>

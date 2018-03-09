@@ -18,7 +18,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {        
     // Comprobar que el token es válido y no ha expirado
-    this._userService.checkToken().subscribe(
+    this.token = this._userService.getToken(); 
+    /*this._userService.checkToken().subscribe(
       res => {
         if (res.check) {
           this.token = this._userService.getToken(); 
@@ -30,7 +31,7 @@ export class AppComponent implements OnInit {
         this._router.navigate(['/']);
         console.log(err.message);              
       }
-    );
+    );*/
   }
 
 }

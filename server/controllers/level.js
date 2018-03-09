@@ -533,7 +533,7 @@ function getPositions (req,res) {
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
             if(tuples.length==0){
-                res.status(404).send({message: 'Nivel sin ninguna posición asociada'}); 
+                res.status(200).send({message: 'Ninguna posición marcada en el nivel'}); 
             }else{                                                                         
                 res.status(200).send({positions:tuples});
             }
@@ -653,7 +653,7 @@ function addLearning (req, res) {
                         }
                     });
                 }else{
-                    res.status(200).send({message: 'Ya existe la relación nivel-aprendizaje'})
+                    res.status(200).send({message: 'Aprendizaje ya asociado al nivel'})
                 }
             }
         });
@@ -717,7 +717,7 @@ function addAction (req, res) {
                         }
                     });
                 }else{
-                    res.status(200).send({message: 'Ya existe la relación nivel-acción'})
+                    res.status(200).send({message: 'Acción ya asociada al nivel'})
                 }
             }
         });

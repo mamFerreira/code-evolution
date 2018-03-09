@@ -182,7 +182,7 @@ function updateUser (req, res){
                 res.status(500).send({message: 'Error al actulizar el usuario', messageError: err.message});
             }else{
                 if(!userUpdate){
-                    res.status(404).send({message: 'No se ha podido actualizar el usuario'});
+                    res.status(404).send({message: 'No se ha podido actualizar el usuario: '});
                 }else{
                     res.status(200).send({user:userUpdate});
                 }
