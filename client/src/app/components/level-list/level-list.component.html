@@ -8,8 +8,8 @@
         <h1>{{title}}</h1>                           
       </div> 
       <div class="col-md-4 float-left level-selected">
-        <div class="level-image">
-          <img />
+        <div class="contenedor-image">
+            <img *ngIf="level.image" src="{{url}}level-load/{{level.image}}/I"/>  
         </div>        
         <button class="btn btn-primary" [routerLink]="['/jugar/nivel/' + level._id]">Jugar</button>        
       </div>

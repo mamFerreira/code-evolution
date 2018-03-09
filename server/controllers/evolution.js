@@ -244,7 +244,7 @@ function getEvolutionLearning (req, res) {
                 res.status(404).send({message: 'Error al obtener el aprendizaje asociado a la evolución'}); 
             }else{
                 if (tuples.length == 0){
-                    res.status(404).send({message: 'No existe aprendizaje asociado a la evolución'});
+                    res.status(200).send({message: 'Evolución sin aprendizaje asociado'});
                 }else{
                     var list = tuples[0].uniqueValues;
                     var json = [];                                

@@ -1,14 +1,31 @@
 <div class="container" *ngIf="evolution">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="page-header">
                 <h1>{{title}}</h1>                                        
             </div>  
-            <div class="evolution-selected"> 
-                <div class="col-md-6 float-right contenedor-image">                    
-                    <img src="{{url}}evolution-load/{{evolution.image}}/I"/>            
+            <section class="main-timeline-section">
+                <div class="timeline-start"></div>
+                <div class="conference-center-line"></div>
+                <div class="conference-timeline-content">
+                    <div *ngFor="let e of evolutions;let i = index;" class="timeline-article" [ngClass]="i%2 == 0  ? 'timeline-article-bottom' : 'timeline-article-top'">                        
+                        <div class="content-date">
+                                <span>{{e.origin}}</span>
+                        </div>
+                        <div class="meta-date" [ngClass]="{'meta-date-selected': e._id == evolution._id }"></div>
+                        <div class="content-box" [ngClass]="{'content-box-selected': e._id == evolution._id }" (click)="changeEvolution(e)">                        
+                            <p>{{e.name}}</p>                                                      
+                        </div>
+                    </div>                    
                 </div>
-                <div class="col-md-6 col-lg-6 float-right evolution-information"> 
+                <div class="timeline-end"></div>
+            </section>
+            <div class="evolution-selected"> 
+                <h2>{{evolution.name}}</h2>
+                <div class="col-md-6 float-right contenedor-image">                    
+                    <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
+                </div>
+                <div class="col-md-6 col-lg-6 float-right evolution-information">                     
                     <table class="table table-evolution-information">
                       <tbody>
                         <tr>
@@ -25,29 +42,18 @@
                         </tr>         
                         <tr>
                             <td><strong>Aprendizaje</strong></td>
-                            <td>Sintáxis básica<br><br>Declaración de variables</td>
+                            <td *ngIf="errorLearning" class="alert alert-warning"> <strong>Error: </strong>{{errorLearning}}</td>
+                            <td>
+                                <div *ngFor="let l of learnings;">
+                                    {{l.title}}
+                                </div>
+                            </td>
                         </tr>                                                          
                       </tbody>
                     </table>                    
                     <button class="btn btn-primary" [routerLink]="['evolucion/'+evolution._id]">Seleccionar</button>   
                 </div>
-            </div>          
-            <div style="display:inline-block;width:100%;overflow-y:auto;">
-                <ul class="timeline timeline-horizontal">
-                    <li class="timeline-item" *ngFor="let e of evolutions">
-                        <div class="timeline-badge" [ngClass]="{'timeline-selected': e._id == evolution._id }"><img src="{{url}}evolution-load/{{e.image}}/I"/></div>
-                        <a class="timeline-panel"  [ngClass]="{'timeline-selected': e._id == evolution._id }" (click)="changeEvolution(e)">
-                            <div class="timeline-heading">
-                                <h4 class="timeline-title">{{e.name}}</h4>
-                                <p><small class="text-muted"><i class="glyphicon glyphicon-time"></i> {{e.origin}}</small></p>
-                            </div>
-                            <div class="timeline-body">
-                                <p><!--aprendizaje--></p>
-                            </div>
-                        </a>
-                    </li>                
-                </ul>
-            </div>
+            </div>                      
         </div>
     </div>  
 </div>

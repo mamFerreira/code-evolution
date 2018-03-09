@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
+import { GlobalService } from '../../services/global.service';
 import { UserService } from '../../services/user.service';
 import { LevelService } from '../../services/level.service';
 import { Level } from '../../models/level.model';
@@ -14,18 +15,21 @@ import { Level } from '../../models/level.model';
 export class LevelListComponent implements OnInit {
 
   public title: string;
+  public url: string;
   public levels: Level[];
   public level: Level;
   public errosMessagge: string;
   public identity;
 
   constructor(
+    private _globalService: GlobalService,
     private _userService: UserService,
     private _levelSercice: LevelService,
     private _route: ActivatedRoute,
     private _router: Router
   ) {
     this.title = 'Seleccione un nivel';
+    this.url = this._globalService.url;
     this.identity = this._userService.getIdentity();
   }
 
@@ -43,7 +47,17 @@ export class LevelListComponent implements OnInit {
             this._router.navigate(['/']);
           } else {
             this.levels = res.levels;
-            this.level = res.levels[0];
+            // Selección del nivel activo
+            if (this.identity.level.evolution._id === id) {
+              this.levels.forEach( (element, index, array) => {
+                if (element._id === this.identity.level._id) {
+                  this.level = res.levels[index];
+                  return;
+                }
+              });                            
+            } else {
+              this.level = res.levels[0];
+            }   
           }
         },
         err => {

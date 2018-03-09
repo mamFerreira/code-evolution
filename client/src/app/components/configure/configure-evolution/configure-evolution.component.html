@@ -25,6 +25,12 @@
           </div>            
         </div> 
         <div class="form-group">
+          <label for="name" class="control-label col-sm-2">Origin (*):</label>
+          <div class="col-sm-5">
+              <input type="text" class="form-control" [(ngModel)]="evolution.origin" name="origin" required #origin="ngModel">
+          </div>            
+        </div>  
+        <div class="form-group">
           <label for="name" class="control-label col-sm-2">Health (*):</label>
           <div class="col-sm-5">
               <input type="text" class="form-control" [(ngModel)]="evolution.health" name="health" required #health="ngModel">
