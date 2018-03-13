@@ -19,7 +19,7 @@ export class Game {
     constructor (level: Level, evolution: Evolution, id: string) {
         this.level = level;
         this.evolution = evolution;
-        this.game = new Phaser.Game('100', 384, Phaser.CANVAS, id); 
+        this.game = new Phaser.Game('100%', '100%', Phaser.CANVAS, id); 
         this.state = new StateMain(this.game, this.evolution.order, this.level.order);
         this.defineWorker();
         this.game.state.add('gameplay', this.state);
@@ -86,7 +86,7 @@ export class Game {
 
     executeCode(code: string) {
         this.postMessage('execute', code);
-        this.game.paused = false;          
+        // this.game.paused = false;                  
     }
 
     stopExecution () {

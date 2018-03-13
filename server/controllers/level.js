@@ -239,20 +239,17 @@ function desactiveLevel (req,res){
 }
 
 /**
- * Traducir el código a JS pasado por parámetro y registrarlo en BBDD
+ * Registrar el código Python pasado por parámetro en BBDD
  * @returns code: código traducido a JS
  */
-function translateCode (req, res){
+function registerCode (req, res){
     var idLevel = req.params.id;
     var idUser = req.user.sub;
     var code = req.body.code;    
     var game = new Game();
-    var parama_id;    
-    var codeTranslate;
+    var parama_id;        
 
-    if (code){
-
-        codeTranslate = code;    
+    if (code){ 
 
         Game.find({ user:idUser, level:idLevel }).exec( (err, tuples) => {
             if (err){
@@ -272,7 +269,7 @@ function translateCode (req, res){
                             if(!tupleAdd){
                                 res.status(404).send({message:'Error al registrar el código'});
                             }else{
-                                res.status(200).send({code: codeTranslate});
+                                res.status(200).send({message: 'Código registrado correctamente'});
                             }
                         }
                     });
@@ -289,7 +286,7 @@ function translateCode (req, res){
                             if(!tupleUpdate){
                                 res.status(404).send({message: 'Error al actualizar el código'}); 
                             }else{
-                                res.status(200).send({code: codeTranslate});
+                                res.status(200).send({message: 'Código actualizado correctamente'});
                             }
                         }
                     });
@@ -901,7 +898,7 @@ module.exports = {
     removeLevel,
     activeLevel,
     desactiveLevel,
-    translateCode,
+    registerCode,
     uploadCode,
     loadCode,
     nextLevel,

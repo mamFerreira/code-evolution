@@ -23,7 +23,7 @@ api.delete('/level-remove/:id', md_auth.ensureAuthAdmin ,LevelController.removeL
 // Operaciones Especiales
 api.get('/level-active/:id',md_auth.ensureAuthAdmin, LevelController.activeLevel);
 api.get('/level-desactive/:id',md_auth.ensureAuthAdmin, LevelController.desactiveLevel);
-api.post('/level-translate/:id',md_auth.ensureAuth, LevelController.translateCode);
+api.post('/level-register-code/:id',md_auth.ensureAuth, LevelController.registerCode);
 api.post('/level-upload-code/:id', [md_auth.ensureAuthAdmin,md_upload_C], LevelController.uploadCode);
 api.get('/level-load-code/:id',md_auth.ensureAuth, LevelController.loadCode);
 api.get('/level-next/:id', md_auth.ensureAuth,LevelController.nextLevel);

@@ -42,10 +42,11 @@
 
 .nav_image {
     background:white;    
-    height: 45px;       
+    height: 60px;       
     width: 60px;   
     margin: 0px auto;
-    margin-top: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
     overflow: hidden;
     float: left;
     border: 2px solid black;

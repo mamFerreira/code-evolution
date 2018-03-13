@@ -80,10 +80,10 @@ export class LevelService {
     return this._http.get(this._globalService.url + 'level-desactive/' + idLevel, this.httpOptions);
   }
 
-  // Traducir código a JS
-  translateCode(code: string, idLevel: string): Observable<any> {
+  // Registrar código Python
+  registerCode(code: string, idLevel: string): Observable<any> {
     let json = JSON.stringify({code});
-    return this._http.post(this._globalService.url + 'level-translate/' + idLevel, json, this.httpOptions);
+    return this._http.post(this._globalService.url + 'level-register-code/' + idLevel, json, this.httpOptions);
   }
 
   // Cargar código del nivel

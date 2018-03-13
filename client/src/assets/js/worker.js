@@ -1,7 +1,9 @@
 importScripts('./acorn_interpreter.js');
+importScripts('./rapydscript.js');
 
 var evolution = 0;
 var myInterpreter;
+var compiler;
 var timeWait = 50;
 var json;
 var idInterval1;
@@ -76,7 +78,6 @@ function initApi1 (i,s){
 
 }
 
-
 function initApi(i, s) {
     if (evolution >= 1){
         initApi1(i,s);
@@ -112,16 +113,24 @@ function stopEjecución(){
 
 var queryableFunctions = {
 
-    initValue: (data) => {               
+    initValue: (data) => {              
         evolution = data; 
+        compiler = RapydScript.create_embedded_compiler();
     },    
 
-    execute: (data) => {                            
-        myInterpreter = new Interpreter(data, initApi);
+    execute: (data) => {           
+        
+        try{
+            var code_translate = compiler.compile(data);
+        }catch(e){
+            console.log('Error al traducir: ' + e);
+        }        
+        myInterpreter = new Interpreter(code_translate, initApi);
+
         try{
             nextStep();
         }catch(e){
-            console.log(e);
+            console.log('Error al ejecutar: ' + e);
         }        
     },
 

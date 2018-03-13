@@ -334,7 +334,7 @@ function uploadIEvolution (req,res){
     var field;
 
     if (req.files.image){
-        var file_path = req.files.image.path;
+        var file_path = req.files.image.path;        
         var file_name = file_path.split('\/')[3];
         var ext = file_name.split('\.')[1];        
         field = {image: file_name};                   
@@ -349,9 +349,15 @@ function uploadIEvolution (req,res){
                         res.status(200).send({image:file_name, evolution:tupleUpdate});
                     }
                 }
-            });
+            });            
         }else{
-            res.status(200).send({message:'Extensión del archivo no válida (.png)'});
+            fs.unlink(file_path, (err) => {
+                var msg = '';
+                if (err){
+                    msg = err.message;
+                }
+                res.status(200).send({message:'Extensión del archivo no válida (.png)' + msg});
+            });            
         }        
     }else{
         res.status(200).send({message:'Imagen no subida'});

@@ -1,7 +1,13 @@
 .canvas,
 .editor{
-    height:385px; 
+    width: 515px;
+    height:380px;     
     border: 2px solid black;
+}
+
+.canvas{
+    overflow: hidden;
+    width: 
 }
 
 button{

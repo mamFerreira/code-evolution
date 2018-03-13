@@ -1,10 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
-import { Game } from '../../class/game';
+
+import { GlobalService } from '../../services/global.service';
 import { LevelService } from '../../services/level.service';
 import { EvolutionService } from '../../services/evolution.service';
+
 import { Level } from '../../models/level.model';
 import { Evolution } from '../../models/evolution.model';
+
+import { Game } from '../../class/game';
 
 @Component({
   selector: 'app-level-play',
@@ -16,22 +20,25 @@ export class LevelPlayComponent implements OnInit {
   
   @ViewChild('editor') editor;
   public title: string;
+  public url: string;
   public level: Level;
   public evolution: Evolution;
   public game: Game;
   public code: string;
-  public codeTranslate: string;
   public errorM: string;
 
   constructor(
+    private _globalService: GlobalService,
     private _levelSercice: LevelService,
     private _evolutionService: EvolutionService,
     private _route: ActivatedRoute
   ) {
     this.title = 'Disfrute del nivel';
+    this.url = this._globalService.url; 
+    this.code = '';   
   }
 
-  ngOnInit() {
+  ngOnInit() {    
     this.load();    
   }
 
@@ -45,10 +52,22 @@ export class LevelPlayComponent implements OnInit {
             this.errorM = 'Error en el servidor';
           } else {
             this.level = res.level;
-            this.evolution = res.level.evolution;
-            this.code = 'moveRight();'; // imprimirValor("Hola Mundo!");'; // this.level.code;            
-            this.loadEditor();
-            this.loadCanvas();
+
+            this._evolutionService.getEvolution(this.level.evolution).subscribe(
+              res => {
+                if (!res.evolution) {
+                  this.errorM = 'Error en el servidor';
+                } else {
+                  this.evolution = res.evolution;
+                  this.loadCode();
+                  this.loadEditor();
+                  this.loadCanvas();
+                }
+              },
+              err => {
+                this.errorM = err.error.message;
+              }
+            );            
           }
         },
         err => {
@@ -56,6 +75,21 @@ export class LevelPlayComponent implements OnInit {
         }
       );
     });
+  }
+
+  loadCode() {
+    this._levelSercice.loadCode(this.level._id).subscribe(
+      res => {
+        if (!res.code) {
+          this.errorM = 'Error en el servidor';
+        } else {          
+          this.code = res.code;
+        }        
+      },
+      err => {
+        this.errorM = err.error.message;    
+      }
+    );
   }
 
   loadEditor() {
@@ -72,14 +106,9 @@ export class LevelPlayComponent implements OnInit {
   }
 
   playLevel () {
-    this._levelSercice.translateCode(this.code, this.level._id).subscribe(
+    this._levelSercice.registerCode(this.code, this.level._id).subscribe(
       res => {
-        if (!res.code) {
-          this.errorM = 'Error en el servidor';
-        } else {
-          this.codeTranslate = res.code.code;
-          this.game.executeCode(this.codeTranslate);
-        }
+        this.game.executeCode(this.code);
       },
       err => {
         this.errorM = err.error.message;

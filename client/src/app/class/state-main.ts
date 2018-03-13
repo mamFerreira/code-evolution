@@ -25,40 +25,47 @@ export class StateMain extends Phaser.State {
         this._velocity = 25;        
     }
 
-    preload() {
-        let e = this._orderLevel.toString();
-        let l = this._orderEvolution.toString();
+    preload() {                
         let url = '../../assets/tilemaps/';        
         // Carga del mapa
-        this._game.load.tilemap('map', url + 'maps/map' + e + '_' + l + '.json', null, Phaser.Tilemap.TILED_JSON);
+        this._game.load.tilemap('map', url + 'maps/map_test.json', null, Phaser.Tilemap.TILED_JSON);
         // Carga de la imagen del jugador
-        this._game.load.image('player', url + 'player/Evolution_' + e +  '.png');
+        this._game.load.image('player', url + 'player/cell.png');        
         // Carga de tileset
-        this._game.load.image('tiles_floor', url + '/tileset/floor_' + e + '.png');
-        this._game.load.image('tiles_block', url + '/tileset/block_' + e + '.png');
+        this._game.load.image('tiledset', url + '/tileset/tiledset.png');        
         // Comprobar si hay que cargar más objetos: posiciones disponibles y objetivo, enemigos, alimento, ....
     }
 
     create() {
         this._game.physics.startSystem(Phaser.Physics.ARCADE);
         this._game.stage.backgroundColor = '#787878';
+
         this.map = this._game.add.tilemap('map');
-        this.map.addTilesetImage('floor_tiled_set', 'tiles_floor');
-        this.map.addTilesetImage('block_tiled_set', 'tiles_block');
+        this.map.addTilesetImage('tiledset', 'tiledset');
+        // this.map.addTilesetImage('block_tiled_set', 'tiles_block');
         this.layer_surface = this.map.createLayer('surface');
         this.layer_block = this.map.createLayer('block');
-        this.map.setCollisionBetween(1, 10000, this.layer_block.layer.properties.collision, this.layer_block);
-        this.layer_surface.resizeWorld();
-        this.layer_block.resizeWorld();  
-        this._player = this._game.add.sprite(0, 0, 'player');            
+        // this.map.setCollisionBetween(1, 10000, true, this.layer_block);
+        // this.layer_surface.resizeWorld();
+        // this.layer_block.resizeWorld();  
+        this._player = this._game.add.sprite(0, 0, 'player'); 
+        this._player.width = 32;
+        this._player.height = 32;
         // this.game.input.onDown.add(this.onTap, this);
         // this.game.input.onUp.add(this.onTap2, this);
         this.cursors = this._game.input.keyboard.createCursorKeys();
         this._game.physics.enable(this._player);
-        this._player.body.collideWorldBounds = true;        
+        // this._player.body.collideWorldBounds = true;        
 
+        // this.ScaleGame();
         this.reload();
     }
+
+    ScaleGame() {            
+        this._game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;                            
+        this._game.scale.setShowAll();    
+    }
+
 
     update() {     
         this.comprobarObjetivos();        
@@ -129,7 +136,7 @@ export class StateMain extends Phaser.State {
     }     
     
     imprimirValor(value) {
-        console.log(value);
+        alert(value);
     }
 }
 

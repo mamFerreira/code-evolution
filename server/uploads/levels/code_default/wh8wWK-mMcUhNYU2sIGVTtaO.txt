@@ -1,0 +1,3 @@
+#Mueve el jugador a la posición objetivo
+
+moveRight();
