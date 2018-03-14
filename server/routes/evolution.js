@@ -27,7 +27,7 @@ api.get('/evolution-action/:id',md_auth.ensureAuth, EvolutionController.getEvolu
 // Operaciones subida de imágenes
 api.post('/evolution-upload-I/:id', [md_auth.ensureAuthAdmin,md_upload_I], EvolutionController.uploadIEvolution);
 api.post('/evolution-upload-P/:id', [md_auth.ensureAuthAdmin,md_upload_P], EvolutionController.uploadPEvolution);
-api.post('/evolution-upload-T/:id/:type', [md_auth.ensureAuthAdmin,md_upload_T], EvolutionController.uploadTEvolution);
+api.post('/evolution-upload-T/:id', [md_auth.ensureAuthAdmin,md_upload_T], EvolutionController.uploadTEvolution);
 
 // Operaciones carga de imágenes
 api.get('/evolution-load/:imageFile/:type',EvolutionController.loadEvolution);

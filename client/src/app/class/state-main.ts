@@ -4,71 +4,113 @@ import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
 export class StateMain extends Phaser.State {
 
-    private _game: Phaser.Game;
+    private urlResource: string;
+    private url: String;
+    public game: Phaser.Game;    
+    public filePlayer: string;
+    public fileMap: string;
+    public fileTiledset: string;
+
+    private posInitial: Position;
+    private posGoal: Position;
+    private positions: Position[];
+    
     private map: Phaser.Tilemap;
     private layer_surface;
     private layer_block;    
     private txt;
     private cursors;    
-    private _player;
+    private player;
     private _locked: boolean;
     private _velocity: number;
     private _orderLevel: number;
     private _orderEvolution: number;
-    public _posO: Position = new Position();
     
-    constructor(game, level, evolution) {
-        super();
-        this._game = game; 
-        this._orderLevel = level;
-        this._orderEvolution = evolution;
-        this._velocity = 25;        
+    
+    constructor(id, url) {
+        super();        
+        this.url = url; 
+        this.urlResource = '../../assets/resource/';
+        this.game = new Phaser.Game('100%', '100%', Phaser.CANVAS, id); 
+        this.positions = new Array<Position>();
     }
 
-    preload() {                
-        let url = '../../assets/tilemaps/';        
-        // Carga del mapa
-        this._game.load.tilemap('map', url + 'maps/map_test.json', null, Phaser.Tilemap.TILED_JSON);
-        // Carga de la imagen del jugador
-        this._game.load.image('player', url + 'player/cell.png');        
-        // Carga de tileset
-        this._game.load.image('tiledset', url + '/tileset/tiledset.png');        
-        // Comprobar si hay que cargar más objetos: posiciones disponibles y objetivo, enemigos, alimento, ....
+    addGoal(type, v1, v2) {
+        if (type === 'position') {
+            this.posGoal = new Position(v1, v2);
+        }
     }
 
+    addPosition (x, y, init = false) {
+        if (init) {
+            this.posInitial = new Position(x, y);
+        } else {
+            let p = new Position(x, y);
+            this.positions.push(p);
+        }
+    }
+
+    preload() {                                
+        this.game.load.tilemap('map', this.url + 'level-load/' + this.fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);
+        this.game.load.image('player', this.url + 'evolution-load/' + this.filePlayer + '/P');        
+        this.game.load.image('tiledset', this.url + 'evolution-load/' + this.fileTiledset + '/T');    
+
+        if (this.posGoal) {
+            this.game.load.image('pos_obj', this.urlResource + 'object/posicion_obj.png');
+        }
+
+        if (this.positions.length > 0 ) {
+            this.game.load.image('pos', this.urlResource + 'object/posicion.png');
+        }
+    }
+    
     create() {
-        this._game.physics.startSystem(Phaser.Physics.ARCADE);
-        this._game.stage.backgroundColor = '#787878';
-
-        this.map = this._game.add.tilemap('map');
+        this.game.stage.backgroundColor = '#787878';
+        this.map = this.game.add.tilemap('map');
         this.map.addTilesetImage('tiledset', 'tiledset');
-        // this.map.addTilesetImage('block_tiled_set', 'tiles_block');
         this.layer_surface = this.map.createLayer('surface');
-        this.layer_block = this.map.createLayer('block');
+        this.layer_block = this.map.createLayer('block');        
+
+        if (this.posGoal) {
+            this.game.add.sprite(this.posGoal.x, this.posGoal.y, 'pos_obj');
+        }
+
+        this.positions.forEach( (p) => {
+            this.game.add.sprite(p.x, p.y, 'pos');
+        });
+
+        this.player = this.game.add.sprite(this.posInitial.x, this.posInitial.y , 'player');
+        this.player.width = 32;
+        this.player.height = 32;
+
+        // this.map.addTilesetImage('block_tiled_set', 'tiles_block');
+        
         // this.map.setCollisionBetween(1, 10000, true, this.layer_block);
         // this.layer_surface.resizeWorld();
-        // this.layer_block.resizeWorld();  
-        this._player = this._game.add.sprite(0, 0, 'player'); 
-        this._player.width = 32;
-        this._player.height = 32;
+        // this.layer_block.resizeWorld();          
         // this.game.input.onDown.add(this.onTap, this);
         // this.game.input.onUp.add(this.onTap2, this);
-        this.cursors = this._game.input.keyboard.createCursorKeys();
-        this._game.physics.enable(this._player);
+        // this.cursors = this._game.input.keyboard.createCursorKeys();
+        // this._game.physics.enable(this._player);
         // this._player.body.collideWorldBounds = true;        
-
         // this.ScaleGame();
-        this.reload();
+        // this._game.physics.startSystem(Phaser.Physics.ARCADE);
     }
 
+    update() {
+        // Comprobar Objetivos    
+    }
+
+
+    imprimirValor(value) {
+        alert(value);
+    }
+
+
+/*
     ScaleGame() {            
         this._game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;                            
         this._game.scale.setShowAll();    
-    }
-
-
-    update() {     
-        this.comprobarObjetivos();        
     }
 
     reload() {        
@@ -79,10 +121,6 @@ export class StateMain extends Phaser.State {
 
         this._game.paused = true;
         this._locked = false;
-    }
-
-    game(): Phaser.Game {
-        return this._game;
     }
 
     get player() {
@@ -133,32 +171,33 @@ export class StateMain extends Phaser.State {
             default:                
         }
         return true;
-    }     
-    
-    imprimirValor(value) {
-        alert(value);
-    }
+    }         
+    */
 }
 
 export class Position {
-    _x: number;
-    _y: number;
-    _active: boolean;
+    private _x: number;
+    private _y: number;
+    private _active: boolean;
+    private _pixel = 32;
 
-    constructor() {}
+    constructor(x, y) {
+        this._x = x * this._pixel;
+        this._y = y * this._pixel;        
+    }
 
     get x(): number {
         return this._x;
     }
     set x(value: number) {
-        this._x = value;
+        this._x = value * this._pixel;
     }
 
     get y(): number {
         return this._y;
     }
     set y(value: number) {
-        this._y = value;
+        this._y = value * this._pixel;
     }
 
     get active(): boolean {
@@ -167,7 +206,5 @@ export class Position {
     set active(value: boolean) {
         this._active = value;
     }
-
-    
 }
 

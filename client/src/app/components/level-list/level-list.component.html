@@ -30,6 +30,7 @@
       <div class="col-md-1 float-left"></div>
       <div class="col-md-8 float-left level-detail">
           <h2>{{level.order}}: {{level.title}}</h2>
+          <h3>{{level.description}}</h3>
           <div class="col-md-3 float-left">
             <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="goals">
               <thead>
@@ -71,8 +72,7 @@
           <div class="col-md-5 float-left">            
             <div class="contenedor-image">            
                 <img *ngIf="level.image" src="{{url}}level-load/{{level.image}}/I"/>  
-            </div>   
-            {{level.description}}                
+            </div>                             
           </div>  
       </div>    
          

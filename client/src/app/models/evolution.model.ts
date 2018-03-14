@@ -8,7 +8,8 @@ export class Evolution {
         public image: string,
         public player: string,
         public health: number,
-        public tiledset_surface: string,
-        public tiledset_block: string
+        // public tiledset_surface: string,
+        // public tiledset_block: string
+        public tiledset: string
     ) {}
 }

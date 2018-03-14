@@ -11,8 +11,9 @@ var EvolutionSchema = new Schema({
     image: String,
     player: String,
     health: Number,
-    tiledset_surface: String,
-    tiledset_block: String,
+    // tiledset_surface: String,
+    // tiledset_block: String,
+    tiledset: String,
     numLevels: {type: Number, default: 0},
 });
 

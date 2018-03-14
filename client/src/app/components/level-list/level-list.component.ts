@@ -124,8 +124,7 @@ export class LevelListComponent implements OnInit {
     this._learningService.getLearningsLevel(this.level._id).subscribe(
       res => {
         if (res.learnings) {
-          this.learnings = res.learnings;
-          console.log(res.learnings);
+          this.learnings = res.learnings;          
         }
       },
       err => {

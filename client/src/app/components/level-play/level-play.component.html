@@ -1,9 +1,8 @@
+<div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
 <div class="col-lg-6 col-md-6 float-right">
     <div id="phaser-game" class="canvas"></div>
 </div>
 <div class="col-lg- 6 col-md-6 float-right">
     <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
+    <button *ngIf="stateStarted && workerDefined" class="btn btn-primary" (click)="playLevel();">Enviar</button>
 </div>
-<button class="btn btn-primary" (click)="playLevel();" *ngIf="level && evolution">Enviar</button>
-<button class="btn btn-primary" (click)="stopLevel();" *ngIf="level && evolution">Detener</button>
-

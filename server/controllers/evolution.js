@@ -407,7 +407,7 @@ function uploadPEvolution (req,res){
  */
 function uploadTEvolution (req,res){
     var id = req.params.id;
-    var type = req.params.type;
+    // var type = req.params.type;
     var file_name = 'No subido...';
     var field;
 
@@ -416,7 +416,8 @@ function uploadTEvolution (req,res){
         var file_name = file_path.split('\/')[3];
         var ext = file_name.split('\.')[1];   
         
-        switch (type){
+        field = {tiledset: file_name};  
+        /*switch (type){
             case 'S':
                 field = {tiledset_surface: file_name};        
                 break;
@@ -425,7 +426,7 @@ function uploadTEvolution (req,res){
                 break;
             default:
                 return res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: 'Tipo de imágen desconocido'});
-        }
+        }*/
         
 
         if (ext=='png'){
@@ -468,8 +469,8 @@ function loadEvolution (req,res){
         case 'P':
             global_path = GLOBAL.PATH_FILE_EVOLUTION_P;            
             break;
-        case 'TS':
-        case 'TB':
+        //case 'TS':
+        case 'T':
             global_path = GLOBAL.PATH_FILE_EVOLUTION_T;            
             break;
         default:
@@ -494,12 +495,15 @@ function loadEvolution (req,res){
                     if (type == 'P'){
                         imageFile = evolution.player;
                     }
-                    if (type == 'TS'){
+                    /*if (type == 'TS'){
                         imageFile = evolution.tiledset_surface;
                     }
                     if (type == 'TB'){
                         imageFile = evolution.tiledset_block;
-                    }                    
+                    }*/
+                    if (type == 'T'){
+                        imageFile = evolution.tiledset;
+                    }                 
                     path_file = global_path + imageFile;                    
                     fs.exists(path_file, (exists) => {
                         if(exists){

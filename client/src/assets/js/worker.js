@@ -1,9 +1,9 @@
 importScripts('./acorn_interpreter.js');
 importScripts('./rapydscript.js');
 
-var evolution = 0;
 var myInterpreter;
 var compiler;
+var dictionary = [];
 var timeWait = 50;
 var json;
 var idInterval1;
@@ -34,53 +34,38 @@ function waitResponseObject(i, callback){
 
 }
 
+function addFunction (method){
+    var wrapper = null;
 
-function initApi1 (i,s){
-
-    var wrapper = (callback) => {                
-        json = null;
-        reply('moveUp');          
-        waitResponse(callback);
-    };
-
-    i.setProperty(s, 'moveUp', i.createAsyncFunction(wrapper));
-
-    var wrapper = (callback) => {                
-        json = null;
-        reply('moveDown');          
-        waitResponse(callback);
-    };
-
-    i.setProperty(s, 'moveDown', i.createAsyncFunction(wrapper));
-
-    var wrapper = (callback) => {                
-        json = null;
-        reply('moveRight');          
-        waitResponse(callback);
-    };
-
-    i.setProperty(s, 'moveRight', i.createAsyncFunction(wrapper));
-
-    var wrapper = (callback) => {                
-        json = null;
-        reply('moveLeft');          
-        waitResponse(callback);
-    };
-
-    i.setProperty(s, 'moveLeft', i.createAsyncFunction(wrapper));
-
-    var wrapper = (v) => {        
-        reply('printValue',v)
-    };
-
-    i.setProperty(s, 'imprimirValor', i.createNativeFunction(wrapper));
-
-
+    switch(method){
+        case 'moveUp':
+        case 'moveDown': 
+        case 'moveRight': 
+        case 'moveLeft':
+            wrapper = (callback) => {                
+                json = null;
+                reply(method);          
+                waitResponse(callback);
+            };
+            break;
+        case 'imprimirValor':
+            wrapper = (v) => {
+                reply('printValue',v);
+            }
+            break;   
+    }
+         
+    if (wrapper != null){        
+        dictionary.push({
+            key:   method,
+            value: wrapper
+        })
+    }      
 }
 
-function initApi(i, s) {
-    if (evolution >= 1){
-        initApi1(i,s);
+function initApi (i,s){        
+    for (var index=0; index<dictionary.length; index++){
+        i.setProperty(s, dictionary[index].key, i.createNativeFunction(dictionary[index].value));
     }
 }
 
@@ -113,8 +98,10 @@ function stopEjecución(){
 
 var queryableFunctions = {
 
-    initValue: (data) => {              
-        evolution = data; 
+    initValue: (data) => {                  
+        data.forEach(element => {
+            addFunction(element.method);
+        });                       
         compiler = RapydScript.create_embedded_compiler();
     },    
 

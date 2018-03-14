@@ -27,7 +27,12 @@
 }
 
 .level-detail h2{
-    margin-bottom: 40px;
+    margin-bottom: 10px;
+}
+
+.level-detail h3{
+    font-size: 12px;
+    margin-bottom: 20px;
 }
 
 .level-detail .level-image{
