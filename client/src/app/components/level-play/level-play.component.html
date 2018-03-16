@@ -1,8 +1,30 @@
+<div *ngIf="game.stateGame == 4" class="alert alert-success"> <strong>Nivel superado!</strong></div>
+<div *ngIf="game.stateGame == 5" class="alert alert-warning"> <strong>Nivel no superado!</strong></div>
+
 <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
 <div class="col-lg-6 col-md-6 float-right">
     <div id="phaser-game" class="canvas"></div>
+    <div *ngIf="stateStarted && workerDefined" class="buttons">
+        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
+            <span class="glyphicon glyphicon-repeat"></span>
+        </button>
+        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
+            <span class="glyphicon glyphicon-play"></span>
+        </button>
+        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
+            <span class="glyphicon glyphicon-pause"></span>
+        </button>
+        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.stop();">
+            <span class="glyphicon glyphicon-stop"></span>
+        </button>
+        <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
+            <span class="glyphicon glyphicon-volume-off"></span>
+        </button>
+        <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
+            <span class="glyphicon glyphicon-volume-up"></span>
+        </button>
+    </div>
 </div>
 <div class="col-lg- 6 col-md-6 float-right">
     <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
-    <button *ngIf="stateStarted && workerDefined" class="btn btn-primary" (click)="playLevel();">Enviar</button>
 </div>

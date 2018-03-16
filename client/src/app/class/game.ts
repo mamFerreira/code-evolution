@@ -1,4 +1,4 @@
-import { StateMain } from './state-main';
+import { StateMain, StateState } from './state-main';
 
 // Importación Modelos
 import { Evolution } from '../models/evolution.model';
@@ -7,24 +7,41 @@ import { LevelGoal } from '../models/level_goal.model';
 import { LevelAction } from '../models/level_action.model';
 import { Position } from '../models/position.model';
 
+export enum StateGame {
+    Init,
+    Run,
+    Pause,
+    Stop,
+    Finish_ok,
+    Finish_fail
+}
 
 export class Game {    
     private state: StateMain;    
-    private worker: Worker;  
+    private worker: Worker;
+    private idInterval;
+    private idIntervalMain;  
+    
+    public stateGame: StateGame;
+    public volume: boolean;
 
     constructor (id: string, url: string) {        
         this.state = new StateMain(id, url);
+        this.stateGame = StateGame.Init;
+        this.volume = true;        
     }
     
     initState( level: Level, evolution: Evolution, goals: LevelGoal[], positions: Position[] ): boolean {
         this.state.fileMap = level.map;
+        this.state.maxTime = level.time;
         this.state.filePlayer = evolution.player;
-        this.state.fileTiledset = evolution.tiledset;        
+        this.state.fileTiledset = evolution.tiledset;   
+        this.state.maxLife = evolution.health;     
 
         goals.forEach((g, index) => {
             switch (g.goal._id) {
                 case '5aa2728a0f97ad1767590448':
-                    this.state.addGoal('position', g.value1, g.value2);                     
+                    this.state.addGoal('position', g.value1, g.value2);                                       
                     break;
             }            
         });
@@ -59,54 +76,7 @@ export class Game {
         });        
 
         this.postMessage('initValue', actionJson);
-        
-
-        // Añadimos el mensaje de escucha: Switch con case para la action.
-        // En cada action llamaremos a la función correspondiente (de state si es el caso)
-        // y el post Message con la información solicitada si es el caso
-        this.worker.addEventListener('message', (e) => {
-
-            let idInterval;
-            
-            switch (e.data.action) {
-                /*case 'moveUp':
-                    this.state.moveDirection('U');                
-                    break;
-                case 'moveDown':
-                    this.postMessage('loadValue', this.state.moveDirection('D'));
-                    break;
-                case 'moveRight':
-                    this.state.moveDirection('R');
-
-                    idInterval = setInterval(() => {
-                        if (!this.state._posO.active) {
-                            this.postMessage('loadValue', true);
-                            clearInterval(idInterval);                            
-                        }                        
-                    }, 500);
-                    break;
-
-                case 'moveLeft':
-                    this.state.moveDirection('L');
-
-                    idInterval = setInterval(() => {
-                        if (!this.state._posO.active) {
-                            this.postMessage('loadValue', true);
-                            clearInterval(idInterval);                            
-                        }                        
-                    }, 500);
-                    break;
-                */
-                case 'printValue':
-                    this.state.imprimirValor(e.data.value);
-                    break;
-                case 'error':
-                    alert('Error: ' + e.data.value);
-                    break;
-                default:
-                    console.log('Error en worker: Acción no definida');
-            }
-        }, false);        
+        this.addEventListener();               
 
         return true;
     }
@@ -115,8 +85,117 @@ export class Game {
         this.worker.postMessage({'action': action, 'value': [value]});
     } 
 
-    executeCode(code: string) {
+    addEventListener() {
+        this.worker.addEventListener('message', (e) => {
+
+            let waitUnblock = false;
+            let waitResponse = false;
+            switch (e.data.action) {
+                case 'moveDown':
+                    this.state.moveDirection('D');
+                    waitUnblock = true;                                     
+                    break;
+                case 'moveUp':
+                    this.state.moveDirection('U');
+                    waitUnblock = true;                                     
+                    break;
+                case 'moveRight':
+                    this.state.moveDirection('R');
+                    waitUnblock = true;                                     
+                    break;
+                case 'moveLeft':
+                    this.state.moveDirection('L');
+                    waitUnblock = true;                                     
+                    break;
+                case 'printValue':
+                    this.state.imprimirValor(e.data.value);
+                    break;
+                case 'error':
+                    alert('Error: ' + e.data.value);
+                    break;
+                default:
+                    console.log('Error en worker: Acción ' + e.data.action + ' no definida');
+            }
+
+            if (waitUnblock) {
+                this.idInterval = setInterval(() => {
+                    if (this.state.state === StateState.Playable) {
+                        this.postMessage('unblock', true);
+                        clearInterval(this.idInterval);                            
+                    }                        
+                }, 500);
+            }
+
+            if (waitResponse) {
+                this.idInterval = setInterval(() => {
+                    if (!this.state.response) {
+                        this.postMessage('loadValue', true);
+                        clearInterval(this.idInterval);                            
+                    }                        
+                }, 500);
+            }
+            
+
+        }, false); 
+    }
+
+    restart () {        
+        this.state.game.paused = true;
+        this.postMessage('finish', true);        
+        clearInterval(this.idInterval);
+        clearInterval(this.idIntervalMain);
+    }
+
+    reload () {
+        // Recargar estado a posición inicial
+        this.state.reload();    
+        this.restart();    
+        this.stateGame = StateGame.Init;
+    }
+
+    play(code) {
         this.postMessage('execute', code);
-        this.state.game.paused = false;                  
+        this.state.game.paused = false;   
+        this.stateGame = StateGame.Run;  
+
+        this.idIntervalMain = setInterval(() => {
+
+            if (this.state.state > 1) {                                          
+
+                if (this.state.state === StateState.LevelUp) {
+                    this.stateGame = StateGame.Finish_ok;
+                } else {
+                    this.stateGame = StateGame.Finish_fail;
+                }                
+                this.restart(); 
+            }      
+
+        }, 50);
+
+    }
+
+    continue() {
+        this.state.game.paused = false;
+        this.stateGame = StateGame.Run;
+    }
+
+    pause() {
+        this.state.game.paused = true;
+        this.stateGame = StateGame.Pause;
+    }
+
+    stop() {
+        this.restart();
+        this.stateGame = StateGame.Stop;
+    }
+
+    volumeOn () {
+        console.log('volumeOn');
+        this.volume = true;
+    }
+    
+    volumeOff () {    
+        console.log('volumeOff');
+        this.volume = false;
     }
 }

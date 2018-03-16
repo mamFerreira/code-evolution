@@ -15,7 +15,7 @@ import { LevelLearning } from '../../models/level_learning.model';
 import { LevelAction } from '../../models/level_action.model';
 import { Position } from '../../models/position.model';
 
-import { Game } from '../../class/game';
+import { Game, StateGame } from '../../class/game';
 
 @Component({
   selector: 'app-level-play',
@@ -40,7 +40,7 @@ export class LevelPlayComponent implements OnInit {
   public goals: LevelGoal[];
   public learnings: LevelLearning[];
   public actions: LevelAction[];
-  public positions: Position[];
+  public positions: Position[];  
 
   constructor(
     private _globalService: GlobalService,
@@ -53,17 +53,17 @@ export class LevelPlayComponent implements OnInit {
     private _route: ActivatedRoute
   ) {
     this.title = 'Disfrute del nivel';
-    this.url = this._globalService.url; 
-    this.game = new Game('phaser-game', this.url);  
+    this.url = this._globalService.url;     
     this.code = ''; 
     this.errorMessage = ''; 
     this.stateStarted = false;   
-    this.workerDefined = false;
+    this.workerDefined = false;  
   }
 
   ngOnInit() {   
     this.loadLevel(); 
     this.loadEditor();
+    this.game = new Game('phaser-game', this.url);  
   }
 
   loadLevel() {
@@ -185,14 +185,21 @@ export class LevelPlayComponent implements OnInit {
     });
   }
 
-  playLevel () {
-    this._levelSercice.registerCode(this.code, this.level._id).subscribe(
-      res => {        
-        this.game.executeCode(this.code);
-      },
-      err => {
-        this.errorMessage += err.error.message;
-      }
-    );
+  play () {
+    if (this.game.stateGame === StateGame.Init) {
+      this._levelSercice.registerCode(this.code, this.level._id).subscribe(
+        res => {        
+          this.game.play(this.code);          
+        },
+        err => {
+          this.errorMessage += err.error.message;
+        }
+      );
+      
+    }
+    
+    if (this.game.stateGame === StateGame.Pause){
+      this.game.continue();            
+    }
   }
 }

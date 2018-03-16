@@ -1,16 +1,15 @@
 .canvas,
 .editor{
     width: 515px;
-    height:380px;     
+    height:444px;     
     border: 2px solid black;
 }
 
 .canvas{
     overflow: hidden;
-    width: 
 }
 
-button{
-    margin-top: 10px;
-    margin-left: 25%;
+.buttons{
+    margin-top: 5px;
+    margin-left: 20%;
 }
