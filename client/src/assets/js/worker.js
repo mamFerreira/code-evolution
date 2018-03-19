@@ -22,18 +22,17 @@ var queryableFunctions = {
 
     // Traducir código, definir interprete y empezar a ejecutar
     execute: (data) => {
-        try{
-            var code_translate = compiler.compile(data);
-        }catch(e){
-            console.log('Error al traducir: ' + e);
-        }        
-        myInterpreter = new Interpreter(code_translate, initApi);
 
         try{
-            nextStep();
-        }catch(e){
-            console.log('Error al ejecutar: ' + e);
+            var code_translate = compiler.compile(data);
+        }catch(e){            
+            reply('error','Line:'+e.lineNumber + ' Colum: ' + e.col + '  ' + e.message);
+            return;
         }        
+
+        myInterpreter = new Interpreter(code_translate, initApi);
+        nextStep();
+                  
     },
 
     // Cargar valor en JSON
@@ -58,7 +57,7 @@ self.addEventListener('message', (e) => {
         if (queryableFunctions.hasOwnProperty(e.data.action)){
             queryableFunctions[e.data.action].apply(self, e.data.value);
         }else{
-            console.log('Función no declarada');
+            reply('error','Función ' + e.data.action +  'no declarada');
         }                     
     } else {
         reply("error", e.data);

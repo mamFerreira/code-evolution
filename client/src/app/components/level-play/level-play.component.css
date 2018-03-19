@@ -1,15 +1,40 @@
-.canvas,
-.editor{
-    width: 515px;
-    height:444px;     
-    border: 2px solid black;
+.canvas, .editor, .shell{
+    width: 515px;    
 }
 
 .canvas{
+    height:444px; 
     overflow: hidden;
+    border: 2px solid black;
 }
 
 .buttons{
     margin-top: 5px;
     margin-left: 20%;
 }
+
+.editor {
+    height:350px;
+    border: 2px solid black;
+    border-bottom: 1px solid gray;
+}
+
+.shell {
+    height:94px;
+    border: 2px solid black;
+    list-style: none;
+    background: #141414;
+    color: #45D40C;
+    font: 0.8em 'Andale Mono', Consolas, 'Courier New';
+    line-height: 1.6em;  
+    overflow:scroll;
+    overflow-x:hidden;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.shell-error {
+    color: red;
+}
+

@@ -21,12 +21,16 @@ export class Game {
     private worker: Worker;
     private idInterval;
     private idIntervalMain;  
-    
+
+    public code_shell: string;
+    public code_error: boolean;
     public stateGame: StateGame;
     public volume: boolean;
 
     constructor (id: string, url: string) {        
         this.state = new StateMain(id, url);
+        this.code_shell = 'Code Evolution Shell...';
+        this.code_error = false;
         this.stateGame = StateGame.Init;
         this.volume = true;        
     }
@@ -111,10 +115,12 @@ export class Game {
                     this.state.imprimirValor(e.data.value);
                     break;
                 case 'error':
-                    alert('Error: ' + e.data.value);
+                    this.code_shell += '<br>$ Error:' + e.data.value;
+                    this.stop();
                     break;
                 default:
-                    console.log('Error en worker: Acción ' + e.data.action + ' no definida');
+                    this.code_shell += '<br>$ Error en worker: Acción ' + e.data.action + ' no definida';
+                    this.stop();
             }
 
             if (waitUnblock) {
@@ -139,7 +145,7 @@ export class Game {
         }, false); 
     }
 
-    restart () {        
+    restart () {                
         this.state.game.paused = true;
         this.postMessage('finish', true);        
         clearInterval(this.idInterval);
@@ -151,12 +157,15 @@ export class Game {
         this.state.reload();    
         this.restart();    
         this.stateGame = StateGame.Init;
+        this.code_shell = 'Code Evolution Shell...';
+        this.code_error = false;
     }
 
     play(code) {
         this.postMessage('execute', code);
         this.state.game.paused = false;   
-        this.stateGame = StateGame.Run;  
+        this.stateGame = StateGame.Run; 
+        this.code_shell += '<br>$ Play...'; 
 
         this.idIntervalMain = setInterval(() => {
 
@@ -177,16 +186,20 @@ export class Game {
     continue() {
         this.state.game.paused = false;
         this.stateGame = StateGame.Run;
+        this.code_shell += '<br>$ Continue...'; 
     }
 
     pause() {
         this.state.game.paused = true;
         this.stateGame = StateGame.Pause;
+        this.code_shell += '<br>$ Pause'; 
     }
 
     stop() {
         this.restart();
         this.stateGame = StateGame.Stop;
+        this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo'; 
+        this.code_error = true;
     }
 
     volumeOn () {

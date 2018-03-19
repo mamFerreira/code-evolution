@@ -6,7 +6,7 @@
     <div id="phaser-game" class="canvas"></div>
     <div *ngIf="stateStarted && workerDefined" class="buttons">
         <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
-            <span class="glyphicon glyphicon-repeat"></span>
+            <span class="glyphicon glyphicon-refresh"></span>
         </button>
         <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
             <span class="glyphicon glyphicon-play"></span>
@@ -14,17 +14,18 @@
         <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
             <span class="glyphicon glyphicon-pause"></span>
         </button>
-        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.stop();">
-            <span class="glyphicon glyphicon-stop"></span>
-        </button>
         <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
             <span class="glyphicon glyphicon-volume-off"></span>
         </button>
         <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
             <span class="glyphicon glyphicon-volume-up"></span>
         </button>
+        <button type="button" class="btn btn-default btn-lg">
+            <span class="glyphicon glyphicon-info-sign"></span>
+        </button>
     </div>
 </div>
 <div class="col-lg- 6 col-md-6 float-right">
     <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
+    <div class="shell" [ngClass]="{'shell-error': game.code_error }"><p [innerHTML]="game.code_shell"></p></div>
 </div>
