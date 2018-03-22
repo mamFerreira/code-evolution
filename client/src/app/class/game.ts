@@ -174,7 +174,9 @@ export class Game {
                 if (this.state.state === StateState.LevelUp) {
                     this.stateGame = StateGame.Finish_ok;
                 } else {
-                    this.stateGame = StateGame.Finish_fail;
+                    this.stateGame = StateGame.Finish_fail;                    
+                    this.code_error = true;
+                    this.code_shell += '<br>$ Error -> ' + this.state.code_error;
                 }                
                 this.restart(); 
             }      

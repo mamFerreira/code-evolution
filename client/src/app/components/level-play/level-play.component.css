@@ -1,6 +1,20 @@
+/*CABECERA*/
+
+.title_2{
+    margin-left: 5%;
+}
+
+.buttons{
+    float: right;
+    margin-top: -40px;        
+    margin-right: 5%;
+}
+
 .canvas, .editor, .shell{
     width: 515px;    
 }
+
+/*CANVAS*/
 
 .canvas{
     height:444px; 
@@ -8,10 +22,7 @@
     border: 2px solid black;
 }
 
-.buttons{
-    margin-top: 5px;
-    margin-left: 20%;
-}
+/*EDITOR*/
 
 .editor {
     height:350px;
@@ -38,3 +49,4 @@
     color: red;
 }
 
+/*LISTADO*/

@@ -1,31 +1,46 @@
-<div *ngIf="game.stateGame == 4" class="alert alert-success"> <strong>Nivel superado!</strong></div>
-<div *ngIf="game.stateGame == 5" class="alert alert-warning"> <strong>Nivel no superado!</strong></div>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <div *ngIf="level && evolution" class="page-header">
+                <h1>{{title}}</h1> 
+                <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>   
+                <div *ngIf="stateStarted && workerDefined" class="buttons">
+                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </button>
+                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
+                        <span class="glyphicon glyphicon-play"></span>
+                    </button>
+                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
+                        <span class="glyphicon glyphicon-pause"></span>
+                    </button>
+                    <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
+                        <span class="glyphicon glyphicon-volume-off"></span>
+                    </button>
+                    <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
+                        <span class="glyphicon glyphicon-volume-up"></span>
+                    </button> 
+                    <button type="button" class="btn btn-default btn-lg">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                    </button>
+                </div>             
+            </div>                 
+            <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
+            <div class ="container_goal">
 
-<div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
-<div class="col-lg-6 col-md-6 float-right">
-    <div id="phaser-game" class="canvas"></div>
-    <div *ngIf="stateStarted && workerDefined" class="buttons">
-        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
-            <span class="glyphicon glyphicon-refresh"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
-            <span class="glyphicon glyphicon-play"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
-            <span class="glyphicon glyphicon-pause"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
-            <span class="glyphicon glyphicon-volume-off"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
-            <span class="glyphicon glyphicon-volume-up"></span>
-        </button>
-        <button type="button" class="btn btn-default btn-lg">
-            <span class="glyphicon glyphicon-info-sign"></span>
-        </button>
+            </div>
+            <div class="col-lg-6 col-md-6 float-right">
+                <h3 class="title_2">Lienzo</h3>
+                <div id="phaser-game" class="canvas"></div>                
+            </div>
+            <div class="col-lg-6 col-md-6 float-right">
+                <h3 class="title_2">Editor</h3>
+                <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
+                <div class="shell" [ngClass]="{'shell-error': game.code_error }"><p [innerHTML]="game.code_shell"></p></div>                                
+            </div>
+            <div class ="container_help">
+
+            </div>
+        </div>
     </div>
-</div>
-<div class="col-lg- 6 col-md-6 float-right">
-    <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
-    <div class="shell" [ngClass]="{'shell-error': game.code_error }"><p [innerHTML]="game.code_shell"></p></div>
 </div>

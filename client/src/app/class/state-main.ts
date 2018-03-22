@@ -42,7 +42,8 @@ export class StateMain extends Phaser.State {
 
     // Variables para intercambio de información
     public state: StateState;
-    public response: string;  
+    public response: string; 
+    public code_error: string; 
     
     // Variables para mostrar posición 
     private clickPositionText;
@@ -85,6 +86,7 @@ export class StateMain extends Phaser.State {
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
         this.response = null;
+        this.code_error = null;
         this.state = StateState.Playable;
         this.posGoalTmp = new Position(0, 0, false);    
 
@@ -353,8 +355,25 @@ export class StateMain extends Phaser.State {
                     break;
             }  
             this.state = StateState.Blocked;            
-        } else {
-            this.state = StateState.GameOver;
+        } else {            
+            let action = '';
+
+            switch (direction) {
+                case 'D':                
+                    action = 'moveDown()';
+                    break;
+                case 'U':
+                    action = 'moveUp()';
+                    break;
+                case 'R':
+                    action = 'moveRight()';
+                    break;  
+                case 'L':
+                    action = 'moveLeft()';
+                    break;
+            }
+            this.state = StateState.GameOver;  
+            this.code_error = 'No existe posición para ' + action;
         }        
     } 
 

@@ -1,59 +1,66 @@
-/*BARRA DE NAVEGACIÓN*/
-.navbar-default{
+/*Barra de navegación*/
+.navbar{
     background: #ffffff;
-    border: 2px solid black;
-    border-radius: 8px;
+    font-size: 15px;    
 }
 
-.navbar-default .navbar-toggle .icon-bar {
-    background-color: black;
+.navbar-brand img{
+    height: 25px;
 }
 
-.navbar .navbar-right {
-    margin-right: 2.5%;    
+.navbar-right{
+    margin-right: 2.5%; 
 }
 
-.navbar .navbar-right img{
-    margin-right: 20px;    
+.glyphicon{
+    font-size: 15px;         
+    margin-right: 5px;
 }
 
-.navbar .glyphicon{
-    font-size: 35px;
-    display: block;
-    color: black;
-    width: 100%;
-}
-
-.navbar-text{
-    color: black;
-    font-weight: bold;
-    font-size: 18px;
-    margin-top: 22px;
-    font-family: 'Oswald', sans-serif;
-}
-
-.btn-logout {
-    cursor:pointer;
-}
-
-.nav_image_logo {
-    height: 30px;
-}
-
-.nav_image {
-    background:white;    
-    height: 60px;       
-    width: 60px;   
+.nav_image {        
+    height: 40px;       
+    width: 40px;   
     margin: 0px auto;
     margin-top: 5px;
     margin-bottom: 5px;
     overflow: hidden;
     float: left;
-    border: 2px solid black;
+    border: 2px solid gray;
     border-radius: 8px;
 }
 
 .nav_image img{
-    width: 55px;
+    width: 40px;
     margin: 0px 0px;       
+}
+
+
+@media (min-width: 768px) and (max-width: 850px) {
+    .nav_user{
+        display: none;
+    }
+
+    .glyphicon{
+        font-size: 10px;         
+        margin-right: 2px;
+    }
+
+    .navbar-brand img {
+        height: 22px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .nav_user{
+        display: none;
+    }
+
+    .navbar-default{
+        font-size: 12px;
+    }
+
+    .navbar-brand img {
+        height: 20px;
+    }
 }
