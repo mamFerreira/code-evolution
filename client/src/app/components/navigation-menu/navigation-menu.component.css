@@ -51,7 +51,7 @@
 }
 
 
-@media (min-width: 768px) and (max-width: 950px) {
+@media (min-width: 768px) and (max-width: 1000px) {
     .nav_user{
         display: none;
     }
@@ -62,7 +62,7 @@
     }
 
     .navbar-brand img {
-        height: 22px;
+        height: 18px;
     }
 }
 

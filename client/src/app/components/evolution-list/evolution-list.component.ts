@@ -20,6 +20,7 @@ export class EvolutionListComponent implements OnInit {
   public evolutions: Evolution[];
   public range: number[];  
   public learnings: Learning[];
+  public learning: Learning;
   public errorMessagge: string;
   public errorLearning: string;
   public identity;
@@ -30,7 +31,7 @@ export class EvolutionListComponent implements OnInit {
     private _userService: UserService,
     private _router: Router
   ) {
-    this.title = 'Seleccione una evolución';
+    this.title = 'Seleccione un organismo';
     this.url = this._globalService.url;
     this.identity = this._userService.getIdentity();
   }
@@ -50,9 +51,7 @@ export class EvolutionListComponent implements OnInit {
           this.range = [];
           for (let i = 0; i < res.num_evolutions; i++) {
             this.range.push(i);
-          }
-
-          console.log(this.range);
+          }          
         }
       },
       err => {
@@ -102,6 +101,10 @@ export class EvolutionListComponent implements OnInit {
   changeEvolution(evolution_selected) {
     this.evolution = evolution_selected;
     this.getLearnings();
+  }
+
+  changeLearning (learning_selected) {
+    this.learning = learning_selected;
   }
 
 }

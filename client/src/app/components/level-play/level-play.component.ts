@@ -40,7 +40,8 @@ export class LevelPlayComponent implements OnInit {
   public goals: LevelGoal[];
   public learnings: LevelLearning[];
   public actions: LevelAction[];
-  public positions: Position[];  
+  public positions: Position[]; 
+  public action: string; 
 
   constructor(
     private _globalService: GlobalService,
@@ -55,6 +56,7 @@ export class LevelPlayComponent implements OnInit {
     this.title = 'Disfrute del nivel';
     this.url = this._globalService.url;     
     this.code = ''; 
+    this.action = '';
     this.errorMessage = ''; 
     this.stateStarted = false;   
     this.workerDefined = false;  

@@ -2,14 +2,6 @@
     <div class="page-header">
         <h1>{{title}}</h1>
     </div>     
-    <!--<div class="btn-group btn-group-lg">  
-        <button type="button" class="btn btn-default" (click)="changeOption('user');">Usuarios</button>
-        <button type="button" class="btn btn-default" (click)="changeOption('evolution');">Evoluciones</button>
-        <button type="button" class="btn btn-default" (click)="changeOption('level');">Niveles</button>
-        <button type="button" class="btn btn-default" (click)="changeOption('goal');">Objetivos</button>
-        <button type="button" class="btn btn-default" (click)="changeOption('learning');">Aprendizajes</button>
-        <button type="button" class="btn btn-default" (click)="changeOption('action');">Acciones</button>        
-    </div>-->
     <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
     <!--Listados del apartado marcado-->
     <div *ngIf="option.length>0">

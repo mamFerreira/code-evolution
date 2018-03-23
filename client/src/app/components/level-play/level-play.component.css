@@ -10,6 +10,14 @@
     margin-right: 5%;
 }
 
+.active,
+button:focus{
+    background-color:transparent;
+    color: black;
+}
+
+
+
 .canvas, .editor, .shell{
     width: 515px;    
 }

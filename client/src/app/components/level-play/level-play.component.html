@@ -5,13 +5,13 @@
                 <h1>{{title}}</h1> 
                 <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>   
                 <div *ngIf="stateStarted && workerDefined" class="buttons">
-                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [ngClass]="{'active': action == 'reload'}" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();action='reload'">
                         <span class="glyphicon glyphicon-refresh"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [ngClass]="{'active': action == 'play'}" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();action='play'">
                         <span class="glyphicon glyphicon-play"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [ngClass]="{'active': action == 'pause'}" [disabled]="game.stateGame != 1" (click)="game.pause();action='pause'">
                         <span class="glyphicon glyphicon-pause"></span>
                     </button>
                     <button type="button" class="btn btn-primary-ce btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">

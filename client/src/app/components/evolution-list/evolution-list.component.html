@@ -1,4 +1,4 @@
-<div class="container" *ngIf="evolution && range">
+<div class="container" *ngIf="evolution && range && evolutions">
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="page-header">
@@ -24,40 +24,67 @@
                 </div>
                 <div class="timeline-end"><p>Fin</p></div>
             </section>
-            <div class="evolution-selected"> 
-                <h2>{{evolution.name}}</h2>
-                <div class="col-md-6 float-right contenedor-image">                    
-                    <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
-                </div>
-                <div class="col-md-6 col-lg-6 float-right evolution-information">                     
-                    <table class="table table-evolution-information">
-                      <tbody>
+            <div class="col-md-11 col-lg-11 evolution-selected"> 
+                <h2>
+                    Organismo seleccionado: <strong>{{evolution.name}}</strong>                                          
+                </h2>                                
+                <div class="col-md-8 col-lg-8 float-right evolution-information">                    
+                    <table class="table">
+                        <tbody>
                         <tr>
-                          <td><strong>Nombre</strong></td>
-                          <td>{{evolution.name}}</td>
+                            <td><strong>Nombre</strong></td>
+                            <td>{{evolution.name}}</td>
                         </tr>
                         <tr>
-                          <td><strong>Origen</strong></td>
-                          <td>{{evolution.origin}}</td>
+                            <td><strong>Origen</strong></td>
+                            <td>{{evolution.origin}}</td>
                         </tr>
                         <tr>
-                          <td><strong>Descripción</strong></td>
-                          <td>{{evolution.description}}</td>
-                        </tr>         
+                            <td><strong>Descripción</strong></td>
+                            <td>{{evolution.description}}</td>
+                        </tr> 
                         <tr>
                             <td><strong>Aprendizaje</strong></td>
                             <td *ngIf="errorLearning" class="alert alert-warning"> <strong>Error: </strong>{{errorLearning}}</td>
                             <td>
-                                <div *ngFor="let l of learnings;">
+                                <button *ngFor="let l of learnings; let i = index;" class="btn-learning" (click)="changeLearning(l)"
+                                [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
                                     {{l.title}}
-                                </div>
+                                </button>
                             </td>
-                        </tr>                                                          
-                      </tbody>
-                    </table>                    
-                    <button class="btn btn-primary-ce" [routerLink]="['evolucion/'+evolution._id]">Seleccionar</button>   
+                        </tr>                                                                                          
+                        </tbody>
+                    </table>                                        
                 </div>
-            </div>                      
+                <div class="col-md-4 col-lg-4 float-right">
+                    <div class="container-image">
+                            <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
+                    </div>                                                                                                            
+                </div>                                        
+                <div class="col-md-8 col-lg-8 float-right">
+                    <table *ngIf="learning" class="table">
+                        <tbody>
+                            <tr>
+                                <td class="col-xs-2"><strong>Titulo</strong></td>
+                                <td><pre [innerHTML]="learning.title"></pre></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Descripción</strong></td>
+                                <td><pre [innerHTML]="learning.description"></pre></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ejemplo</strong></td>
+                                <td><pre [innerHTML]="learning.example"></pre></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>    
+                <div class="col-md-4 col-lg-4 float-right">
+                    <div class="container-button">
+                        <button class="btn btn-play" [routerLink]="['evolucion/'+evolution._id]">ACEPTAR</button>    
+                    </div>
+                </div>        
+            </div>                     
         </div>
     </div>  
 </div>
