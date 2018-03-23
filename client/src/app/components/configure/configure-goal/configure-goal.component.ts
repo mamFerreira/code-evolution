@@ -83,8 +83,7 @@ export class ConfigureGoalComponent implements OnInit {
           this.errorMessage = err.error.message;
         }
       ); 
-    } else {
-      console.log('Añadir');
+    } else {      
       this._goalService.addGoal(this.goal).subscribe(
         res => {
           if (!res.goal) {

@@ -118,6 +118,25 @@ function getEvolutions (req, res){
 }
 
 /**
+ * Obtener el numero de evoluciones dadas de alta
+ * @returns num_evolutions: Numeros de evoluciones en BBDD
+ */
+function getNumEvolutions (req, res){
+
+    Evolution.find({}).count().exec((err,num) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(!num){
+                res.status(404).send({message: 'Ninguna evolución cumple los requisitos'}); 
+            }else{                   
+                res.status(200).send({num_evolutions:num});
+            }
+        }
+    });
+}
+
+/**
  * Actualizar evolución
  * @returns evolution: Evolución antes de la actualización
  */
@@ -534,6 +553,7 @@ module.exports = {
     addEvolution,
     getEvolution,
     getEvolutions,
+    getNumEvolutions,
     updateEvolution,
     removeEvolution,
     getNumLevels,

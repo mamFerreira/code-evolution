@@ -5,22 +5,22 @@
                 <h1>{{title}}</h1> 
                 <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>   
                 <div *ngIf="stateStarted && workerDefined" class="buttons">
-                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame == 0 || game.stateGame == 1" (click)="game.reload();">
                         <span class="glyphicon glyphicon-refresh"></span>
                     </button>
-                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame != 0 && game.stateGame != 2" (click)="play();">
                         <span class="glyphicon glyphicon-play"></span>
                     </button>
-                    <button type="button" class="btn btn-default btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
+                    <button type="button" class="btn btn-primary-ce btn-lg" [disabled]="game.stateGame != 1" (click)="game.pause();">
                         <span class="glyphicon glyphicon-pause"></span>
                     </button>
-                    <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
+                    <button type="button" class="btn btn-primary-ce btn-lg" (click)="game.volumeOff();" *ngIf="game.volume">
                         <span class="glyphicon glyphicon-volume-off"></span>
                     </button>
-                    <button type="button" class="btn btn-default btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
+                    <button type="button" class="btn btn-primary-ce btn-lg" (click)="game.volumeOn();" *ngIf="!game.volume">
                         <span class="glyphicon glyphicon-volume-up"></span>
                     </button> 
-                    <button type="button" class="btn btn-default btn-lg">
+                    <button type="button" class="btn btn-primary-ce btn-lg">
                         <span class="glyphicon glyphicon-info-sign"></span>
                     </button>
                 </div>             

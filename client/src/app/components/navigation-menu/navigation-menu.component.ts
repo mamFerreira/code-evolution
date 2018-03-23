@@ -12,7 +12,8 @@ import { GlobalService } from '../../services/global.service';
 export class NavigationMenuComponent implements OnInit {
 
   public identity;
-  public url: String;
+  public url: string;
+  public option: string;
 
   constructor(
     private _userService: UserService,
@@ -20,14 +21,20 @@ export class NavigationMenuComponent implements OnInit {
   ) {
     this.url = this._globalService.url;
     this.identity = this._userService.getIdentity();
+    this.option = '';
   }
 
-  ngOnInit() {}
+  ngOnInit() {    
+  }
 
   logout() {
     localStorage.removeItem('identity');
     localStorage.removeItem('token');
     window.location.reload();
+  }
+
+  changeOption(type) {
+    this.option = type;    
   }
 
 }

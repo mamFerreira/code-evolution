@@ -2,23 +2,37 @@
 html, body{
     margin: 0;
     height: 100%;
-    background: #ffffff;     
+    background: #f0f0f0;     
     font-family: 'Oswald', sans-serif;       
 }
 
-h1, h2{
-    text-decoration-color: black;       
+h1, h2, h3, h4{       
+    color: #343434;  
 }
 
 h1 {
-    font-size: 28px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: bold;    
 }
  
 h2{
-    font-size: 22px;    
+    font-size: 18px;    
 }
 
 h4{
     font-size: 15px;    
+}
+
+.page-header {
+    margin-top: 0px;
+}
+
+.btn-primary-ce {
+    background-color: #343434;  
+    color: #fff;
+}
+
+.btn-primary-ce:hover {
+    background-color: #b9b9b9;  
+    color: #343434;
 }

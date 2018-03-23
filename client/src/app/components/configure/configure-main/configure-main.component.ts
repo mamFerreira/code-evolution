@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 
 // Importar servicios
 import { UserService } from '../../../services/user.service';
@@ -31,6 +31,7 @@ export class ConfigureMainComponent implements OnInit {
     private _goalService: GoalService,
     private _learningService: LearningService,
     private _actionService: ActionService,
+    private _route: ActivatedRoute,
     private _router: Router
   ) { 
     this.title = 'Menú configuración';
@@ -39,6 +40,11 @@ export class ConfigureMainComponent implements OnInit {
   }
 
   ngOnInit() {
+    this._route.params.forEach((params: Params) => {   
+      if (params['type']) {
+        this.changeOption(params['type']);        
+      }
+    });
   }
 
   changeOption(opt) {
@@ -67,30 +73,6 @@ export class ConfigureMainComponent implements OnInit {
       default:
         this.errorMessage = 'Error: Opción incorrecta';
     }
-  }
-
-  addElement() {
-
-    switch (this.option) {
-      case 'evolution':
-        this._router.navigate(['/admin/addEvolution']);
-        break;
-      case 'level':
-        this._router.navigate(['/admin/addLevel']);
-        break;
-      case 'goal':
-        this._router.navigate(['/admin/addGoal']);
-        break;
-      case 'learning':
-        this._router.navigate(['/admin/addLearning']);
-        break;
-      case 'action':
-        this._router.navigate(['/admin/addAction']);
-        break;
-      default:
-        this.errorMessage = 'Error: Opción incorrecta';
-    }
-
   }
 
   /**

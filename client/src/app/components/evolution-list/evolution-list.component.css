@@ -1,17 +1,19 @@
+.evolution-selected {
+  margin-top: 100px;
+  margin: 10%;
+}
+
 .evolution-information .btn{  
-  width: 30%;
+  width: 10%;
   min-width: 80px;
-  margin-left: 15%;
-  float:left;  
 }
 
 .contenedor-image {
-  height: 350px;
-  width: 350px;
-  border: 3px solid black;
-  margin-top: 5%;
-  border-radius: 20px;
-  margin-left: 10%;
+  height: 200px;
+  width: 200px;
+  border: 2px solid #773617;
+  margin-top: 2%;
+  border-radius: 20px;  
   margin-right: auto;
   margin-bottom: 10%;
   overflow: hidden;  
@@ -19,7 +21,7 @@
 }
 
 .contenedor-image img{
-  height: 325px;
+  height: 200px;
   position:absolute;
   left:0px;
   right:0px;
@@ -28,85 +30,110 @@
 }
 
 .evolution-information{
-  margin-left: 50px;
-  margin-top: 5%;
+  margin-left: 10%;
+  margin-top: 2%;
 }
 
 
 /* Timeline */
+
+/*Sección principal*/
 .main-timeline-section{
   position: relative; 
-  width: 100%;  
-  margin:auto; 
-  height:300px;
+  margin-top: 50px;
+  min-width: 900px;
 }
+
+/*Marcas inicio y fin de la linea de tiempo*/
 .main-timeline-section .timeline-start,
 .main-timeline-section .timeline-end{
+  height:20px;
+  width:5px;
   position: absolute;
-  background:#4E8120;
-  border-radius:100px;
+  background:#c99e67;
+  border-radius:20px;
   top:50%;
   transform: translateY(-50%);
-  width:20px;
-  height:20px;
 }
 .main-timeline-section .timeline-end{
   right:0px;
 }
+
+.main-timeline-section .timeline-start p,
+.main-timeline-section .timeline-end p{
+  margin-top: -20px;
+}
+
+/*Linea de tiempo*/
 .main-timeline-section .conference-center-line{
   position: absolute;
   width:100%;
-  height:5px;
+  height:3px;
   top:50%;
   transform: translateY(-50%);
-  background:#4E8120;
+  background:#c99e67;
 }
+/*Bloque linea de tiempo evolución*/
 .timeline-article{
     width: 14%;
     position: relative;
-    min-height: 300px;
-    float:left;    
+    height: 75px;
+    float:left;
+    top: 20px;   
 }
+
+/*Fecha de linea de tiempo*/
 .timeline-article .content-date{
     position: absolute;
-    top: 35%;
-    left: -15px; 
-    font-size:17px;
+    left: -15px;
     text-align: center;
+    font-size:14px;
+    text-align: center;
+    top: -60px;
 }
+
+.timeline-article .interrogation{
+  left: -10px;
+}
+
+/*Marca en linea de tiempo*/
 .timeline-article .meta-date{
-    position: absolute;
-    top: 50%;
-    left: 0px;
-    transform: translateY(-50%); 
-    width:20px;
     height:20px;
-    border-radius: 100%;
-    background:#fff;
-    border:1px solid black;
+    width:5px;
+    top: -20px;
+    left: 0;
+    position: absolute;
+    background:#c99e67;
+    border-radius:20px;
+    transform: translateY(-50%);
 }
-
 .timeline-article .meta-date-selected{
-  background: #E0D41D;
+  background: #773617;  
 }
 
+/*Caja de texto*/
 .timeline-article .content-box{
   box-shadow: 2px 2px 4px 0px #c1c1c1;
-  border:1px solid gray;
-  border-radius: 5px;
+  border:2px solid #c99e67;
+  border-radius: 2px;
   background-color: #fff;
-  width: 100px;
+  width: 80px;
   position: absolute;
-  top: 60%;
-  left: -40px; 
-  padding:10px;
+  left: -38px; 
+  padding:2px;
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
 }
 
 .timeline-article .content-box-selected{
-  border:1px solid #4E8120;
+  border:2px solid #773617;
+  background-color: #773617;
+  color: white;
+}
+
+.timeline-article .content-box p{
+  margin:0;
 }
 
 .timeline-article-top .content-box:before{
@@ -114,22 +141,32 @@
   position:absolute; 
   left:50%;
   transform: translateX(-50%);
-  top:-20px;
-  border:10px solid transparent;
-  border-bottom-color: black;
+  top:-15px;
+  border:6px solid transparent;
+  border-bottom-color: #c99e67;
 }
+
+.timeline-article-top .content-box-selected:before{
+  border-bottom-color: #773617;
+}
+
 .timeline-article-bottom .content-date{
-  top: 59%;
+  top: 0px;
 }
+
 .timeline-article-bottom .content-box{
-  top: 25%;
+  top: -70px;
 }
 .timeline-article-bottom .content-box:before{
   content: " ";
   position:absolute; 
   left:50%;
   transform: translateX(-50%);
-  bottom:-20px;
-  border:10px solid transparent;
-  border-top-color:black;
+  bottom:-15px;
+  border:6px solid transparent;
+  border-top-color:#c99e67;
+}
+
+.timeline-article-bottom .content-box-selected:before{
+  border-top-color: #773617;
 }

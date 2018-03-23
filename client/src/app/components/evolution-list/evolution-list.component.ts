@@ -17,7 +17,8 @@ export class EvolutionListComponent implements OnInit {
   public title: string;
   public url: string;
   public evolution: Evolution;
-  public evolutions: Evolution[];  
+  public evolutions: Evolution[];
+  public range: number[];  
   public learnings: Learning[];
   public errorMessagge: string;
   public errorLearning: string;
@@ -35,7 +36,29 @@ export class EvolutionListComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.getNumEvolutions();
     this.getEvolutions();
+  }
+
+  getNumEvolutions() {
+    // Obtener el número de evoluciones
+    this._evolutionService.getNumEvolutions().subscribe(
+      res => {
+        if (!res.num_evolutions) {
+          this._router.navigate(['/']);
+        } else {
+          this.range = [];
+          for (let i = 0; i < res.num_evolutions; i++) {
+            this.range.push(i);
+          }
+
+          console.log(this.range);
+        }
+      },
+      err => {
+        this.errorMessagge = err.error.message;
+      }
+    );
   }
 
 

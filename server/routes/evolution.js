@@ -16,6 +16,7 @@ var md_upload_T = multipart({uploadDir: global.PATH_FILE_EVOLUTION_T});
 api.post('/evolution-add', md_auth.ensureAuthAdmin, EvolutionController.addEvolution);
 api.get('/evolution/:id',md_auth.ensureAuth, EvolutionController.getEvolution);
 api.get('/evolutions',md_auth.ensureAuth, EvolutionController.getEvolutions);
+api.get('/evolutions-num',md_auth.ensureAuth, EvolutionController.getNumEvolutions);
 api.put('/evolution-update/:id', md_auth.ensureAuthAdmin ,EvolutionController.updateEvolution);
 api.delete('/evolution-remove/:id', md_auth.ensureAuthAdmin ,EvolutionController.removeEvolution);
 

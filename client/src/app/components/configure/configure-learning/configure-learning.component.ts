@@ -79,8 +79,7 @@ export class ConfigureLearningComponent implements OnInit {
           this.errorMessage = err.error.message;
         }
       ); 
-    } else {
-      console.log('Añadir');
+    } else {      
       this._learningService.addLearning(this.learning).subscribe(
         res => {
           if (!res.learning) {

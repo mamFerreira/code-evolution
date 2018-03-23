@@ -45,6 +45,11 @@ export class EvolutionService {
         return this._http.get(this._globalService.url + 'evolutions/', this.httpOptions);
     }
 
+    // Obtener el numero de evoluciones registradas en el sistema
+    getNumEvolutions(): Observable<any> {
+        return this._http.get(this._globalService.url + 'evolutions-num/', this.httpOptions);
+    }
+
     // Actualizar evolución
     updateEvolution (evol_to_update: Evolution): Observable<any> {
         let json = JSON.stringify(evol_to_update);

@@ -1,24 +1,28 @@
-<div class="container" *ngIf="evolution">
+<div class="container" *ngIf="evolution && range">
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="page-header">
                 <h1>{{title}}</h1>                                        
             </div>  
             <section class="main-timeline-section">
-                <div class="timeline-start"></div>
+                <div class="timeline-start"><p>Inicio</p></div>
                 <div class="conference-center-line"></div>
                 <div class="conference-timeline-content">
-                    <div *ngFor="let e of evolutions;let i = index;" class="timeline-article" [ngClass]="i%2 == 0  ? 'timeline-article-bottom' : 'timeline-article-top'">                        
-                        <div class="content-date">
-                                <span>{{e.origin}}</span>
+                    <div class="timeline-article"></div>                    
+                    <div *ngFor="let i of range" class="timeline-article" [ngClass]="i%2 == 0  ? 'timeline-article-bottom' : 'timeline-article-top'">                        
+                        <div class="content-date" *ngIf="evolutions[i]">
+                                <span>{{evolutions[i].origin}}</span>
                         </div>
-                        <div class="meta-date" [ngClass]="{'meta-date-selected': e._id == evolution._id }"></div>
-                        <div class="content-box" [ngClass]="{'content-box-selected': e._id == evolution._id }" (click)="changeEvolution(e)">                        
-                            <p>{{e.name}}</p>                                                      
+                        <div class="content-date interrogation" *ngIf="!evolutions[i]">
+                                <span>¿...?</span>
                         </div>
-                    </div>                    
+                        <div class="meta-date"></div>
+                        <div class="content-box" *ngIf="evolutions[i]" [ngClass]="{'content-box-selected': evolutions[i]._id == evolution._id }" (click)="changeEvolution(evolutions[i])">                                                                             
+                            <p>{{evolutions[i].name}}</p> 
+                        </div>
+                    </div>
                 </div>
-                <div class="timeline-end"></div>
+                <div class="timeline-end"><p>Fin</p></div>
             </section>
             <div class="evolution-selected"> 
                 <h2>{{evolution.name}}</h2>
@@ -51,7 +55,7 @@
                         </tr>                                                          
                       </tbody>
                     </table>                    
-                    <button class="btn btn-primary" [routerLink]="['evolucion/'+evolution._id]">Seleccionar</button>   
+                    <button class="btn btn-primary-ce" [routerLink]="['evolucion/'+evolution._id]">Seleccionar</button>   
                 </div>
             </div>                      
         </div>

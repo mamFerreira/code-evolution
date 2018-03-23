@@ -256,8 +256,7 @@ function registerCode (req, res){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
             }else{
                 // Registramos tupla
-                if(tuples.length==0){
-                    console.log(tuples.length);
+                if(tuples.length==0){                    
                     game.level = idLevel;
                     game.user = idUser;
                     game.code = code;
