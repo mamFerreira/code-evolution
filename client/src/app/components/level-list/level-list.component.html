@@ -25,7 +25,9 @@
               </tr>            
           </tbody>
         </table>
-        <button class="btn btn-primary-ce" [routerLink]="['/jugar/nivel/' + level._id]">Jugar</button>     
+        <div class="container-button">
+            <button class="btn btn-play" [routerLink]="['/jugar/nivel/' + level._id]">JUGAR</button>    
+        </div>        
       </div>
       <div class="col-md-1 float-left"></div>
       <div class="col-md-8 float-left level-detail">
@@ -70,7 +72,7 @@
               </table>
           </div>    
           <div class="col-md-5 float-left">            
-            <div class="contenedor-image">            
+            <div class="container-image">            
                 <img *ngIf="level.image" src="{{url}}level-load/{{level.image}}/I"/>  
             </div>                             
           </div>  

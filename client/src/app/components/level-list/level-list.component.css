@@ -1,4 +1,4 @@
-.contenedor-image {
+.container-image {
     height: 325px;
     width: 440px;
     border: 2px solid black;
@@ -11,7 +11,7 @@
     position: relative; 
   }
   
-  .contenedor-image img{
+  .container-image img{
     height: 325px;
     position:absolute;
     left:0px;
@@ -54,3 +54,26 @@
 .table-level-selected {
     background-color: #c0c0c0;
 }
+
+.container-button {
+    margin: 0 auto;
+    position: relative; 
+    width: 80%;
+}
+  
+.btn-play {
+    width: 50%;
+    border: 2px solid #343434;
+    background-color: #00a1e4;
+    color: #fff;
+    margin:auto;
+    font-size: 20px;
+    box-shadow: 5px 5px 5px 5px #c1c1c1;
+}
+
+@media (max-width: 995px) {
+
+    .container-image{
+        display: none;
+    }
+  }
