@@ -1,4 +1,6 @@
-import { StateMain, StateState } from './state-main';
+import { StateMain } from './state-main';
+import { GameAction } from './game-action';
+import { GameState } from './game-state';
 
 // Importación Modelos
 import { Evolution } from '../models/evolution.model';
@@ -7,15 +9,6 @@ import { LevelGoal } from '../models/level_goal.model';
 import { LevelAction } from '../models/level_action.model';
 import { Position } from '../models/position.model';
 
-export enum StateGame {
-    Init,
-    Run,
-    Pause,
-    Stop,
-    Finish_ok,
-    Finish_fail
-}
-
 export class Game {    
     private state: StateMain;    
     private worker: Worker;
@@ -23,24 +16,23 @@ export class Game {
     private idIntervalMain;  
 
     public code_shell: string;
-    public code_error: boolean;
-    public stateGame: StateGame;
-    public volume: boolean;
+    public code_error: boolean;    
+    public volume: boolean;    
 
     constructor (id: string, url: string) {        
         this.state = new StateMain(id, url);
         this.code_shell = 'Code Evolution Shell...';
-        this.code_error = false;
-        this.stateGame = StateGame.Init;
-        this.volume = true;        
+        this.code_error = false;        
+        this.volume = true;      
     }
     
-    initState( level: Level, evolution: Evolution, goals: LevelGoal[], positions: Position[] ): boolean {
+    initState( level: Level, evolution: Evolution, goals: LevelGoal[], actions: LevelAction[], positions: Position[]) {
         this.state.fileMap = level.map;
         this.state.maxTime = level.time;
         this.state.filePlayer = evolution.player;
         this.state.fileTiledset = evolution.tiledset;   
         this.state.maxLife = evolution.health;     
+
 
         goals.forEach((g, index) => {
             switch (g.goal._id) {
@@ -56,15 +48,15 @@ export class Game {
             } else {
                 this.state.addPosition(p.value_x, p.value_y);
             }  
-        });
+        });        
 
         this.state.game.state.add('gameplay', this.state);
         this.state.game.state.start('gameplay');
-        
-        return true;
+
+        this.defineWorker(actions);
     }
 
-    defineWorker(actions: LevelAction[]): boolean {
+    defineWorker(actions: LevelAction[]) {
 
         let actionJson = [];
         this.worker = new Worker('../../assets/js/worker.js');      
@@ -80,9 +72,7 @@ export class Game {
         });        
 
         this.postMessage('initValue', actionJson);
-        this.addEventListener();               
-
-        return true;
+        this.addEventListener(); 
     }
 
     postMessage(action, value) {
@@ -116,16 +106,16 @@ export class Game {
                     break;
                 case 'error':
                     this.code_shell += '<br>$ Error:' + e.data.value;
-                    this.stop();
+                    this.doAction(GameAction.Stop);
                     break;
                 default:
                     this.code_shell += '<br>$ Error en worker: Acción ' + e.data.action + ' no definida';
-                    this.stop();
+                    this.doAction(GameAction.Stop);
             }
 
             if (waitUnblock) {
                 this.idInterval = setInterval(() => {
-                    if (this.state.state === StateState.Playable) {
+                    if (!this.state.waitMove) {                        
                         this.postMessage('unblock', true);
                         clearInterval(this.idInterval);                            
                     }                        
@@ -145,72 +135,57 @@ export class Game {
         }, false); 
     }
 
-    restart () {                
-        this.state.game.paused = true;
+    restart () {                        
         this.postMessage('finish', true);        
         clearInterval(this.idInterval);
         clearInterval(this.idIntervalMain);
     }
 
-    reload () {
-        // Recargar estado a posición inicial
-        this.state.reload();    
-        this.restart();    
-        this.stateGame = StateGame.Init;
-        this.code_shell = 'Code Evolution Shell...';
-        this.code_error = false;
-    }
+    doAction (action: GameAction, code: string = null) {
+        switch (action) { 
+            case GameAction.Reload:                
+                this.state.reload();    
+                this.restart();                    
+                this.code_shell = 'Code Evolution Shell...';
+                this.code_error = false;                
+                break;
+            case GameAction.Play:
+                this.state.stateGame = GameState.Run;
+                this.postMessage('execute', code);                
+                this.code_shell += '<br>$ Play...'; 
 
-    play(code) {
-        this.postMessage('execute', code);
-        this.state.game.paused = false;   
-        this.stateGame = StateGame.Run; 
-        this.code_shell += '<br>$ Play...'; 
+                this.idIntervalMain = setInterval(() => {                                        
 
-        this.idIntervalMain = setInterval(() => {
-
-            if (this.state.state > 1) {                                          
-
-                if (this.state.state === StateState.LevelUp) {
-                    this.stateGame = StateGame.Finish_ok;
-                } else {
-                    this.stateGame = StateGame.Finish_fail;                    
-                    this.code_error = true;
-                    this.code_shell += '<br>$ Error -> ' + this.state.code_error;
-                }                
-                this.restart(); 
-            }      
-
-        }, 50);
-
-    }
-
-    continue() {
-        this.state.game.paused = false;
-        this.stateGame = StateGame.Run;
-        this.code_shell += '<br>$ Continue...'; 
-    }
-
-    pause() {
-        this.state.game.paused = true;
-        this.stateGame = StateGame.Pause;
-        this.code_shell += '<br>$ Pause'; 
-    }
-
-    stop() {
-        this.restart();
-        this.stateGame = StateGame.Stop;
-        this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo'; 
-        this.code_error = true;
-    }
-
-    volumeOn () {
-        console.log('volumeOn');
-        this.volume = true;
-    }
+                    if (this.state.stateGame === GameState.LevelUp) {                                                    
+                        this.restart();
+                    } else if (this.state.stateGame === GameState.GameOver) {
+                        this.code_shell += '<br>$ Error -> ' + this.state.code_error;
+                        this.code_error = true;                        
+                        this.restart();
+                    }                                                            
+                }, 50);
+                break;
+            case GameAction.Pause:                                
+                this.code_shell += '<br>$ Pause'; 
+                this.state.stateGame = GameState.Pause;
+                break;
+            case GameAction.Continue:                
+                this.code_shell += '<br>$ Continue...'; 
+                this.state.stateGame = GameState.Run;
+                break;
+            case GameAction.Stop:                        
+                this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo'; 
+                this.code_error = true;                
+                this.state.stateGame = GameState.Stop;
+                this.restart();
+                break;
+            case GameAction.ChangeVolume:
+                this.volume = !this.volume;
+                break;
+        }
+    }    
     
-    volumeOff () {    
-        console.log('volumeOff');
-        this.volume = false;
+    get stateGame () {
+        return this.state.stateGame;
     }
 }

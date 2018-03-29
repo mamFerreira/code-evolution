@@ -15,7 +15,9 @@ import { LevelLearning } from '../../models/level_learning.model';
 import { LevelAction } from '../../models/level_action.model';
 import { Position } from '../../models/position.model';
 
-import { Game, StateGame } from '../../class/game';
+import { Game } from '../../class/game';
+import { GameAction } from '../../class/game-action';
+import { GameState } from '../../class/game-state';
 
 @Component({
   selector: 'app-level-play',
@@ -32,8 +34,8 @@ export class LevelPlayComponent implements OnInit {
   public code: string;
 
   public game: Game;
-  public stateStarted: boolean;
-  public workerDefined: boolean;
+  // Variables para mostrar los botones cuando el juego este iniciado
+  public gameStarted: boolean;  
 
   public evolution: Evolution;
   public level: Level;
@@ -41,7 +43,7 @@ export class LevelPlayComponent implements OnInit {
   public learnings: LevelLearning[];
   public actions: LevelAction[];
   public positions: Position[]; 
-  public action: string; 
+  public lastAction: GameAction; 
 
   constructor(
     private _globalService: GlobalService,
@@ -55,19 +57,19 @@ export class LevelPlayComponent implements OnInit {
   ) {
     this.title = 'Disfrute del nivel';
     this.url = this._globalService.url;     
-    this.code = ''; 
-    this.action = '';
+    this.code = '';     
     this.errorMessage = ''; 
-    this.stateStarted = false;   
-    this.workerDefined = false;  
+    this.gameStarted = false;       
   }
 
   ngOnInit() {   
     this.loadLevel(); 
-    this.loadEditor();
-    this.game = new Game('phaser-game', this.url);  
+    this.loadEditor();    
   }
 
+  /**
+   * Carga del nivel
+   */
   loadLevel() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];
@@ -89,6 +91,9 @@ export class LevelPlayComponent implements OnInit {
     });
   }
 
+  /**
+   * Carga de la evolución
+   */
   loadEvolution() {
     this._evolutionService.getEvolution(this.level.evolution).subscribe(
       res => {
@@ -105,6 +110,27 @@ export class LevelPlayComponent implements OnInit {
     );    
   }
 
+  /**
+   * Carga del código a mostrar en el editor
+   */
+  loadCode() {
+    this._levelSercice.loadCode(this.level._id).subscribe(
+      res => {
+        if (!res.code) {
+          this.errorMessage += res.message;
+        } else {          
+          this.code = res.code;
+        }        
+      },
+      err => {
+        this.errorMessage += err.error.message;    
+      }
+    );
+  }
+
+  /**
+  * Carga de las objetivos, acciones y posiciones del nivel
+  */
   loadPropertyLevel() {
     // Objetivos
     this._goalService.getGoalsLevel(this.level._id).subscribe(
@@ -127,8 +153,7 @@ export class LevelPlayComponent implements OnInit {
                       this.errorMessage += res.message;
                     } else {
                       this.positions = res.positions;                          
-                      this.stateStarted = this.game.initState(this.level, this.evolution, this.goals, this.positions);     
-                      this.workerDefined = this.game.defineWorker(this.actions);                 
+                      this.loadGame();               
                     }
                   },
                   err => {
@@ -163,21 +188,18 @@ export class LevelPlayComponent implements OnInit {
     );          
   }
 
-  loadCode() {
-    this._levelSercice.loadCode(this.level._id).subscribe(
-      res => {
-        if (!res.code) {
-          this.errorMessage += res.message;
-        } else {          
-          this.code = res.code;
-        }        
-      },
-      err => {
-        this.errorMessage += err.error.message;    
-      }
-    );
-  }
+  /**
+   * Carga del juego
+   */
+  loadGame() {
+    this.game = new Game('phaser-game', this.url);  
+    this.game.initState(this.level, this.evolution, this.goals, this.actions, this.positions);       
+    this.gameStarted = true;
+  }  
 
+  /**
+   * Carga del editor
+   */
   loadEditor() {
     this.editor.setTheme('eclipse');
     this.editor.setMode('python');
@@ -187,21 +209,39 @@ export class LevelPlayComponent implements OnInit {
     });
   }
 
-  play () {
-    if (this.game.stateGame === StateGame.Init) {
-      this._levelSercice.registerCode(this.code, this.level._id).subscribe(
-        res => {        
-          this.game.play(this.code);          
-        },
-        err => {
-          this.errorMessage += err.error.message;
-        }
-      );
-      
+  /**
+   * Gestión de acciones botones de reproducción
+   */
+  doAction (action: GameAction) {
+
+    if (action !== GameAction.ChangeVolume) {
+      this.lastAction = action;
+    }    
+
+    if (action === GameAction.Play) {
+      if (this.stateGame === GameState.Init) {
+        this._levelSercice.registerCode(this.code, this.level._id).subscribe(
+          res => {        
+            this.game.doAction(GameAction.Play, this.code);           
+          },
+          err => {
+            this.errorMessage += err.error.message;
+          }
+        );          
+      }
+      if (this.stateGame === GameState.Pause) {
+        this.game.doAction(GameAction.Continue);           
+      }
+    } else {
+      this.game.doAction(action);
     }
-    
-    if (this.game.stateGame === StateGame.Pause){
-      this.game.continue();            
-    }
+
   }
+
+  /**
+   * Obtener estado de la partida
+   */
+  get stateGame () {
+    return this.game.stateGame;
+}
 }

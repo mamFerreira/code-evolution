@@ -7,7 +7,7 @@
       <div class="page-header">
         <h1>{{evolution.name}}: {{title}}</h1>                           
       </div> 
-      <div class="col-md-3 float-left">
+      <div class="col-md-4 float-left">
         <h2>Listado de niveles</h2>
         <table class="table table-levels" cellspacing="0" width="100%">
           <thead>
@@ -28,12 +28,12 @@
         <div class="container-button">
             <button class="btn btn-play" [routerLink]="['/jugar/nivel/' + level._id]">JUGAR</button>    
         </div>        
-      </div>
-      <div class="col-md-1 float-left"></div>
-      <div class="col-md-8 float-left level-detail">
+      </div>  
+      <div class="col-md-1 float-left"></div>    
+      <div class="col-md-7 float-left level-detail">
           <h2>{{level.order}}: {{level.title}}</h2>
           <h3>{{level.description}}</h3>
-          <div class="col-md-3 float-left">
+          <div class="col-md-4 float-left">
             <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="goals">
               <thead>
                   <tr>
@@ -47,37 +47,48 @@
               </tbody>
             </table>
             <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="learnings">
-              <thead>
-                  <tr>
-                      <th>Aprendizaje</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <tr *ngFor="let l of learnings">
-                      <td>{{l.learning.title}}</td>                  
-                  </tr>            
-              </tbody>
-              </table>
-              <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="actions">
+                <thead>
+                    <tr>
+                        <th>Aprendizaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let l of learnings">
+                    <td>
+                        <popover-content #ppLearning title= "{{l.learning.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
+                            <p class="popover-description">{{l.learning.description}}</p>
+                            <pre *ngIf="l.learning.example" [innerHTML]="l.learning.example" class="popover-example"></pre>                            
+                        </popover-content>
+                        <a [popover]="ppLearning" class="popover-botton">{{l.learning.title}}</a>
+                    </td>                  
+                    </tr>            
+                </tbody>
+            </table>
+            <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="actions">
                 <thead>
                     <tr>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let a of actions">
-                        <td>{{a.action.method}}</td>                  
+                    <tr *ngFor="let a of actions; let i=index">                                                
+                        <td>
+                            <popover-content #ppAction title= "{{a.action.method}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true" >
+                                <p class="popover-description">{{a.action.description}}</p>
+                                <pre *ngIf="a.action.example" [innerHTML]="a.action.example" class="popover-example"></pre>
+                            </popover-content>
+                            <a [popover]="ppAction" class="popover-botton">{{a.action.method}}</a>
+                        </td>
                     </tr>            
                 </tbody>
-              </table>
+            </table>
           </div>    
           <div class="col-md-5 float-left">            
             <div class="container-image">            
                 <img *ngIf="level.image" src="{{url}}level-load/{{level.image}}/I"/>  
             </div>                             
           </div>  
-      </div>    
-         
+      </div>   
     </div>
   </div>
 </div>

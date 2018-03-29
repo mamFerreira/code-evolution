@@ -1,0 +1,5 @@
+<div [@dialog] *ngIf="stateGame===5" class="dialog">
+    Game Over
+    <ng-content></ng-content>    
+</div>
+<div *ngIf="stateGame===5" class="overlay" (click)="close()"></div>

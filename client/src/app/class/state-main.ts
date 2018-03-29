@@ -2,6 +2,8 @@ import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
+import { GameState } from './game-state';
+
 let styleTime = {
     font: 'bold 20pt Arial',
     fill: '#000000',
@@ -14,13 +16,10 @@ let stylePositionClick = {
     align: 'center'
 };
 
-export enum StateState {
-    Playable,
-    Blocked,
-    LevelUp,
-    GameOver
-}
 
+export enum TypeGoal {
+    Position
+}
 
 export class StateMain extends Phaser.State {
     
@@ -41,7 +40,8 @@ export class StateMain extends Phaser.State {
     private url: String;      
 
     // Variables para intercambio de información
-    public state: StateState;
+    private _stateGame: GameState;
+    public waitMove: boolean;
     public response: string; 
     public code_error: string; 
     
@@ -74,20 +74,19 @@ export class StateMain extends Phaser.State {
         this.game = new Phaser.Game(515, 444, Phaser.CANVAS, id); 
         this.positions = new Array<Position>();
         this.posGoal = new Position(0, 0, false);
-        this.posGoalTmp = new Position(0, 0, false);
-        this.state = StateState.Playable;
+        this.posGoalTmp = new Position(0, 0, false);        
         this.velocity = 64;
         this.healthBarWidth = 250;        
     }
 
     reload() {
+        this.stateGame = GameState.Init;
         this.player.x = this.posInitial.x;
         this.player.y = this.posInitial.y;
         this.player.body.velocity.x = 0;
         this.player.body.velocity.y = 0;
         this.response = null;
-        this.code_error = null;
-        this.state = StateState.Playable;
+        this.code_error = null;        
         this.posGoalTmp = new Position(0, 0, false);    
 
         // Tiempo
@@ -185,7 +184,7 @@ export class StateMain extends Phaser.State {
         this.healthBar = this.game.add.sprite(101, 397, bmd);        
 
         // Pausar juego
-        this.game.paused = true;                
+        this.stateGame = GameState.Init;             
     }
 
     drawSpeechClick() {
@@ -251,7 +250,7 @@ export class StateMain extends Phaser.State {
         this.timerText.text = 'Time: ' + this.currentTime;
         if (this.currentTime <= 0) {
             this.game.time.events.remove(this.timerGameOver);                
-            this.state = StateState.GameOver;                
+            this.stateGame = GameState.GameOver;                           
         }
     }
 
@@ -265,13 +264,12 @@ export class StateMain extends Phaser.State {
         // Comprobar objetivo posición temporal   
         if (this.posGoalTmp.active && this.posGoalTmp.check(this.player.body.x, this.player.body.y)) {            
             this.stopPlayer();
-            this.state = StateState.Playable;         
+            this.waitMove = false;    
         }  
 
         // Comprobar posición objetivo final
         if (this.posGoal.active && this.posGoal.check(this.player.body.x, this.player.body.y)){            
-            this.game.paused = true;
-            this.state = StateState.LevelUp;
+            this.stateGame = GameState.LevelUp;             
         }                
     }
 
@@ -334,6 +332,33 @@ export class StateMain extends Phaser.State {
         this.posGoalTmp.active = false;
     }
 
+    set stateGame (s: GameState) {
+        
+        this._stateGame = s; 
+        
+        switch (s) {
+            case GameState.Init:
+                this.waitMove = false;
+                this.game.paused = true;                
+                break;
+            case GameState.Run:
+                this.game.paused = false;                
+                break;        
+            case GameState.Pause:
+                this.game.paused = true;
+                break;
+            case GameState.LevelUp:
+                this.game.paused = true;
+                break;
+        }        
+    }
+
+    get stateGame () {
+        return this._stateGame;
+    }
+
+
+
     /* Métodos ejecutables por el jugador */
     moveDirection(direction: string) {        
         
@@ -354,7 +379,7 @@ export class StateMain extends Phaser.State {
                     this.player.body.velocity.x = -this.velocity;                                    
                     break;
             }  
-            this.state = StateState.Blocked;            
+            this.waitMove = true;
         } else {            
             let action = '';
 
@@ -372,7 +397,7 @@ export class StateMain extends Phaser.State {
                     action = 'moveLeft()';
                     break;
             }
-            this.state = StateState.GameOver;  
+            this.stateGame = GameState.GameOver;             
             this.code_error = 'No existe posición para ' + action;
         }        
     } 

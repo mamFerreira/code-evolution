@@ -11,12 +11,11 @@
 }
 
 .active,
-button:focus{
+button:focus,
+button:disabled{
     background-color:transparent;
     color: black;
 }
-
-
 
 .canvas, .editor, .shell{
     width: 515px;    
@@ -58,3 +57,16 @@ button:focus{
 }
 
 /*LISTADO*/
+
+.container-goal-actions{    
+    height: 444px;
+}
+
+.goal-no-check{
+    background-color: #F1948A;
+}
+
+.goal-check{
+    background-color: #A9DFBF;
+}
+

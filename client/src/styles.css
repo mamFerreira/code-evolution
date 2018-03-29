@@ -30,9 +30,51 @@ h3{
 .btn-primary-ce {
     background-color: #343434;  
     color: #fff;
+    border-radius: 10px; 
 }
 
 .btn-primary-ce:hover {
     background-color: #b9b9b9;  
     color: #343434;
+    
+}
+
+/* POPOVER */
+
+.popover{
+    max-width:400px;
+}
+
+.popover-botton{
+    cursor: pointer;
+    color: #343434;
+}
+
+.popover-botton:hover{
+    text-decoration: none; 
+}
+
+.popover-title{
+    background-color: #c99e67;
+    color: #343434;
+    font-weight: bold;
+}
+
+.popover-description{
+    font-size: 12px;
+}
+
+.popover-example {
+    font-size: 10px;
+    color: #000000;
+    background-color: #fff;
+}
+
+
+
+
+@media (min-width: 1200px){
+    .container {
+        width: 1300px;
+    }
 }

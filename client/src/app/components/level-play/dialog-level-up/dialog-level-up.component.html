@@ -1,0 +1,5 @@
+<div [@dialog] *ngIf="stateGame===4" class="dialog">
+    Level Up
+    <ng-content></ng-content>    
+</div>
+<div *ngIf="stateGame===4" class="overlay" (click)="close()"></div>

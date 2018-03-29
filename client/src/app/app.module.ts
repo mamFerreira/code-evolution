@@ -1,8 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { AceEditorModule } from 'ng2-ace-editor';
+import { PopoverModule } from 'ngx-popover';
 
 import { routing, appRoutingProviders } from './app.routing';
 
@@ -24,6 +26,9 @@ import { HomeComponent } from './components/home/home.component';
 import { EvolutionListComponent } from './components/evolution-list/evolution-list.component';
 import { LevelListComponent } from './components/level-list/level-list.component';
 import { LevelPlayComponent } from './components/level-play/level-play.component';
+import { DialogLevelUpComponent } from './components/level-play/dialog-level-up/dialog-level-up.component';
+import { DialogGameOverComponent } from './components/level-play/dialog-game-over/dialog-game-over.component';
+
 // Importación de componentes de configuración
 import { ConfigureMainComponent } from './components/configure/configure-main/configure-main.component';
 import { ConfigureUserComponent } from './components/configure/configure-user/configure-user.component';
@@ -45,7 +50,9 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     HomeComponent,
     EvolutionListComponent,
     LevelListComponent,
-    LevelPlayComponent,
+    LevelPlayComponent,   
+    DialogLevelUpComponent,
+    DialogGameOverComponent,
     ConfigureMainComponent,
     ConfigureUserComponent,
     ConfigureEvolutionComponent,
@@ -55,11 +62,13 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     ConfigureActionComponent
   ],
   imports: [
-    BrowserModule,
+    BrowserModule,  
+    BrowserAnimationsModule,  
     FormsModule,
     HttpClientModule,
     routing,
-    AceEditorModule
+    AceEditorModule,
+    PopoverModule
   ],
   providers: [GlobalService, UserService, EvolutionService, LevelService, ActionService, GoalService, LearningService, appRoutingProviders],
   bootstrap: [AppComponent]
