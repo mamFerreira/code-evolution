@@ -18,9 +18,6 @@ import { ConfigureLearningComponent } from './components/configure/configure-lea
 import { ConfigureActionComponent } from './components/configure/configure-action/configure-action.component';
 
 
-
-
-
 const appRoutes: Routes = [
     {path: '', component: HomeComponent},
     {path: 'home', component: HomeComponent},

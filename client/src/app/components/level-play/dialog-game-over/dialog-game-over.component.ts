@@ -22,14 +22,19 @@ import { GameState } from '../../../class/game-state';
 export class DialogGameOverComponent implements OnInit {
   
   @Input() stateGame: GameState;
-  @Input() level: number;
-  @Output() visibleChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Input() evolution: number;
+  @Input() strError: string;
+  @Output() doAction: EventEmitter<number> = new EventEmitter<number>();
 
   constructor() { }
 
   ngOnInit() { }
 
-  close() {
+  reload() {
+    this.doAction.emit(0);
+  }
 
+  close() {
+    this.stateGame = 0;
   }
 }

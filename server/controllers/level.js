@@ -63,15 +63,31 @@ function addLevel (req, res){
 function getLevel (req, res){
     var id = req.params.id;
 
-    Level.findById(id).exec((err,tuple)=>{
+    Level.findById(id).populate({path: 'evolution'}).exec((err,tuple)=>{
         if(err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
             if(!tuple){
                 res.status(404).send({message:'El nivel no existe'});
             }else{    
-                if (req.user.role != 'ROLE_ADMIN' && (tuple.evolution.order > req.user.evolution_order || ( tuple.evolution.order == req.user.evolution_order && tuple.order > req.user.level_order ) ) ){
-                    res.status(401).send({message:"Sin permisos de acceso al nivel"});
+                if (req.user.role != 'ROLE_ADMIN') {
+                    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
+                        if (err) {
+                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                        }else{
+                            if(!tuple_user){
+                                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+                            }else{                                
+                                if (tuple.evolution.order > tuple_user.level.evolution.order 
+                                    || 
+                                    ( tuple.evolution.order == tuple_user.level.evolution.order && tuple.order > tuple_user.level.order  )){
+                                    res.status(401).send({message:"Sin permisos de acceso al nivel"});
+                                }else{
+                                    res.status(200).send({level:tuple});
+                                }                                
+                            }
+                        }
+                    });   
                 }else{
                     res.status(200).send({level:tuple});
                 }                                                           
@@ -116,27 +132,41 @@ function getLevelsByEvolution (req, res){
             }else{
                 
                 if (req.user.role != 'ROLE_ADMIN') {
-                    if (tuple.order == req.user.evolution_order){
-                        query = {active: 1, evolution: id , order: {$lte:req.user.level_order}};                
-                    }else if (tuple.order > req.user.evolution_order){ 
-                        res.status(404).send({message: 'Sin permisos para ver los niveles de la evolución'}); 
-                    }                    
-                }
-
-                
-
-                Level.find(query).sort('order').exec((err,tuples) => {
-                    if (err){
-                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                    }else{
-                        if(tuples.length==0){
-                            res.status(404).send({message: 'Ningún nivel cumple los requisitos'}); 
-                        }else{                                                                         
-                            res.status(200).send({levels:tuples});
+                    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
+                        if (err) {
+                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                        }else{
+                            if(!tuple_user){
+                                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+                            }else{
+                                if (tuple.order == tuple_user.level.evolution.order){
+                                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id , order: {$lte:tuple_user.level.order}});
+                                }else if (tuple.order > tuple_user.level.evolution.order){
+                                    res.status(404).send({message: 'Sin permisos para ver los niveles de la evolución'}); 
+                                } else{
+                                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id});
+                                }
+                            }
                         }
-                    }
-                });
 
+                    });               
+                }else{
+                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id});
+                }                   
+            }
+        }
+    });
+}
+
+function getLevelsByEvolution_2 (req, res, query) {
+    Level.find(query).sort('order').exec((err,tuples) => {
+        if (err){
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(tuples.length==0){
+                res.status(404).send({message: 'Ningún nivel cumple los requisitos'}); 
+            }else{                                                                         
+                res.status(200).send({levels:tuples});
             }
         }
     });
@@ -381,81 +411,84 @@ function loadCode (req, res) {
     });    
 }
 
-// Pasar parámetro con el nivel pasado y actualizarlo si es el actual
+/**
+ * Pasar parámetro con el nivel pasado y actualizarlo si es el actual
+ * @returns level: siguiente nivel si existe
+ */ 
+
 function nextLevel (req, res){
-    var param_id = req.params.id;
-    var level_id = req.user.level_id;
-    var level_order = parseInt(req.user.level_order) + 1;
-    var evolution_id = req.user.evolution_id;
-    var evolution_order = parseInt(req.user.evolution_order) + 1;    
-    var user = new User();
-    user._id = req.user.sub;
+
+    var user, level_param;    
     
-    if (param_id == level_id){        
-        //Si existe nivel con orden superior y misma evolución, apuntar a él
-        Level.find({evolution:evolution_id, order:level_order}).exec( (err, listLevel) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                if (listLevel.length == 0){
-                    //Obtener primer nivel de la siguiente evolución
-                    Evolution.find({order:evolution_order}).exec ( (err, listEvolution) => {
-                        if (err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+    // Obtenemos información usuario
+    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
+        if (err) {
+            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+        }else{
+            if(!tuple_user){
+                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+            }else{                                                 
+                user = tuple_user;
+
+                // Obtenemos información nivel pasado por parametro
+                Level.findById(req.params.id).populate({path:'evolution'}).exec( (err, tuple_level) => {
+                    if (err) {
+                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                    }else{
+                        if(!tuple_level){
+                            res.status(404).send({message: 'No existe tupla con dicho identificador: Level'}); 
                         }else{
-                            if (listEvolution.length==0){
-                                res.status(200).send({message:'Última evolución'})
-                            }else{
-                                //Apuntar al primer nivel de la siguiente evolución
-                                var evolution_id_2 = listEvolution[0]._id;
-                                Level.find({evolution:evolution_id_2,order:1}).exec( (err,listLevel2) => {
-                                    if (err){
-                                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                            level_param = tuple_level;
+
+                            // Comprobamos si existe siguiente nivel en la misma evolución
+                            Level.find({evolution:level_param.evolution._id, order:{$gt: level_param.order}}).populate({path:'evolution'}).sort('order').exec ( (err, tuples_level) => {
+                                if (err){
+                                    res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                                }else{
+                                    if (tuples_level.length > 0){                                                                                
+                                        if (String(level_param._id) === String(user.level._id)){                 
+                                            user.level = tuples_level[0]._id;
+                                            User.findByIdAndUpdate(user._id, user,(err,tuple) => {                                                                        
+                                            });    
+                                        }                                           
+                                        res.status(200).send({level: tuples_level[0]}); // Siguiente nivel misma evolución
                                     }else{
-                                        if (listLevel2.length==0){
-                                            //No hacer nada. La siguiente evolución no tiene niveles
-                                            res.status(200).send({message:'Evolución sin niveles en orden 1: ' + evolution_id_2})
-                                        }else{
-                                            user.level = listLevel2[0]._id;
-
-                                            User.findByIdAndUpdate(user._id, user, (err,userUpdate) => {
-                                                if (err){
-                                                    res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                                                }else{
-                                                    if (!userUpdate){
-                                                        res.status(404).send({message: 'No se ha podido actualizar el nivel del usuario'});
-                                                    }else{
-                                                        res.status(200).send({level:listLevel2[0]});
-                                                    }
+                                        // Comprobamos si existe proxima evolución
+                                        Evolution.find({order:{$gt: level_param.evolution.order}}).sort('order').exec ( (err, tuples_evolution) => {
+                                            if (err){
+                                                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                                            }else{
+                                                if (tuples_evolution.length > 0){ 
+                                                    Level.find({evolution:tuples_evolution[0],order:1}).populate({path:'evolution'}).exec( (err,tuples_level_2) => {
+                                                        if(err){
+                                                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                                                        }else{
+                                                            if (tuples_level_2.length > 0){                                                                             
+                                                                if (String(level_param._id) === String(user.level._id)){                 
+                                                                    user.level = tuples_level_2[0]._id;
+                                                                    User.findByIdAndUpdate(user._id, user, (err,tuple) => {                                                                        
+                                                                    });  
+                                                                }                                           
+                                                                res.status(200).send({level: tuples_level_2[0]}); // Siguiente nivel siguiente evolución
+                                                            }else{
+                                                                res.status(200).send({message: 'Juego superado'});
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    res.status(200).send({message: 'Juego superado'});
                                                 }
-                                            });
-                                        }
+                                            }
+                                        }); 
                                     }
-                                });
-                            }
+                                }
+                            });
                         }
-                    });
-                }else{
-                    user.level = listLevel[0]._id;
-
-                    User.findByIdAndUpdate(user._id, user, (err,userUpdate) => {
-                        if (err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if (!userUpdate){
-                                res.status(404).send({message: 'No se ha podido actualizar el nivel del usuario'});
-                            }else{
-                                res.status(200).send({level:listLevel[0]});
-                            }
-                        }
-                    });                    
-                }
+                    }
+                });
             }
-        });
-    }else{
-        res.status(200).send({message:'Nivel distinto al actual del jugador. No avanza de nivel'});
-    }
-    
+        }
+    });             
 }
 
 /**

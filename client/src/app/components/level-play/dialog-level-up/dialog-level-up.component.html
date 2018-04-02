@@ -1,5 +1,21 @@
 <div [@dialog] *ngIf="stateGame===4" class="dialog">
-    Level Up
-    <ng-content></ng-content>    
+    <div class="dialog-1" *ngIf="!next">
+        <div class="dialog-title">   
+            <h1>Nivel superado!</h1>                
+        </div> 
+        <div class="dialog-buttons">
+            <button class="btn btn-primary" (click)="reload()">Volver a jugar</button>
+            <button class="btn btn-primary" (click)="nextWindow()">Siguiente</button>        
+        </div>
+    </div>    
+    <div class ="dialog-2" *ngIf="next">
+        <div class="dialog-title">   
+            <h1>{{msg}}</h1>                
+        </div> 
+        <div class="dialog-buttons">
+            <button class="btn btn-primary" (click)="reload()">Volver a jugar</button>
+            <button class="btn btn-primary" (click)="nextLevel()">{{msgButton}}</button>        
+        </div>
+    </div>
 </div>
 <div *ngIf="stateGame===4" class="overlay" (click)="close()"></div>

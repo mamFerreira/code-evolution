@@ -75,7 +75,7 @@ export class StateMain extends Phaser.State {
         this.positions = new Array<Position>();
         this.posGoal = new Position(0, 0, false);
         this.posGoalTmp = new Position(0, 0, false);        
-        this.velocity = 64;
+        this.velocity = 128;
         this.healthBarWidth = 250;        
     }
 
@@ -268,7 +268,7 @@ export class StateMain extends Phaser.State {
         }  
 
         // Comprobar posición objetivo final
-        if (this.posGoal.active && this.posGoal.check(this.player.body.x, this.player.body.y)){            
+        if (this.posGoal.active && this.posGoal.check(this.player.body.x, this.player.body.y)) {            
             this.stateGame = GameState.LevelUp;             
         }                
     }

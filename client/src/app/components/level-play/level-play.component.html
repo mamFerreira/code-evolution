@@ -87,8 +87,8 @@
             </div>
         </div>
     </div>
-    <div *ngIf="level && game">
-        <app-dialog-level-up [(stateGame)]="stateGame"  [(level)]="level._id"></app-dialog-level-up>
-        <app-dialog-game-over [(stateGame)]="stateGame" [(level)]="level._id"></app-dialog-game-over>
+    <div *ngIf="level && evolution && game">
+        <app-dialog-level-up [(stateGame)]="stateGame" [(level)]="level._id" [(evolution)]="evolution._id" (doAction)="doAction($event)"></app-dialog-level-up>
+        <app-dialog-game-over [(stateGame)]="stateGame" [(evolution)]="level.evolution" [(strError)]="strError" (doAction)="doAction($event)"></app-dialog-game-over>
     </div>
     

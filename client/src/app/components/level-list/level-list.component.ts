@@ -57,14 +57,13 @@ export class LevelListComponent implements OnInit {
 
   getEvolution() {
     this._route.params.forEach((params: Params) => {
-      let id = params['id'];
-
+      let id = params['id'];      
       this._evolutionService.getEvolution(id).subscribe(
         res => {
           if (!res.evolution) {
             this.errosMessagge = res.message;
           } else {
-            this.evolution = res.evolution;
+            this.evolution = res.evolution;                        
           }
         },
         err => {
@@ -72,35 +71,30 @@ export class LevelListComponent implements OnInit {
         }
       );
     });
+    
   } 
 
   getLevels() {
     this._route.params.forEach((params: Params) => {
-      let id = params['id'];
-
+      let id = params['id'];      
       this._levelSercice.getLevelsEvolution(id).subscribe(
-        res => {
+        res => {          
           if (!res.levels) {
             this._router.navigate(['/']);
           } else {
-            this.levels = res.levels;
+            this.levels = res.levels;                    
             // Selección del nivel activo
-            if (this.identity.level.evolution._id === id) {
-              this.levels.forEach( (element, index, array) => {
-                if (element._id === this.identity.level._id) {
-                  this.level = res.levels[index];
-                  this.getGoals();
-                  this.getLearnings();
-                  this.getActions();
-                  return;
-                }
-              });                            
+            if (this.identity.level.evolution._id === id) {            
+              this.level = this.identity.level;
+              this.getGoals();
+              this.getLearnings();
+              this.getActions();                                                                            
             } else {
               this.level = res.levels[0];
             }   
           }
         },
-        err => {
+        err => {          
           this.errosMessagge = err.error.message;
         }
       );

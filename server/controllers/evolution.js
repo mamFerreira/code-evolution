@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var ObjectID = require('mongodb').ObjectID;
+var User = require ('../models/user');
 var Evolution = require ('../models/evolution');
 var Level = require ('../models/level');
 var LevelLearning = require ('../models/level_learning');
@@ -64,17 +65,31 @@ function addEvolution (req, res){
 function getEvolution (req, res){
     var id = req.params.id;
 
-    Evolution.findById(id).exec((err,tuple)=>{
+    Evolution.findById(id).exec((err,tuple_evolution)=>{
         if (err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
-            if(!tuple){
+            if(!tuple_evolution){
                 res.status(404).send({message: 'No existe tupla con dicho identificador: ' + table});  
             }else{
-                if (req.user.role != 'ROLE_ADMIN' && tuple.order > req.user.evolution_order){
-                    res.status(401).send({message:"Sin permisos de acceso a la evolución"});
+                if (req.user.role != 'ROLE_ADMIN'){
+                    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
+                        if (err) {
+                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                        }else{
+                            if(!tuple_user){
+                                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+                            }else{
+                                if (tuple_evolution.order > tuple_user.level.evolution.order){
+                                    res.status(401).send({message:"Sin permisos de acceso a la evolución"});
+                                }else{
+                                    res.status(200).send({evolution: tuple_evolution});
+                                }                                
+                            }
+                        }
+                    });                     
                 }else{
-                    res.status(200).send({evolution: tuple});
+                    res.status(200).send({evolution: tuple_evolution});
                 }              
             }
         }
@@ -89,9 +104,26 @@ function getEvolutions (req, res){
     var query = {};
 
     if (req.user.role != 'ROLE_ADMIN'){
-        query = {'order':{$lte:req.user.evolution_order}};        
-    }    
+                        
+        User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
+            if (err) {
+                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+            }else{
+                if(!tuple_user){
+                    res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+                }else{
+                    getEvolutions_2(req,res,{'order':{$lte:tuple_user.level.evolution.order}});
+                }
+            }
+        });     
 
+
+    }else {
+        getEvolutions_2(req, res, {})
+    }  
+}
+
+function getEvolutions_2 (req, res, query){
     Evolution.find(query).sort('order').exec((err,tuples) => {
         if (err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -114,7 +146,6 @@ function getEvolutions (req, res){
             }
         }
     });
-
 }
 
 /**

@@ -1,5 +1,11 @@
 <div [@dialog] *ngIf="stateGame===5" class="dialog">
-    Game Over
-    <ng-content></ng-content>    
+    <div class="dialog-title">   
+        <h1>Nivel no superado!</h1>
+        <h2>{{strError}}</h2>
+    </div>    
+    <div class="dialog-buttons">
+        <button class="btn btn-primary" (click)="reload()">Volver a intentar</button>
+        <button class="btn btn-primary" [routerLink]="['/jugar/evolucion/' + evolution]">Cambiar nivel</button>
+    </div>
 </div>
 <div *ngIf="stateGame===5" class="overlay" (click)="close()"></div>

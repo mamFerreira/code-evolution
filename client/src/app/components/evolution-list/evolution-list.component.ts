@@ -33,7 +33,7 @@ export class EvolutionListComponent implements OnInit {
   ) {
     this.title = 'Seleccione un organismo';
     this.url = this._globalService.url;
-    this.identity = this._userService.getIdentity();
+    this.identity = this._userService.getIdentity();        
   }
 
   ngOnInit() {
@@ -69,9 +69,10 @@ export class EvolutionListComponent implements OnInit {
         if (!res.evolutions) {
           this._router.navigate(['/']);
         } else {
-          this.evolutions = res.evolutions;
+          this.evolutions = res.evolutions;                 
           this.evolution = this.identity.level.evolution;
           this.getLearnings();
+                    
         }
       },
       err => {

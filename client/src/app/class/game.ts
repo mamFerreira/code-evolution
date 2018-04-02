@@ -3,30 +3,50 @@ import { GameAction } from './game-action';
 import { GameState } from './game-state';
 
 // Importación Modelos
+import { User } from '../models/user.model';
 import { Evolution } from '../models/evolution.model';
 import { Level } from '../models/level.model';
 import { LevelGoal } from '../models/level_goal.model';
 import { LevelAction } from '../models/level_action.model';
 import { Position } from '../models/position.model';
 
+// Importación de servicios
+import { UserService } from '../services/user.service';
+import { LevelService } from '../services/level.service';
+
 export class Game {    
     private state: StateMain;    
     private worker: Worker;
+    private _identity;
+    private _levelService: LevelService; 
+    private _userService: UserService;   
+    private _idLevel: string;
     private idInterval;
-    private idIntervalMain;  
+    private idIntervalMain; 
 
     public code_shell: string;
-    public code_error: boolean;    
+    public code_error: string;
+    public is_error: boolean;    
     public volume: boolean;    
 
-    constructor (id: string, url: string) {        
-        this.state = new StateMain(id, url);
+    constructor (
+        id: string, 
+        url: string, 
+        levelService: LevelService,
+        userService: UserService
+    ) {        
+        this._levelService = levelService;
+        this._userService = userService;
+        this._identity = userService.getIdentity();
+        this.state = new StateMain(id, url);        
         this.code_shell = 'Code Evolution Shell...';
-        this.code_error = false;        
-        this.volume = true;      
+        this.code_error = '';
+        this.is_error = false;        
+        this.volume = true;                 
     }
     
     initState( level: Level, evolution: Evolution, goals: LevelGoal[], actions: LevelAction[], positions: Position[]) {
+        this._idLevel = level._id;
         this.state.fileMap = level.map;
         this.state.maxTime = level.time;
         this.state.filePlayer = evolution.player;
@@ -147,7 +167,8 @@ export class Game {
                 this.state.reload();    
                 this.restart();                    
                 this.code_shell = 'Code Evolution Shell...';
-                this.code_error = false;                
+                this.code_error = '';
+                this.is_error = false; 
                 break;
             case GameAction.Play:
                 this.state.stateGame = GameState.Run;
@@ -156,11 +177,13 @@ export class Game {
 
                 this.idIntervalMain = setInterval(() => {                                        
 
-                    if (this.state.stateGame === GameState.LevelUp) {                                                    
-                        this.restart();
+                    if (this.state.stateGame === GameState.LevelUp) { 
+                        this.nextLevel();                                                   
+                        this.restart();                        
                     } else if (this.state.stateGame === GameState.GameOver) {
                         this.code_shell += '<br>$ Error -> ' + this.state.code_error;
-                        this.code_error = true;                        
+                        this.code_error = this.state.code_error;
+                        this.is_error = true;                        
                         this.restart();
                     }                                                            
                 }, 50);
@@ -174,8 +197,7 @@ export class Game {
                 this.state.stateGame = GameState.Run;
                 break;
             case GameAction.Stop:                        
-                this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo'; 
-                this.code_error = true;                
+                this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo';                             
                 this.state.stateGame = GameState.Stop;
                 this.restart();
                 break;
@@ -183,7 +205,25 @@ export class Game {
                 this.volume = !this.volume;
                 break;
         }
-    }    
+    }  
+    
+    nextLevel() {                                          
+        this._levelService.nextLevel(this._idLevel).subscribe(
+            res => {
+                if (!res.level) {
+                    this.code_shell += '<br>$ ' + res.message + '!';
+                } else { 
+                    if (this._idLevel === this._identity.level._id) {                                                     
+                        this._identity.level = res.level;                                           
+                        localStorage.setItem('identity', JSON.stringify(this._identity)); 
+                    }
+                }                 
+            },
+            err => {
+                this.code_error += err.error.message;          
+            }
+        );                
+    }
     
     get stateGame () {
         return this.state.stateGame;

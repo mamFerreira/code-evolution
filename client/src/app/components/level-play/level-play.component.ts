@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
 
+import { UserService } from '../../services/user.service';
 import { GlobalService } from '../../services/global.service';
 import { EvolutionService } from '../../services/evolution.service';
 import { LevelService } from '../../services/level.service';
@@ -46,6 +47,7 @@ export class LevelPlayComponent implements OnInit {
   public lastAction: GameAction; 
 
   constructor(
+    private _userService: UserService,
     private _globalService: GlobalService,
     private _evolutionService: EvolutionService,
     private _levelSercice: LevelService,
@@ -62,7 +64,7 @@ export class LevelPlayComponent implements OnInit {
     this.gameStarted = false;       
   }
 
-  ngOnInit() {   
+  ngOnInit() {      
     this.loadLevel(); 
     this.loadEditor();    
   }
@@ -77,15 +79,16 @@ export class LevelPlayComponent implements OnInit {
       this._levelSercice.getLevel(id).subscribe(
         res => {
           if (!res.level) {
-            this.errorMessage += res.message;
-          } else {
+            this.errorMessage += res.message;            
+          } else {            
             this.level = res.level;            
-            this.loadEvolution();           
+            this.evolution = res.level.evolution;
+            this.loadPropertyLevel();          
             this.loadCode();                                                     
           }
         },
-        err => {
-          this.errorMessage += err.error.message;          
+        err => {          
+          this.errorMessage += err.error.message;                    
         }
       );
     });
@@ -97,14 +100,14 @@ export class LevelPlayComponent implements OnInit {
   loadEvolution() {
     this._evolutionService.getEvolution(this.level.evolution).subscribe(
       res => {
-        if (!res.evolution) {
+        if (!res.evolution) {          
           this.errorMessage += res.message;
         } else {
           this.evolution = res.evolution;          
-          this.loadPropertyLevel();                         
+                                  
         }
       },
-      err => {
+      err => {        
         this.errorMessage += err.error.message;
       }
     );    
@@ -192,7 +195,7 @@ export class LevelPlayComponent implements OnInit {
    * Carga del juego
    */
   loadGame() {
-    this.game = new Game('phaser-game', this.url);  
+    this.game = new Game('phaser-game', this.url, this._levelSercice, this._userService);  
     this.game.initState(this.level, this.evolution, this.goals, this.actions, this.positions);       
     this.gameStarted = true;
   }  
@@ -243,5 +246,13 @@ export class LevelPlayComponent implements OnInit {
    */
   get stateGame () {
     return this.game.stateGame;
-}
+  }
+
+  /**
+   * Obtener estado de la partida
+   */
+  get strError () {
+    return this.game.code_error;
+  }
+  
 }
