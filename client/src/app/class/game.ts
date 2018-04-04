@@ -17,6 +17,7 @@ import { LevelService } from '../services/level.service';
 export class Game {    
     private state: StateMain;    
     private worker: Worker;
+    private checked: CheckData;
     private _identity;
     private _levelService: LevelService; 
     private _userService: UserService;   
@@ -38,7 +39,8 @@ export class Game {
         this._levelService = levelService;
         this._userService = userService;
         this._identity = userService.getIdentity();
-        this.state = new StateMain(id, url);        
+        this.state = new StateMain(id, url);  
+        this.checked = new CheckData();      
         this.code_shell = 'Code Evolution Shell...';
         this.code_error = '';
         this.is_error = false;        
@@ -101,7 +103,7 @@ export class Game {
 
     addEventListener() {
         this.worker.addEventListener('message', (e) => {
-
+            let value1, value2;
             let waitUnblock = false;
             let waitResponse = false;
             switch (e.data.action) {
@@ -121,12 +123,23 @@ export class Game {
                     this.state.moveDirection('L');
                     waitUnblock = true;                                     
                     break;
-                case 'printValue':
-                    this.state.imprimirValor(e.data.value);
+                case 'move':
+
+                    if (! this.checked.checkArray(e.data.value, 2)) {
+                        this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
+                        return;
+                    }          
+                    
+                    if (! this.checked.checkIntPos(e.data.value[0]) || !this.checked.checkIntPos(e.data.value[1])) {
+                        this.registerError('Los valores de la acción "move" no son enteros positivos');
+                        return;
+                    }
+                    this.state.move (e.data.value[0], e.data.value[1]);                    
+                    waitUnblock = true;
+
                     break;
-                case 'error':
-                    this.code_shell += '<br>$ Error:' + e.data.value;
-                    this.doAction(GameAction.Stop);
+                case 'error':                    
+                    this.registerError(e.data.value);
                     break;
                 default:
                     this.code_shell += '<br>$ Error en worker: Acción ' + e.data.action + ' no definida';
@@ -153,6 +166,12 @@ export class Game {
             
 
         }, false); 
+    }
+
+    registerError(message) {
+        this.code_shell += '<br>$ Error:' + message;
+        this.code_error += 'Error: ' + message;
+        this.doAction(GameAction.Stop);
     }
 
     restart () {                        
@@ -198,7 +217,7 @@ export class Game {
                 break;
             case GameAction.Stop:                        
                 this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo';                             
-                this.state.stateGame = GameState.Stop;
+                this.state.stateGame = GameState.GameOver;
                 this.restart();
                 break;
             case GameAction.ChangeVolume:
@@ -227,5 +246,38 @@ export class Game {
     
     get stateGame () {
         return this.state.stateGame;
+    }
+}
+
+
+export class CheckData {
+
+    constructor () { }
+
+    checkArray (array, value) {
+
+        if (array.length !== value) {
+            return false;
+        }
+
+        for (let i = 0; i < array.length; i++) {
+            if (array[i] === undefined) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    checkIntPos (value) {
+        if (value !== parseInt(value, 10)) {
+            return false;
+        }
+
+        if (parseInt(value, 10) < 0) {
+            return false;
+        }
+
+        return true;
     }
 }

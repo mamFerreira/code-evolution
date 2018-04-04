@@ -396,6 +396,13 @@ function uploadIEvolution (req,res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
                     }else{
+                        // Eliminamos la imagen anterior
+                        let file_path_old = GLOBAL.PATH_FILE_EVOLUTION_I + tupleUpdate.image;
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });                                              
                         res.status(200).send({image:file_name, evolution:tupleUpdate});
                     }
                 }
@@ -438,6 +445,12 @@ function uploadPEvolution (req,res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
                     }else{
+                        let file_path_old = GLOBAL.PATH_FILE_EVOLUTION_P + tupleUpdate.player;
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        }); 
                         res.status(200).send({image:file_name, evolution:tupleUpdate});
                     }
                 }
@@ -467,17 +480,6 @@ function uploadTEvolution (req,res){
         var ext = file_name.split('\.')[1];   
         
         field = {tiledset: file_name};  
-        /*switch (type){
-            case 'S':
-                field = {tiledset_surface: file_name};        
-                break;
-            case 'B':
-                field = {tiledset_block: file_name};        
-                break;
-            default:
-                return res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: 'Tipo de imágen desconocido'});
-        }*/
-        
 
         if (ext=='png'){
             Evolution.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
@@ -487,6 +489,12 @@ function uploadTEvolution (req,res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen de la evolución'});
                     }else{
+                        let file_path_old = GLOBAL.PATH_FILE_EVOLUTION_T + tupleUpdate.tiledset;
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });
                         res.status(200).send({image:file_name, evolution:tupleUpdate});
                     }
                 }

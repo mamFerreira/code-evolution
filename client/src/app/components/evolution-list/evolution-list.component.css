@@ -39,9 +39,7 @@
 
 .container-image {
   height: 150px;
-  width: 150px;
-  border: 2px solid #773617;
-  border-radius: 20px;  
+  width: 150px;    
   margin: 0 auto;
   overflow: hidden;  
   position: relative; 
@@ -62,18 +60,19 @@ pre{
 
 .container-button {
   margin: 0 auto;
-  position: relative; 
-  width: 150px;
+  position: relative;   
 }
 
 .btn-play {
-  width: 100%;
+  width: 20%;
   border: 2px solid #343434;
   background-color: #00a1e4;
   color: #fff;
   margin:auto;
-  font-size: 20px;
-  box-shadow: 5px 5px 5px 5px #c1c1c1;
+  margin-left: 15%;
+  font-size: 18px;
+  text-align: center;
+  box-shadow: 2px 2px 2px 2px #c1c1c1;
 }
 
 @media (max-width: 995px) {

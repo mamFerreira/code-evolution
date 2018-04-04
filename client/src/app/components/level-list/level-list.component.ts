@@ -142,6 +142,9 @@ export class LevelListComponent implements OnInit {
 
   changeLevel(level_selected) {
     this.level = level_selected;
+    this.getGoals();
+    this.getLearnings();
+    this.getActions();
   }
 
 }

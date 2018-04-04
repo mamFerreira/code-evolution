@@ -23,6 +23,9 @@
                     <button type="button" class="btn btn-primary-ce">
                         <span class="glyphicon glyphicon-info-sign"></span>
                     </button>
+                    <button type="button" class="btn btn-primary-ce" [routerLink]="['/jugar/evolucion/'+evolution._id]">
+                        <span class="glyphicon glyphicon-log-out"></span>
+                    </button>
                 </div>             
             </div>                 
             <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>

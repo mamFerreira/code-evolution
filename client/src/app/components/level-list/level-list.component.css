@@ -24,6 +24,7 @@
 
 .level-detail h2{
     margin-bottom: 10px;
+    margin-left: 5%;
 }
 
 .level-detail h3{
@@ -46,24 +47,29 @@
     margin-top: 10px;
 }
 
+.table-levels tr{
+    cursor:pointer;
+}
+
 .table-level-selected {
     background-color: #c0c0c0;
 }
 
 .container-button {
     margin: 0 auto;
-    position: relative; 
-    width: 80%;
+    position: relative;     
 }
   
 .btn-play {
-    width: 50%;
+    width: 25%;
     border: 2px solid #343434;
     background-color: #00a1e4;
     color: #fff;
     margin:auto;
-    font-size: 20px;
-    box-shadow: 5px 5px 5px 5px #c1c1c1;
+    margin-left: 15%;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 2px 2px 2px 2px #c1c1c1;
 }
 
 @media (max-width: 995px) {

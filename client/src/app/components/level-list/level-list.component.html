@@ -26,11 +26,11 @@
           </tbody>
         </table>
         <div class="container-button">
-            <button class="btn btn-play" [routerLink]="['/jugar/nivel/' + level._id]">JUGAR</button>    
+            <button class="btn btn-play" [routerLink]="['/jugar/nivel/' + level._id]">JUGAR</button> 
+            <button class="btn btn-play" [routerLink]="['/jugar']">VOLVER</button>   
         </div>        
-      </div>  
-      <div class="col-md-1 float-left"></div>    
-      <div class="col-md-7 float-left level-detail">
+      </div>          
+      <div class="col-md-8 float-left level-detail">
           <h2>{{level.order}}: {{level.title}}</h2>
           <h3>{{level.description}}</h3>
           <div class="col-md-4 float-left">

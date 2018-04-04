@@ -7,13 +7,13 @@ var AsyncFunctions = [];
 var NativeFunctions = [];
 var timeWait = 10;
 var json, block;
-var idInterval, idIntervalResponse;
+var idInterval;
 
 // Operaciones disponibles en el worker
 var queryableFunctions = {
 
     // Cargar métodos ejecutables por el worker e inicializar el compilador
-    initValue: (data) => {                  
+    initValue: (data) => {                         
         data.forEach(element => {
             addMethod(element.method);
         });                       
@@ -78,6 +78,13 @@ function addMethod (method){
                 block = true;
                 reply(method);          
                 waitResponse(callback);
+            };
+            break;
+        case 'move':
+            wrapperAsync = (v1, v2, callback) => {
+                block = true;
+                reply(method,v1, v2); 
+                waitResponse(callback);               
             };
             break;
         case 'imprimirValor':

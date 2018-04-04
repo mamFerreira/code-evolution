@@ -1,0 +1,38 @@
+"""
+Completa las operaciones para llevar la célula hasta la
+posición objetivo.
+Será más fácil si usas las variables ya declaradas
+"""
+
+pos_jugador_x = 450
+pos_jugaror_y = 325
+
+pos_objetivo_x = 60
+pos_objetivo_y = 325
+
+
+# Primer desplazamiento
+y = pos_jugaror_y - 275
+move (pos_jugador_x , y)
+
+# Segundo desplazamiento
+x = pos_jugador_x - 130
+move (x,y)
+
+# Siguientes desplazamientos (Completa las operaciones)
+y = y +
+move (x,y)
+
+x = x -
+move (x,y)
+
+y = y -
+move (x,y)
+
+x = x -
+move (x,y)
+
+
+# Último desplazamiento
+move (pos_objetivo_x,pos_objetivo_y)
+

@@ -24,11 +24,11 @@
                 </div>
                 <div class="timeline-end"><p>Fin</p></div>
             </section>
-            <div class="col-md-11 col-lg-11 evolution-selected"> 
+            <div class="col-md-12 col-lg-12 evolution-selected"> 
                 <h2>
                     Organismo seleccionado: <strong>{{evolution.name}}</strong>                                          
                 </h2>                                
-                <div class="col-md-8 col-lg-8 float-right evolution-information">                    
+                <div class="col-md-6 col-lg-6 float-right evolution-information">                    
                     <table class="table">
                         <tbody>
                         <tr>
@@ -54,14 +54,18 @@
                             </td>
                         </tr>                                                                                          
                         </tbody>
-                    </table>                                        
+                    </table> 
+                    <div class="container-button">
+                        <button class="btn btn-play" [routerLink]="['evolucion/'+evolution._id]">ACEPTAR</button>   
+                        <button class="btn btn-play" [routerLink]="['/home']">VOLVER</button>  
+                    </div>                                       
                 </div>
-                <div class="col-md-4 col-lg-4 float-right">
+                <!--<div class="col-md-4 col-lg-4 float-right">
                     <div class="container-image">
                             <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
                     </div>                                                                                                            
-                </div>                                        
-                <div class="col-md-8 col-lg-8 float-right">
+                </div>-->                                        
+                <div class="col-md-6 col-lg-6 float-left">
                     <table *ngIf="learning" class="table">
                         <tbody>
                             <tr>
@@ -78,13 +82,8 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>    
-                <div class="col-md-4 col-lg-4 float-right">
-                    <div class="container-button">
-                        <button class="btn btn-play" [routerLink]="['evolucion/'+evolution._id]">ACEPTAR</button>    
-                    </div>
-                </div>        
-            </div>                     
+                </div>                           
+            </div>                    
         </div>
     </div>  
 </div>

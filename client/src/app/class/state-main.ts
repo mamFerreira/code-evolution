@@ -29,6 +29,8 @@ export class StateMain extends Phaser.State {
     private layer_surface: Phaser.TilemapLayer;
     private layer_block: Phaser.TilemapLayer;          
     private player;   
+    private size_player: number;
+    private sound;
 
     // Variables de configuración
     private velocity;
@@ -37,6 +39,7 @@ export class StateMain extends Phaser.State {
     public fileMap: string;
     public fileTiledset: string;
     private urlResource: string;
+    private urlAudio: string;
     private url: String;      
 
     // Variables para intercambio de información
@@ -71,12 +74,14 @@ export class StateMain extends Phaser.State {
         super();        
         this.url = url; 
         this.urlResource = '../../assets/resource/';
+        this.urlAudio = '../../assets/audio/';
         this.game = new Phaser.Game(515, 444, Phaser.CANVAS, id); 
         this.positions = new Array<Position>();
         this.posGoal = new Position(0, 0, false);
         this.posGoalTmp = new Position(0, 0, false);        
-        this.velocity = 128;
-        this.healthBarWidth = 250;        
+        this.velocity = 64;
+        this.healthBarWidth = 250; 
+        this.size_player = 32;       
     }
 
     reload() {
@@ -102,6 +107,8 @@ export class StateMain extends Phaser.State {
         this.game.load.tilemap('map', this.url + 'level-load/' + this.fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);
         this.game.load.image('player', this.url + 'evolution-load/' + this.filePlayer + '/P');        
         this.game.load.image('tiledset', this.url + 'evolution-load/' + this.fileTiledset + '/T');    
+        // Carga de audios
+        this.game.load.audio('song1', this.urlAudio + 'song1.mp3');
         // Carga elementos barra marcador
         this.game.load.image('health', this.urlResource + 'object/health.png');
         // Carga burbujas de diálogo
@@ -128,7 +135,10 @@ export class StateMain extends Phaser.State {
         this.map = this.game.add.tilemap('map');
         this.map.addTilesetImage('tiledset', 'tiledset');
         this.layer_surface = this.map.createLayer('surface');
-        this.layer_block = this.map.createLayer('block');   
+        this.layer_block = this.map.createLayer('block'); 
+        this.map.setCollisionBetween(1, 3500, true, this.layer_block);
+        this.sound = this.game.add.audio('song1');
+
         
         // Marcador
         let scoreBoard = this.game.add.graphics();
@@ -149,10 +159,13 @@ export class StateMain extends Phaser.State {
             this.game.add.sprite(p.x, p.y, 'pos');
         });
         // Player
-        this.player = this.game.add.sprite(this.posInitial.x, this.posInitial.y , 'player');
+        this.player = this.game.add.sprite(this.posInitial.x, this.posInitial.y, 'player');
         this.player.width = 32;
         this.player.height = 32;
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
+        this.player.body.collideWorldBounds = true;
+        this.player.body.onWorldBounds = new Phaser.Signal();
+        this.player.body.onWorldBounds.add(this.eventCollisionBlock, this);
 
         // Mostrar posición click
         this.game.input.onDown.add(this.drawSpeechClick, this);
@@ -196,8 +209,8 @@ export class StateMain extends Phaser.State {
         }
         let messagge = 'x = ' + posX + '\ny = ' + posY;
         // Arriba centro por defecto
-        let posText = new Position (posX - 15, posY - 50, true, 1);
-        let posSpeech = new Position (posX - 45, posY - 60, true, 1);
+        let posText = new Position (posX - 15, posY - 50, true);
+        let posSpeech = new Position (posX - 45, posY - 60, true);
         let image = 'speech_U_C';              
         
         // Abajo centro
@@ -254,65 +267,76 @@ export class StateMain extends Phaser.State {
         }
     }
 
+    eventCollisionBlock() {
+        this.stateGame = GameState.GameOver;
+        this.code_error = 'Colisión';
+    }
+
     update() {
                 
         /*if (this.currentLife > 0) {
             this.currentLife -= 1;
             this.healthBar.width = (this.currentLife * this.healthBarWidth) / this.maxLife;                      
-        }*/           
+        }*/   
+        
+        this.game.physics.arcade.collide(this.layer_block, this.player, this.eventCollisionBlock, null, this);
 
-        // Comprobar objetivo posición temporal   
-        if (this.posGoalTmp.active && this.posGoalTmp.check(this.player.body.x, this.player.body.y)) {            
+        // Comprobar objetivo posición temporal           
+        if (this.posGoalTmp.active && 
+            this.posGoalTmp.inRange(this.player.x, this.player.y, 2)) {             
             this.stopPlayer();
-            this.waitMove = false;    
+            this.waitMove = false; 
+                   
         }  
 
         // Comprobar posición objetivo final
-        if (this.posGoal.active && this.posGoal.check(this.player.body.x, this.player.body.y)) {            
-            this.stateGame = GameState.LevelUp;             
-        }                
+        if (this.posGoal.active && this.posGoal.inRange(this.player.x, this.player.y, 2)) {            
+           this.stateGame = GameState.LevelUp;             
+        }              
     }
 
     addGoal(type, v1, v2) {
         if (type === 'position') {
-            this.posGoal = new Position(v1, v2);
+            this.posGoal = new Position(v1 - (this.size_player / 2), v2 - (this.size_player / 2));
         }
     }
 
     addPosition (x, y, init = false) {
         if (init) {
-            this.posInitial = new Position(x, y);
+            this.posInitial = new Position(x - (this.size_player / 2), y - (this.size_player / 2));
         } else {
-            let p = new Position(x, y);            
+            let p = new Position(x - (this.size_player / 2), y - (this.size_player / 2));            
             this.positions.push(p);
         }
     }
 
-    nextPosition(direction): Position {
-        let posPlayer = new Position (this.player.body.x, this.player.body.y, true, 1);        
+    nextPosition(direction): Position {        
+        let posPlayer = new Position (this.player.x, this.player.y);                
         let posNext = new Position (0, 0, false);     
         let positions_tmp = Object.assign([], this.positions);
+        let range = 2;
+        
         positions_tmp.push(this.posGoal);
         positions_tmp.forEach(p => {
-            if (!posPlayer.check(p.x, p.y)) {                
+            if (!posPlayer.inRange(p.x, p.y, range)) {                 
                 switch (direction) {
-                    case 'D':                        
-                        if (p.x === posPlayer.x && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
+                    case 'D':                                                                      
+                        if (posPlayer.inRange(p.x, p.y, range, 'x') && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
                             posNext.assign(p);
                         }
                         break;
-                    case 'U':
-                        if (p.x === posPlayer.x && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
+                    case 'U':                                                
+                        if (posPlayer.inRange(p.x, p.y, range, 'x') && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
                             posNext.assign(p);
                         }
                         break;
-                    case 'R':                        
-                        if (p.y === posPlayer.y && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {
+                    case 'R':                             
+                        if (posPlayer.inRange(p.x, p.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {
                             posNext.assign(p);
                         }
                         break;
                     case 'L':                        
-                        if (p.y === posPlayer.y && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
+                        if (posPlayer.inRange(p.x, p.y, range, 'y') && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
                             posNext.assign(p);
                         }
                         break;
@@ -326,9 +350,7 @@ export class StateMain extends Phaser.State {
 
     stopPlayer() {
         this.player.body.velocity.x = 0;
-        this.player.body.velocity.y = 0;
-        this.player.body.x = this.posGoalTmp.x;
-        this.player.body.y = this.posGoalTmp.y;
+        this.player.body.velocity.y = 0;                
         this.posGoalTmp.active = false;
     }
 
@@ -342,7 +364,8 @@ export class StateMain extends Phaser.State {
                 this.game.paused = true;                
                 break;
             case GameState.Run:
-                this.game.paused = false;                
+                this.game.paused = false; 
+                // this.sound.play();               
                 break;        
             case GameState.Pause:
                 this.game.paused = true;
@@ -350,13 +373,15 @@ export class StateMain extends Phaser.State {
             case GameState.LevelUp:
                 this.game.paused = true;
                 break;
+            case GameState.GameOver:
+                this.game.paused = true;   
+                break;             
         }        
     }
 
     get stateGame () {
         return this._stateGame;
     }
-
 
 
     /* Métodos ejecutables por el jugador */
@@ -402,8 +427,10 @@ export class StateMain extends Phaser.State {
         }        
     } 
 
-    imprimirValor(value) {
-        console.log(value);
+    move (x: number, y: number) {        
+        this.posGoalTmp = new Position (x - (this.size_player / 2), y - (this.size_player / 2)); 
+        this.waitMove = true;                              
+        this.game.physics.arcade.moveToXY(this.player, this.posGoalTmp.x, this.posGoalTmp.y, this.velocity);
     }
 
 }
@@ -413,9 +440,9 @@ export class Position {
     private _y: number;
     private _active: boolean;    
 
-    constructor(x, y, active = true, pixel = 32) {
-        this._x = x * pixel;
-        this._y = y * pixel;        
+    constructor(x, y, active = true) {
+        this._x = x;
+        this._y = y;        
         this._active = active;
     }
 
@@ -440,13 +467,30 @@ export class Position {
         this._active = value;
     }
 
-    check(x: number, y: number) {
-        let range = 1;
-        if ((x < this._x + range && x > this._x - range) && (y < this._y + range && y > this._y - range)) {
-            return true;
-        } else {
-            return false;
+    inRange (x: number, y: number, range: number, coord: string = 'xy'): boolean {
+
+        let result = true;
+
+        switch (coord) {
+            case 'x':            
+                if ( x >= this._x + range || x <= this._x - range) {
+                    result = false;
+                }
+                break;
+            case 'y':            
+                if ( y >= this._y + range || y <= this._y - range) {
+                    result = false;
+                }
+                break;                
+            case 'xy':
+                if ( x >= this._x + range || x <= this._x - range || y >= this._y + range || y <= this._y - range) {
+                    result = false;
+                }
+                break;
+            default:
+                result = false;
         }
+        return result;        
     }
 
     assign(p: Position) {

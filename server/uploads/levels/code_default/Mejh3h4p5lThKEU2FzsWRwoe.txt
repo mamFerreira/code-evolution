@@ -1,0 +1,24 @@
+"""
+Completa las operaciones para llevar al organismo unicelular
+hasta la posición objetivo
+"""
+
+# Primer desplazamiento
+x = 50
+y = 150
+move (x,y)
+
+# Segundo desplazamiento
+x = x +  #Elige uno de los siguientes valores (20,120,200)
+move (x,y)
+
+# Tercer desplazamiento
+y = y + #Elige uno de los siguientes valores (100,150,200)
+move (x,y)
+
+
+# Último desplazamiento
+x = x + #Elige uno de los siguientes valores (220,280,350)
+y = y - #Elige uno de los siguientes valores (200,250,300)
+move (x,y)
+

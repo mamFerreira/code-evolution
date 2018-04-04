@@ -1,0 +1,18 @@
+"""
+Mueve la célula a través del mapa para llevarla 
+hasta la posición objetivo.
+"""
+
+x = 120
+y = 320
+move(x,y)
+
+x = 
+y =
+move (x,y)
+
+x = 
+y =
+move (x,y)
+
+

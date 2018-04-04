@@ -347,6 +347,12 @@ function uploadCode (req, res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar el fichero del nivel'});
                     }else{
+                        let file_path_old = GLOBAL.PATH_FILE_LEVEL_C + tupleUpdate.code_default;                        
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });
                         res.status(200).send({file:file_name, level:tupleUpdate});
                     }
                 }
@@ -804,6 +810,12 @@ function uploadILevel (req, res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar la imagen del nivel'});
                     }else{
+                        let file_path_old = GLOBAL.PATH_FILE_LEVEL_I + tupleUpdate.image;                        
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });
                         res.status(200).send({image:file_name, level:tupleUpdate});
                     }
                 }
@@ -839,6 +851,12 @@ function uploadMapLevel (req, res){
                     if(!tupleUpdate){
                         res.status(404).send({message: 'No se ha podido actualizar el mapa del nivel'});
                     }else{
+                        let file_path_old = GLOBAL.PATH_FILE_LEVEL_M + tupleUpdate.map;                        
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });
                         res.status(200).send({file:file_name, level:tupleUpdate});
                     }
                 }

@@ -1,0 +1,13 @@
+"""
+Asigna el valor correspondiente a las variables x e y para
+llevar el organismo celular hasta la posición marcada del mapa.
+
+Al hacer click en cualquier posición del mapa aparecerá un 
+bocadillo con sus coordenadas. Ayudate de esta funcionalidad 
+para saber que valores asignar a las variables
+"""
+
+x = 
+y =
+
+move(x,y)

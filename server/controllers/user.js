@@ -274,14 +274,20 @@ function uploadIUser (req, res){
         var ext = file_name.split('\.')[1];
 
         if (ext=='png' || ext=='jpg' || ext=='gif'){
-            User.findByIdAndUpdate(userId,{image:file_name}, (err,userUpdate) => {
+            User.findByIdAndUpdate(userId,{image:file_name}, (err,tupleUpdate) => {
                 if (err){
                     res.status(500).send({message: 'Error al subir imagen de usuario', messageError: err.message}); 
                 }else{
-                    if(!userUpdate){
+                    if(!tupleUpdate){                        
                         res.status(404).send({message: 'No se ha podido actualizar la imagen del usuario'});
-                    }else{
-                        res.status(200).send({image:file_name, user:userUpdate});
+                    }else{                        
+                        let file_path_old = GLOBAL.PATH_FILE_USER + tupleUpdate.image;                        
+                        fs.exists(file_path_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_path_old)
+                            }
+                        });
+                        res.status(200).send({image:file_name, user:tupleUpdate});
                     }
                 }
             });

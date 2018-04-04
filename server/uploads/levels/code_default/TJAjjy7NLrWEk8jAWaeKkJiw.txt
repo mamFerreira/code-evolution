@@ -5,4 +5,11 @@ Usa las acciones disponibles para realizar los desplazamientos
 a traves de las posiciones habilitadas.
 """
 
-player.moveDown()
+food = findNearestFood()
+
+if food.y < 200:
+	moveUp()
+
+
+# Añada otro if para que el organismo se mueva hacia abajo
+# si la coordenada "y" del aliemento es mayor a 200
