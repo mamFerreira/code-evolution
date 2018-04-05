@@ -10,11 +10,11 @@ var table = 'goal';
  */
 function addGoal (req, res){
     var tuple = new Goal();
-    var params = req.body; //Recogemos los datos que llegan por POST
-
+    var params = req.body; //Recogemos los datos que llegan por POST        
     tuple.title = params.title;
+    tuple.key = params.key;
     
-    if (tuple.title){
+    if (tuple.title && tuple.key){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -96,7 +96,7 @@ function updateGoal (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    if (update.title.length > 0) {
+    if (update.title.length > 0 && update.key.length > 0) {
         Goal.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
             if (err){
                 res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
@@ -109,7 +109,7 @@ function updateGoal (req, res){
             }
         })
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: nombre'});
+        res.status(200).send({message:'Rellena los campos obligatorios: nombre, clave'});
     }
 }
 

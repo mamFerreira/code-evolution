@@ -81,7 +81,7 @@ export class StateMain extends Phaser.State {
         this.posGoalTmp = new Position(0, 0, false);        
         this.velocity = 64;
         this.healthBarWidth = 250; 
-        this.size_player = 32;       
+        this.size_player = 38;       
     }
 
     reload() {
@@ -160,8 +160,8 @@ export class StateMain extends Phaser.State {
         });
         // Player
         this.player = this.game.add.sprite(this.posInitial.x, this.posInitial.y, 'player');
-        this.player.width = 32;
-        this.player.height = 32;
+        this.player.width = this.size_player;
+        this.player.height = this.size_player;
         this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
         this.player.body.collideWorldBounds = true;
         this.player.body.onWorldBounds = new Phaser.Signal();

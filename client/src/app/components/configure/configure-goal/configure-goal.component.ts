@@ -44,7 +44,7 @@ export class ConfigureGoalComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir objetivo';
-        this.goal = new Goal (null, '');
+        this.goal = new Goal (null, '', '');
       }      
     });
   }

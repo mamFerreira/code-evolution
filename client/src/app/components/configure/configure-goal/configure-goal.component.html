@@ -10,7 +10,13 @@
             <div class="col-sm-10">
                 <input type="text" class="form-control" [(ngModel)]="goal.title" name="title" required #title="ngModel">
             </div>            
-          </div>            
+          </div>     
+          <div class="form-group">
+            <label for="name" class="control-label col-sm-2">Key (*):</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" [(ngModel)]="goal.key" name="key" required #key="ngModel">
+            </div>            
+          </div>        
           <div class="col-sm-offset-2 col-sm-10">
               <button type="submit" class="btn btn-success">Guardar</button>
               <a [routerLink]="['/admin/goal']" class="btn btn-warning">Volver</a>
