@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
 import { LevelService } from '../../../services/level.service';
-import { GameState } from '../../../class/game-state';
+import { GameState } from '../../../enum/game-state';
 
 
 // Servicios

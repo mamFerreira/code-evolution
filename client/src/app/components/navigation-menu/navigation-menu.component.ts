@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 
 import { UserService } from '../../services/user.service';
-import { GlobalService } from '../../services/global.service';
+import { Global } from '../../enum/global';
 
 @Component({
   selector: 'app-navigation-menu',
   templateUrl: './navigation-menu.component.html',
   styleUrls: ['./navigation-menu.component.css'],
-  providers: [UserService, GlobalService]
+  providers: [UserService]
 })
 export class NavigationMenuComponent implements OnInit {
 
@@ -16,10 +16,9 @@ export class NavigationMenuComponent implements OnInit {
   public option: string;
 
   constructor(
-    private _userService: UserService,
-    private _globalService: GlobalService
+    private _userService: UserService    
   ) {
-    this.url = this._globalService.url;
+    this.url = Global.url_api;
     this.identity = this._userService.getIdentity();
     this.option = '';
   }

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
 // Importar servicios
-import { GlobalService } from '../../../services/global.service';
 import { UserService } from '../../../services/user.service';
 import { EvolutionService } from '../../../services/evolution.service';
 import { LevelService } from '../../../services/level.service';
@@ -20,6 +19,7 @@ import { Position } from '../../../models/position.model';
 import { LevelGoal } from '../../../models/level_goal.model';
 import { LevelLearning } from '../../../models/level_learning.model';
 import { LevelAction } from '../../../models/level_action.model';
+import { Global } from '../../../enum/global';
 
 @Component({
   selector: 'app-configure-level',
@@ -58,8 +58,7 @@ export class ConfigureLevelComponent implements OnInit {
   public fileCode: Array<File>;
   public fileMap: Array<File>;   
 
-  constructor(
-    private _globalService: GlobalService,
+  constructor(   
     private _userService: UserService,
     private _evolutionService: EvolutionService,
     private _levelService: LevelService,
@@ -71,7 +70,7 @@ export class ConfigureLevelComponent implements OnInit {
   ) {     
     this.title = 'Editar nivel';
     this.identity = this._userService.getIdentity();
-    this.url = this._globalService.url;
+    this.url = Global.url_api;
     this.boolEdit = true;
     this.successMessage = '';
     this.errorMessage = new Array<string> ();       

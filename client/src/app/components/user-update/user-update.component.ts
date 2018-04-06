@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 
 import { UserService } from '../../services/user.service';
-import { GlobalService } from '../../services/global.service';
 import { User } from '../../models/user.model';
+import { Global } from '../../enum/global';
 
 @Component({
   selector: 'app-user-update',
@@ -23,13 +23,12 @@ export class UserUpdateComponent implements OnInit {
   public successUpdate: string;
 
   constructor(
-    private _userService: UserService,
-    private _globalService: GlobalService
+    private _userService: UserService
   ) {
     this.title = 'Actualizar mi información personal';
     this.user = this._userService.getIdentity();
     this.token = this._userService.getToken();
-    this.url = this._globalService.url;
+    this.url = Global.url_api;
   }
 
   ngOnInit() { }

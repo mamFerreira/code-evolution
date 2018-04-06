@@ -60,6 +60,7 @@ button:disabled{
 
 .container-goal-actions{    
     height: 444px;
+    font-size: 12px;
 }
 
 .goal-no-check{

@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
 
 import { UserService } from '../../services/user.service';
-import { GlobalService } from '../../services/global.service';
 import { EvolutionService } from '../../services/evolution.service';
 import { LevelService } from '../../services/level.service';
 import { GoalService } from '../../services/goal.service';
@@ -17,8 +16,9 @@ import { LevelAction } from '../../models/level_action.model';
 import { Position } from '../../models/position.model';
 
 import { Game } from '../../class/game';
-import { GameAction } from '../../class/game-action';
-import { GameState } from '../../class/game-state';
+import { GameAction } from '../../enum/game-action';
+import { GameState } from '../../enum/game-state';
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-level-play',
@@ -30,7 +30,6 @@ export class LevelPlayComponent implements OnInit {
   
   @ViewChild('editor') editor;
   public title: string;
-  public url: string;
   public errorMessage: string;
   public code: string;
 
@@ -41,14 +40,14 @@ export class LevelPlayComponent implements OnInit {
   public evolution: Evolution;
   public level: Level;
   public goals: LevelGoal[];
+  public goalStr: Array <string>;
   public learnings: LevelLearning[];
   public actions: LevelAction[];
   public positions: Position[]; 
   public lastAction: GameAction; 
 
   constructor(
-    private _userService: UserService,
-    private _globalService: GlobalService,
+    private _userService: UserService,    
     private _evolutionService: EvolutionService,
     private _levelSercice: LevelService,
     private _goalService: GoalService,
@@ -57,8 +56,7 @@ export class LevelPlayComponent implements OnInit {
     
     private _route: ActivatedRoute
   ) {
-    this.title = 'Disfrute del nivel';
-    this.url = this._globalService.url;     
+    this.title = 'Disfrute del nivel';  
     this.code = '';     
     this.errorMessage = ''; 
     this.gameStarted = false;       
@@ -141,7 +139,8 @@ export class LevelPlayComponent implements OnInit {
         if (!res.goals) {
           this.errorMessage += res.message;
         } else {
-          this.goals = res.goals;           
+          this.goals = res.goals;      
+          this.loadGoalStr();          
           // Acciones
           this._actionService.getActionsLevel(this.level._id).subscribe(
             res => {
@@ -195,7 +194,7 @@ export class LevelPlayComponent implements OnInit {
    * Carga del juego
    */
   loadGame() {
-    this.game = new Game('phaser-game', this.url, this._levelSercice, this._userService);  
+    this.game = new Game('phaser-game', this._levelSercice, this._userService);  
     this.game.initState(this.level, this.evolution, this.goals, this.actions, this.positions);       
     this.gameStarted = true;
   }  
@@ -241,6 +240,24 @@ export class LevelPlayComponent implements OnInit {
 
   }
 
+  loadGoalStr () {
+    this.goalStr =  new Array<string>();          
+          
+    for (let e of this.goals) {
+      let aux = e.goal.title;      
+      
+      switch (e.goal.key) {
+        case 'POSITION':
+          aux += ': (' + e.value1 + ',' + e.value2 + ')';
+          break;
+        case 'FOOD':
+          aux += ': ' + e.value1;
+          break;
+      }
+      this.goalStr.push (aux);
+    }
+  }
+
   /**
    * Obtener estado de la partida
    */
@@ -254,5 +271,5 @@ export class LevelPlayComponent implements OnInit {
   get strError () {
     return this.game.code_error;
   }
-  
+
 }

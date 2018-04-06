@@ -1,6 +1,6 @@
 import { StateMain } from './state-main';
-import { GameAction } from './game-action';
-import { GameState } from './game-state';
+import { GameAction } from '../enum/game-action';
+import { GameState } from '../enum/game-state';
 
 // Importación Modelos
 import { User } from '../models/user.model';
@@ -32,14 +32,13 @@ export class Game {
 
     constructor (
         id: string, 
-        url: string, 
         levelService: LevelService,
         userService: UserService
     ) {        
         this._levelService = levelService;
         this._userService = userService;
         this._identity = userService.getIdentity();
-        this.state = new StateMain(id, url);  
+        this.state = new StateMain(id);  
         this.checked = new CheckData();      
         this.code_shell = 'Code Evolution Shell...';
         this.code_error = '';
@@ -50,18 +49,14 @@ export class Game {
     initState( level: Level, evolution: Evolution, goals: LevelGoal[], actions: LevelAction[], positions: Position[]) {
         this._idLevel = level._id;
         this.state.fileMap = level.map;
-        this.state.maxTime = level.time;
+        this.state.timeMax = level.time;
         this.state.filePlayer = evolution.player;
         this.state.fileTiledset = evolution.tiledset;   
-        this.state.maxLife = evolution.health;     
+        this.state.lifeMax = evolution.health;     
 
 
-        goals.forEach((g, index) => {
-            switch (g.goal._id) {
-                case '5aa2728a0f97ad1767590448':
-                    this.state.addGoal('position', g.value1, g.value2);                                       
-                    break;
-            }            
+        goals.forEach((g, index) => {    
+            this.state.addGoal(g.goal.key, g.value1, g.value2);                                       
         });
         
         positions.forEach((p, index) => {
@@ -138,7 +133,16 @@ export class Game {
                     waitUnblock = true;
 
                     break;
-                case 'error':                    
+                case 'findNearestFood':
+                    this.postMessage('loadValue', this.state.findNearestFood());
+                    break;
+                case 'print':
+                    console.log(e.data.value[0]);
+                    break;
+                case 'finish':
+                    this.registerError('Ejecución finalizada sin contemplar los objetivos');
+                    break;
+                case 'error':
                     this.registerError(e.data.value);
                     break;
                 default:
@@ -162,9 +166,7 @@ export class Game {
                         clearInterval(this.idInterval);                            
                     }                        
                 }, 500);
-            }
-            
-
+            }            
         }, false); 
     }
 

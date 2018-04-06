@@ -33,15 +33,15 @@
                 <div id="phaser-game" class="canvas"></div>                
             </div>
             <div class="col-lg-2 col-md-2 float-right container-goal-actions">
-                <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="goals">
+                <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="goalStr">
                     <thead>
                         <tr>
                             <th>Objetivos</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let g of goals">
-                            <td class="goal-no-check">{{g.goal.title}}</td>                  
+                        <tr *ngFor="let g of goalStr">
+                            <td class="goal-no-check">{{g}}</td>                  
                         </tr>            
                     </tbody>
                 </table>

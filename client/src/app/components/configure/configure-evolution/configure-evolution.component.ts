@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
 // Importar servicios
-import { GlobalService } from '../../../services/global.service';
 import { UserService } from '../../../services/user.service';
 import { EvolutionService } from '../../../services/evolution.service';
 import { LevelService } from '../../../services/level.service';
@@ -10,6 +9,8 @@ import { LevelService } from '../../../services/level.service';
 import { User } from '../../../models/user.model';
 import { Evolution } from '../../../models/evolution.model';
 import { Level } from '../../../models/level.model';
+
+import { Global } from '../../../enum/global';
 
 @Component({
   selector: 'app-configure-evolution',
@@ -33,8 +34,7 @@ export class ConfigureEvolutionComponent implements OnInit {
   public successMessage: string;
   public boolEdit: boolean;
 
-  constructor(
-    private _globalService: GlobalService,
+  constructor(    
     private _userService: UserService,
     private _evolutionService: EvolutionService,
     private _levelService: LevelService,
@@ -46,7 +46,7 @@ export class ConfigureEvolutionComponent implements OnInit {
     this.errorMessage = new Array<string> ();  
     this.successMessage = '';
     this.boolEdit = true;
-    this.url = this._globalService.url;
+    this.url = Global.url_api;
   }
 
   ngOnInit() {

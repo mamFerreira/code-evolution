@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { GlobalService } from '../../services/global.service';
 import { UserService } from '../../services/user.service';
 import { EvolutionService } from '../../services/evolution.service';
 import { Evolution } from '../../models/evolution.model';
 import { Learning } from '../../models/learning.model';
+import { Global } from '../../enum/global';
 
 @Component({
   selector: 'app-evolution-list',
@@ -25,14 +25,13 @@ export class EvolutionListComponent implements OnInit {
   public errorLearning: string;
   public identity;
 
-  constructor(
-    private _globalService: GlobalService,
+  constructor(    
     private _evolutionService: EvolutionService,
     private _userService: UserService,
     private _router: Router
   ) {
     this.title = 'Seleccione un organismo';
-    this.url = this._globalService.url;
+    this.url = Global.url_api;
     this.identity = this._userService.getIdentity();        
   }
 

@@ -9,7 +9,6 @@ import { PopoverModule } from 'ngx-popover';
 import { routing, appRoutingProviders } from './app.routing';
 
 // Importación de servicios
-import { GlobalService } from './services/global.service';
 import { UserService } from './services/user.service';
 import { EvolutionService } from './services/evolution.service';
 import { LevelService } from './services/level.service';
@@ -70,7 +69,7 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     AceEditorModule,
     PopoverModule
   ],
-  providers: [GlobalService, UserService, EvolutionService, LevelService, ActionService, GoalService, LearningService, appRoutingProviders],
+  providers: [UserService, EvolutionService, LevelService, ActionService, GoalService, LearningService, appRoutingProviders],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

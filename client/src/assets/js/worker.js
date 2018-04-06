@@ -5,6 +5,7 @@ var myInterpreter;
 var compiler;
 var AsyncFunctions = [];
 var NativeFunctions = [];
+var ObjectFunctions = [];
 var timeWait = 10;
 var json, block;
 var idInterval;
@@ -68,6 +69,7 @@ self.addEventListener('message', (e) => {
 function addMethod (method){
     var wrapperAsync = null;
     var wrapperNative = null;
+    var wrapperObject = null;
 
     switch(method){
         case 'moveUp':
@@ -87,12 +89,17 @@ function addMethod (method){
                 waitResponse(callback);               
             };
             break;
-        case 'imprimirValor':
-            wrapperNative = (v) => {
-                reply('printValue',v);                
-            };
-            break;   
+        case 'findNearestFood':
+            wrapperObject = () => {};
+            break;        
     }
+
+    if (wrapperNative != null){        
+        NativeFunctions.push({
+            key:   method,
+            value: wrapperNative
+        })
+    }  
 
     if (wrapperAsync != null){        
         AsyncFunctions.push({
@@ -100,24 +107,42 @@ function addMethod (method){
             value: wrapperAsync
         })
     } 
-         
-    if (wrapperNative != null){        
-        NativeFunctions.push({
+
+    if (wrapperObject != null){        
+        ObjectFunctions.push({
             key:   method,
-            value: wrapperNative
-        })
-    }      
+            value: wrapperObject
+        })        
+    }  
+            
 }
 
 // Función de inicialización de la API del worker
-function initApi (i,s){        
-    for (var index=0; index<AsyncFunctions.length; index++){
-        i.setProperty(s, AsyncFunctions[index].key, i.createAsyncFunction(AsyncFunctions[index].value));
-    }
-
+function initApi (i,s){ 
+    
     for (var index=0; index<NativeFunctions.length; index++){
         i.setProperty(s, NativeFunctions[index].key, i.createNativeFunction(NativeFunctions[index].value));
     }
+    
+    for (var index=0; index<AsyncFunctions.length; index++){
+        i.setProperty(s, AsyncFunctions[index].key, i.createAsyncFunction(AsyncFunctions[index].value));
+    }
+    
+    for (var index=0; index<ObjectFunctions.length; index++){
+
+        var key = ObjectFunctions[index].key;
+
+        var wrapper = (callback) => {                
+            json = null;
+            reply(key);          
+            waitResponseObject(i, callback);
+        };    
+
+        i.setProperty(s, key, i.createAsyncFunction(wrapper));
+    }
+    
+    i.setProperty(s, 'print', i.createNativeFunction((v) => {reply('print',v);}));
+
 }
 
 // Envío de mensaje al hilo principal
@@ -136,6 +161,7 @@ function nextStep() {
             try{
                 if (!myInterpreter.step()){                    
                     stop();
+                    reply('finish');
                 }
             }catch(e){                
                 reply('error',e.message);
@@ -147,7 +173,7 @@ function nextStep() {
 // Fin de la ejecución del código enviado por el hilo principal
 function stop(){    
     block = false;
-    clearInterval(idInterval);    
+    clearInterval(idInterval);        
 }
 
 // Esperar respuesta del hilo principal
@@ -168,8 +194,8 @@ function waitResponseObject(i, callback){
     idIntevalResponse = setInterval(()=>{        
         if (json){            
             var obj = i.createObject(i.OBJECT);
-            i.setProperty(obj, 'x', i.createPrimitive(json.x));
-            i.setProperty(obj, 'y', i.createPrimitive(json.y));
+            i.setProperty(obj, 'x', i.createPrimitive(json._x));
+            i.setProperty(obj, 'y', i.createPrimitive(json._y));            
             callback(obj)
             clearInterval(idIntevalResponse);                
         }

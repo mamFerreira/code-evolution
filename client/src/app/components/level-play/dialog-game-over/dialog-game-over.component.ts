@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, OnChanges, EventEmitter } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { GameState } from '../../../class/game-state';
+import { GameState } from '../../../enum/game-state';
 
 @Component({
   selector: 'app-dialog-game-over',
