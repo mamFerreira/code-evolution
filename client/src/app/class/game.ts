@@ -1,7 +1,3 @@
-import { StateMain } from './state-main';
-import { GameAction } from '../enum/game-action';
-import { GameState } from '../enum/game-state';
-
 // Importación Modelos
 import { User } from '../models/user.model';
 import { Evolution } from '../models/evolution.model';
@@ -14,69 +10,99 @@ import { Position } from '../models/position.model';
 import { UserService } from '../services/user.service';
 import { LevelService } from '../services/level.service';
 
-export class Game {    
-    private state: StateMain;    
-    private worker: Worker;
-    private checked: CheckData;
-    private _identity;
-    private _levelService: LevelService; 
-    private _userService: UserService;   
-    private _idLevel: string;
-    private idInterval;
-    private idIntervalMain; 
+// Importación de clases
+import { Checker} from './checker';
+import { GameAction } from '../enum/game-action';
+import { GameState } from '../enum/game-state';
 
-    public code_shell: string;
-    public code_error: string;
-    public is_error: boolean;    
-    public volume: boolean;    
 
-    constructor (
-        id: string, 
-        levelService: LevelService,
-        userService: UserService
-    ) {        
-        this._levelService = levelService;
-        this._userService = userService;
-        this._identity = userService.getIdentity();
-        this.state = new StateMain(id);  
-        this.checked = new CheckData();      
-        this.code_shell = 'Code Evolution Shell...';
-        this.code_error = '';
-        this.is_error = false;        
-        this.volume = true;                 
-    }
+export class Game {   
     
-    initState( level: Level, evolution: Evolution, goals: LevelGoal[], actions: LevelAction[], positions: Position[]) {
-        this._idLevel = level._id;
-        this.state.fileMap = level.map;
-        this.state.timeMax = level.time;
-        this.state.filePlayer = evolution.player;
-        this.state.fileTiledset = evolution.tiledset;   
-        this.state.lifeMax = evolution.health;     
+    // Variables principales
+    private _identity;
+    private _state;    
+    private _worker: Worker;
+    private _checker: Checker;  
+    private _level: Level;
+    private _evolution: Evolution; 
+    private _fullLoad: boolean;  
 
+    // Variables intervalos
+    private _idIntervalM; 
+    private _idIntervalB;
 
-        goals.forEach((g, index) => {    
-            this.state.addGoal(g.goal.key, g.value1, g.value2);                                       
-        });
-        
-        positions.forEach((p, index) => {
-            if (index === 0) {
-                this.state.addPosition(p.value_x, p.value_y, true);
-            } else {
-                this.state.addPosition(p.value_x, p.value_y);
-            }  
-        });        
-
-        this.state.game.state.add('gameplay', this.state);
-        this.state.game.state.start('gameplay');
-
-        this.defineWorker(actions);
+    // Variables intercamio de información
+    private _codeShell: string;   
+    private _msgError: string;    
+                         
+    constructor (
+        private _userService: UserService,
+        private _levelService: LevelService,                
+    ) {
+        this._identity = _userService.getIdentity();        
+        this._checker = new Checker();              
+        this._codeShell = '';   
+        this._msgError = '';                             
     }
 
-    defineWorker(actions: LevelAction[]) {
+    // Propiedades
+
+    get stateGame () {
+        return this._state.stateGame;
+    }
+
+    get codeShell () {
+        return 'Code Evolution Shell...' + this._codeShell;
+    }
+
+    get msgError () {
+        return this._msgError;
+    }
+
+    get error () {
+        if (this._msgError.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    get goals () {
+        return this._state.goals;
+    }
+
+    // Métodos de carga
+
+    loadState (l: Level, e: Evolution, g: LevelGoal[], p: Position[]) {
+                
+        import('./states/' + l.state).then(s => {
+            
+            this._level = l;
+            this._evolution = e;
+            this._state = new s.State();
+            
+            this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
+            this._state.loadConfigure(this._level.time, this._evolution.health);        
+
+
+            g.forEach((g, index) => {    
+                this._state.loadGoal(g.goal.title, g.goal.key, g.value1, g.value2);                                       
+            });
+            
+            p.forEach((p, index) => {
+                if (index === 0) {
+                    this._state.loadPositionPlayer(p.value_x, p.value_y);
+                } else {
+                    this._state.loadPosition(p.value_x, p.value_y);
+                }  
+            });                                   
+        });        
+    }
+
+    loadWorker (actions: LevelAction[]) {
 
         let actionJson = [];
-        this.worker = new Worker('../../assets/js/worker.js');      
+        this._worker = new Worker('../../assets/js/worker.js');      
         
         // Cargamos las acciones disponibles del nivel en el worker
         actions.forEach(a => {
@@ -92,49 +118,42 @@ export class Game {
         this.addEventListener(); 
     }
 
+    // Métodos comunicación worker
+
     postMessage(action, value) {
-        this.worker.postMessage({'action': action, 'value': [value]});
+        this._worker.postMessage({'action': action, 'value': [value]});
     } 
 
     addEventListener() {
-        this.worker.addEventListener('message', (e) => {
-            let value1, value2;
-            let waitUnblock = false;
-            let waitResponse = false;
+        this._worker.addEventListener('message', (e) => {            
+
             switch (e.data.action) {
                 case 'moveDown':
-                    this.state.moveDirection('D');
-                    waitUnblock = true;                                     
+                    this._state.moveDirection('D');                                                     
                     break;
                 case 'moveUp':
-                    this.state.moveDirection('U');
-                    waitUnblock = true;                                     
+                    this._state.moveDirection('U');                                                       
                     break;
                 case 'moveRight':
-                    this.state.moveDirection('R');
-                    waitUnblock = true;                                     
+                    this._state.moveDirection('R');                                                        
                     break;
                 case 'moveLeft':
-                    this.state.moveDirection('L');
-                    waitUnblock = true;                                     
+                    this._state.moveDirection('L');                                                        
                     break;
                 case 'move':
-
-                    if (! this.checked.checkArray(e.data.value, 2)) {
+                    if (! this._checker.checkArray(e.data.value, 2)) {
                         this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
                         return;
                     }          
                     
-                    if (! this.checked.checkIntPos(e.data.value[0]) || !this.checked.checkIntPos(e.data.value[1])) {
+                    if (! this._checker.checkIntPos(e.data.value[0]) || !this._checker.checkIntPos(e.data.value[1])) {
                         this.registerError('Los valores de la acción "move" no son enteros positivos');
                         return;
                     }
-                    this.state.move (e.data.value[0], e.data.value[1]);                    
-                    waitUnblock = true;
-
+                    this._state.move (e.data.value[0], e.data.value[1]);                                        
                     break;
                 case 'findNearestFood':
-                    this.postMessage('loadValue', this.state.findNearestFood());
+                    this.postMessage('loadValue', this._state.findNearestFood());
                     break;
                 case 'print':
                     console.log(e.data.value[0]);
@@ -145,141 +164,105 @@ export class Game {
                 case 'error':
                     this.registerError(e.data.value);
                     break;
-                default:
-                    this.code_shell += '<br>$ Error en worker: Acción ' + e.data.action + ' no definida';
-                    this.doAction(GameAction.Stop);
+                default:                
+                    this.registerError ('Acción ' + e.data.action + ' no definida');
             }
 
-            if (waitUnblock) {
-                this.idInterval = setInterval(() => {
-                    if (!this.state.waitMove) {                        
+            if (this._state.wait) {
+                this._idIntervalB = setInterval(() => {
+                    if (!this._state.wait) {                        
                         this.postMessage('unblock', true);
-                        clearInterval(this.idInterval);                            
+                        clearInterval(this._idIntervalB);                            
                     }                        
                 }, 500);
             }
 
-            if (waitResponse) {
-                this.idInterval = setInterval(() => {
-                    if (!this.state.response) {
-                        this.postMessage('loadValue', true);
-                        clearInterval(this.idInterval);                            
-                    }                        
-                }, 500);
-            }            
         }, false); 
     }
 
-    registerError(message) {
-        this.code_shell += '<br>$ Error:' + message;
-        this.code_error += 'Error: ' + message;
-        this.doAction(GameAction.Stop);
-    }
-
-    restart () {                        
-        this.postMessage('finish', true);        
-        clearInterval(this.idInterval);
-        clearInterval(this.idIntervalMain);
-    }
+    // Métodos principales
 
     doAction (action: GameAction, code: string = null) {
         switch (action) { 
             case GameAction.Reload:                
-                this.state.reload();    
-                this.restart();                    
-                this.code_shell = 'Code Evolution Shell...';
-                this.code_error = '';
-                this.is_error = false; 
+                this._state.reload();    
+                this.finish();                    
+                this._codeShell = '';  
+                this._msgError = '';                               
                 break;
             case GameAction.Play:
-                this.state.stateGame = GameState.Run;
-                this.postMessage('execute', code);                
-                this.code_shell += '<br>$ Play...'; 
+                this._state.stateGame = GameState.Run;
+                this.postMessage('execute', code);                                
+                this.addCodeShell('Play...');
 
-                this.idIntervalMain = setInterval(() => {                                        
+                this._idIntervalM = setInterval(() => {                                        
 
-                    if (this.state.stateGame === GameState.LevelUp) { 
+                    if (this._state.stateGame === GameState.LevelUp) { 
                         this.nextLevel();                                                   
-                        this.restart();                        
-                    } else if (this.state.stateGame === GameState.GameOver) {
-                        this.code_shell += '<br>$ Error -> ' + this.state.code_error;
-                        this.code_error = this.state.code_error;
-                        this.is_error = true;                        
-                        this.restart();
+                        this.finish();                        
+                    } else if (this._state.stateGame === GameState.GameOver) {                        
+                        this.addCodeShell('Error: ' + this._state.msgError, true);                        
+                        this.finish();
                     }                                                            
                 }, 50);
                 break;
-            case GameAction.Pause:                                
-                this.code_shell += '<br>$ Pause'; 
-                this.state.stateGame = GameState.Pause;
+            case GameAction.Pause:                                                
+                this.addCodeShell('Pause');
+                this._state.stateGame = GameState.Pause;
                 break;
             case GameAction.Continue:                
-                this.code_shell += '<br>$ Continue...'; 
-                this.state.stateGame = GameState.Run;
+                this.addCodeShell('Continue');
+                this._state.stateGame = GameState.Run;
                 break;
-            case GameAction.Stop:                        
-                this.code_shell += '<br>$ Stop: Corrija y recarga para volver a intentarlo';                             
-                this.state.stateGame = GameState.GameOver;
-                this.restart();
+            case GameAction.Stop:                                              
+                this.addCodeShell('Stop: Corrija y recarga para volver a intentarlo');                    
+                this._state.stateGame = GameState.GameOver;
+                this.finish();
                 break;
-            case GameAction.ChangeVolume:
-                this.volume = !this.volume;
+            case GameAction.ChangeVolume:                
+                this._state.volume = !this._state.volume;
                 break;
         }
     }  
-    
-    nextLevel() {                                          
-        this._levelService.nextLevel(this._idLevel).subscribe(
+
+    nextLevel() {
+        this._levelService.nextLevel(this._level._id).subscribe(
             res => {
-                if (!res.level) {
-                    this.code_shell += '<br>$ ' + res.message + '!';
+                if (!res.level) {                    
+                    this._msgError = res.message;
                 } else { 
-                    if (this._idLevel === this._identity.level._id) {                                                     
+                    if (this._level._id === this._identity.level._id) {                                                     
                         this._identity.level = res.level;                                           
                         localStorage.setItem('identity', JSON.stringify(this._identity)); 
                     }
                 }                 
             },
             err => {
-                this.code_error += err.error.message;          
+                this._msgError = err.message;
             }
         );                
     }
-    
-    get stateGame () {
-        return this.state.stateGame;
-    }
-}
 
+    // Métodos auxiliares    
 
-export class CheckData {
+    addCodeShell (msg, error = false) {
+        this._codeShell += '<br>$ ' + msg;
 
-    constructor () { }
-
-    checkArray (array, value) {
-
-        if (array.length !== value) {
-            return false;
+        if (error) {
+            this._msgError = msg;
         }
 
-        for (let i = 0; i < array.length; i++) {
-            if (array[i] === undefined) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
-    checkIntPos (value) {
-        if (value !== parseInt(value, 10)) {
-            return false;
-        }
-
-        if (parseInt(value, 10) < 0) {
-            return false;
-        }
-
-        return true;
+    registerError(msg) {
+        this.addCodeShell('Error:' + msg, true);                
+        this.doAction(GameAction.Stop);
     }
+
+    finish () {
+        this.postMessage('finish', true);        
+        clearInterval(this._idIntervalB);
+        clearInterval(this._idIntervalM);
+    }
+
 }

@@ -190,13 +190,17 @@ function waitResponse(callback){
 
 // Esperar respuesta del hilo principal con objeto
 function waitResponseObject(i, callback){
-
-    idIntevalResponse = setInterval(()=>{        
-        if (json){            
-            var obj = i.createObject(i.OBJECT);
-            i.setProperty(obj, 'x', i.createPrimitive(json._x));
-            i.setProperty(obj, 'y', i.createPrimitive(json._y));            
-            callback(obj)
+    
+    idIntevalResponse = setInterval(()=>{                
+        if (json){                        
+            if (json._active){
+                var obj = i.createObject(i.OBJECT);
+                i.setProperty(obj, 'x', i.createPrimitive(json._x));
+                i.setProperty(obj, 'y', i.createPrimitive(json._y));            
+                callback(obj);
+            }else{
+                callback(null);
+            }            
             clearInterval(idIntevalResponse);                
         }
     },timeWait) 

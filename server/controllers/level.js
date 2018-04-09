@@ -34,12 +34,13 @@ function addLevel (req, res){
     level.title = params.title;
     level.description = params.description;    
     level.evolution = params.evolution; 
+    level.state = params.state; 
     level.image = '';
     level.time = params.time;   
     level.code_default = '';
     level.map = '';
 
-    if (level.order && level.title && level.evolution && level.time){
+    if (level.order && level.title && level.evolution && level.time && level.state){
         level.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -63,28 +64,38 @@ function addLevel (req, res){
 function getLevel (req, res){
     var id = req.params.id;
 
-    Level.findById(id).populate({path: 'evolution'}).exec((err,tuple)=>{
+    Level.findById(id).exec((err,tuple)=>{
         if(err){
             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
         }else{
             if(!tuple){
-                res.status(404).send({message:'El nivel no existe'});
+                res.status(404).send({message:'Nivel no existe'});
             }else{    
                 if (req.user.role != 'ROLE_ADMIN') {
-                    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
-                        if (err) {
+                    Evolution.findById(tuple.evolution).exec((err,tupleEvolution) => {
+                        if (err){
                             res.status(500).send({message: 'Error en el servidor', messageError: err.message});
                         }else{
-                            if(!tuple_user){
-                                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
-                            }else{                                
-                                if (tuple.evolution.order > tuple_user.level.evolution.order 
-                                    || 
-                                    ( tuple.evolution.order == tuple_user.level.evolution.order && tuple.order > tuple_user.level.order  )){
-                                    res.status(401).send({message:"Sin permisos de acceso al nivel"});
-                                }else{
-                                    res.status(200).send({level:tuple});
-                                }                                
+                            if (!tupleEvolution){
+                                res.status(404).send({message:'Evolución no existe'});
+                            }else{
+                                User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tupleUser) => {
+                                    if (err) {
+                                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                                    }else{
+                                        if(!tupleUser){
+                                            res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
+                                        }else{                                
+                                            if (tupleEvolution.order > tupleUser.level.evolution.order 
+                                                || 
+                                                ( tupleEvolution.order == tupleUser.level.evolution.order && tuple.order > tupleUser.level.order  )){
+                                                res.status(401).send({message:"Sin permisos de acceso al nivel"});
+                                            }else{
+                                                res.status(200).send({level:tuple});
+                                            }                                
+                                        }
+                                    }
+                                });
                             }
                         }
                     });   

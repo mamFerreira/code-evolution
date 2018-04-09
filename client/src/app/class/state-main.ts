@@ -2,9 +2,9 @@ import 'phaser-ce/build/custom/pixi';
 import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
+import { Position } from './position';
 import { Global } from '../enum/global';
 import { GameState } from '../enum/game-state';
-
 
 let styleScore = {
     font: 'bold 16pt Arial',
@@ -17,248 +17,403 @@ let stylePositionClick = {
     align: 'center'
 };
 
-
-export enum TypeGoal {
-    Position
-}
-
 export class StateMain extends Phaser.State {
     
     // Variables principales
-    public game: Phaser.Game;  
-    private map: Phaser.Tilemap;
-    private layer_surface: Phaser.TilemapLayer;
-    private layer_block: Phaser.TilemapLayer;          
-    private player;   
-    private size_player: number;
-    private sound;
-
-    // Variables de configuración
-    private velocity;
-    private healthBarWidth;
-    public filePlayer: string;
-    public fileMap: string;
-    public fileTiledset: string;
-    private urlResource: string;
-    private urlAudio: string;
-    private urlApi: String;      
-
-    // Variables para intercambio de información
+    private _game: Phaser.Game;
+    private _player: Phaser.Sprite; 
+    private _map: Phaser.Tilemap;
+    private _layerSurface: Phaser.TilemapLayer;
+    private _layerBlock: Phaser.TilemapLayer;
+    private _soundMain: Phaser.Sound;
+    // Variable configuración
+    private _canvasH: number;
+    private _canvasW: number;
+    private _scoreH: number;
+    private _velocity: number;
+    private _sizeSprite: number;
+    private _widthHealthBar: number;
+    private _posInitial: Position;
+    private _healthMax: number;
+    private _timeMax: number;
+    private _volume: boolean;
+    // Variables file BBDD
+    private _filePlayer: string;
+    private _fileMap: string;
+    private _fileTiledset: string;
+    // Variables para intercambio de información con game.ts
     private _stateGame: GameState;
-    public waitMove: boolean;
-    public response: string; 
-    public code_error: string; 
-    
-    // Variables para mostrar posición 
-    private clickPositionText;
-    private clickPositionImage;
-
-    // Variables de posición
-    private posInitial: Position;
-    private posGoalTmp: Position;
-    private posGoal: Position;
-    private positions: Position[];
-
+    private _wait: boolean; 
+    private _msgError: string;
     // Variables objetivo
-    private coinGoal: number;
-    private coinCurrent: number;
-    private coinText;
-
-    private foodGoal: number;
-    private foodCurrent: number;
-    private foodCanvas: number;
-    private foodText;    
-
-    private enemyGoal: number;
-    private enemyCurrent: number;
-    private enemyText;
-
-    // Variables de tiempo
-    public timeMax: number;    
-    private timeCurrent: number;
-    private timerGameOver;
-    private timerText;
-
-    // Variables de vida
-    public lifeMax: number;
-    private lifeCurrent: number;
-    private healthBar;
-
-    // Variables objetos
-    private groupFood;
-           
+    private _goals: Array<[string, boolean]>;
+    private _index: number;        
+    private _posGoal: Position;    
+    private _indexPos: number;
+    private _coinGoal: number;
+    private _indexCoin: number;
+    private _deathGoal: number;
+    private _indexDeath: number;
+    private _foodGoal: number;
+    private _indexFood: number;
+    // Variables objetivos temporales
+    private _posGoalTmp: Position;
+    // Variables grupos de objetos
+    private _groupPosition: Array<Position>;
+    private _groupCoin: Phaser.Group;
+    private _groupDeath: Phaser.Group;
+    private _groupFood: Phaser.Group;
+    // Variables canvas: posición click    
+    private _clickImage: Phaser.Image;
+    private _clickText: Phaser.Text;
+    // Variables canvas: health
+    private _healthCurrent: number;
+    private _healthBar: Phaser.Sprite;        
+    // Variables canvas: coin
+    private _coinCurrent: number;
+    private _coinText: Phaser.Text;
+    // Variables canvas: death
+    private _deathCurrent: number;
+    private _deathText: Phaser.Text;
+    // Variables canvas: food
+    private _foodCurrent: number;
+    private _foodText: Phaser.Text;  
+    // Variables canvas: tiempo
+    private _timeCurrent: number;
+    private _timeText: Phaser.Text;
+    private _timeEvent: Phaser.Event;
     
-    constructor(id) {
+    
+    constructor() {
         super();        
-        this.urlApi = Global.url_api;         
-        this.urlResource = '../../assets/resource/';
-        this.urlAudio = '../../assets/audio/';
-        this.game = new Phaser.Game(515, 444, Phaser.CANVAS, id); 
-        this.velocity = 64;
-        this.healthBarWidth = 250; 
-        this.size_player = 38; 
-        this.positions = new Array<Position>();
-        this.posGoal = new Position(0, 0, false);
-        this.foodGoal = null;
-        this.enemyGoal = null;
+        this._canvasW = 515;
+        this._canvasH = 385;
+        this._scoreH = 64;        
+        this._velocity = 64;
+        this._widthHealthBar = 250; 
+        this._sizeSprite = 36; 
+        this._volume = false;     
+        this._goals = new Array<[string, boolean]> ();   
+        this._index = 0;
+
+        this._game = new Phaser.Game(this._canvasW, this._canvasH + this._scoreH, Phaser.CANVAS, Global.id_canvas);
+        this._game.state.add('gameplay', this);
+        this._game.state.start('gameplay');
     }
+
+    // Propiedades
+
+    set stateGame (s: GameState) {
+        
+        this._stateGame = s; 
+        
+        switch (s) {
+            case GameState.Init:                
+                this._game.paused = true; 
+                this._wait = false;                
+                this._msgError = null;               
+                break;
+            case GameState.Run:
+                this._game.paused = false; 
+                // this.sound.play();               
+                break;        
+            case GameState.Pause:
+                this._game.paused = true;
+                break;
+            case GameState.LevelUp:
+                this._game.paused = true;
+                break;
+            case GameState.GameOver:
+                this._game.paused = true;                   
+                break;             
+        }        
+    }
+
+    set groupFood (g: Phaser.Group) {
+        this._groupFood  = g;
+    }
+
+    set volume (v: boolean) {
+        this._volume = v;
+    }
+
+    get game () {
+        return this._game;
+    }
+
+    get player () {
+        return this._player;
+    }
+
+    get volume () {
+        return this._volume;
+    }
+
+    get posInitial () {
+        return this._posInitial;
+    }
+
+    get stateGame () {
+        return this._stateGame;
+    }
+
+    get wait () {
+        return this._wait;
+    }
+
+    get msgError () {
+        return this._msgError;
+    }
+
+    get goals() {
+        return this._goals;
+    }
+
+    get groupPosition () {
+        return this._groupPosition;
+    }
+
+    get groupCoin () {
+        return this._groupCoin;
+    }
+
+    get groupDeath () {
+        return this._groupDeath;
+    }
+
+    get groupFood () {
+        return this._groupFood;
+    }    
+
+    // Funciones de carga
+
+    loadFile (file_P, file_M, file_T) {
+        this._filePlayer = file_P;
+        this._fileMap = file_M;
+        this._fileTiledset = file_T;
+    }
+
+    loadConfigure (time, health) {
+        this._timeMax = time;
+        this._healthMax = health;
+    }
+
+    loadGoal(title, key, v1, v2) {            
+        
+        let msg;
+
+        switch (key) {
+            case 'POSITION':                
+                this._posGoal = new Position(v1 - (this._sizeSprite / 2), v2 - (this._sizeSprite / 2));
+                msg = title + ': (' + v1 + ',' + v2 + ')';
+                this._indexPos = this._index;
+                break;
+            case 'FOOD':
+                this._foodGoal = v1;
+                msg = title + ': ' + v1;
+                this._indexFood = this._index;
+                break;
+        }        
+        this._goals.push([msg, false]);        
+        this._index ++;        
+    }
+
+    loadPositionPlayer (x, y) {
+        this._posInitial = new Position(x - (this._sizeSprite / 2), y - (this._sizeSprite / 2));
+    }
+
+    loadPosition (x, y) { 
+        let p = new Position(x - (this._sizeSprite / 2), y - (this._sizeSprite / 2));            
+
+        if (!this._groupPosition) {
+            this._groupPosition = new Array<Position>();
+        }
+
+        this._groupPosition.push(p);        
+    }
+
+    loadResource (name, path) {
+        this._game.load.image(name, Global.url_resource + path);
+    }
+
+    loadGroup () {
+        return this._game.add.physicsGroup();
+    }
+
+    // Funciones básicas Phaser.State
 
     reload() {
         // Estado del juego
         this.stateGame = GameState.Init;
 
         // Jugador
-        this.player.x = this.posInitial.x;
-        this.player.y = this.posInitial.y;
-        this.player.body.velocity.x = 0;
-        this.player.body.velocity.y = 0;
+        this._player.x = this._posInitial.x;
+        this._player.y = this._posInitial.y;
+        this.stopPlayer();
+        this._game.world.bringToTop(this._player);
         
         // Posiciones
-        this.posGoalTmp = new Position(0, 0, false);         
-
-        // Marcadores
-        this.lifeCurrent = this.lifeMax;        
-        this.coinCurrent = 0; 
-        this.coinText.text = this.coinCurrent;
-        this.enemyCurrent = 0;
-        this.enemyText.text = this.enemyCurrent;
-        this.foodCurrent = 0; 
-        this.foodCanvas = 0;
-        this.foodText.text = this.foodCurrent;
-        this.timeCurrent = this.timeMax;
-        this.timerText.text = this.timeCurrent;    
-        
-        
-        // Eliminar assets
-        this.groupFood.removeAll();
-
+        this._posGoalTmp = null;
 
         // Evento tiempo
-        if (this.timerGameOver) {
-            this.game.time.events.remove(this.timerGameOver);  
-        }        
-        this.timerGameOver = this.game.time.events.loop(Phaser.Timer.SECOND, this.eventTime, this);
-    }
+        this._game.time.events.remove(this._timeEvent);       
+        this._timeEvent = this._game.time.events.loop(Phaser.Timer.SECOND, this.eventTime, this);
 
-    preload() {                        
-        // Carga map, player y tiledset        
-        this.game.load.tilemap('map', this.urlApi + 'level-load/' + this.fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);
-        this.game.load.image('player', this.urlApi + 'evolution-load/' + this.filePlayer + '/P');        
-        this.game.load.image('tiledset', this.urlApi + 'evolution-load/' + this.fileTiledset + '/T');    
-        // Carga de audios
-        this.game.load.audio('song1', this.urlAudio + 'song1.mp3');
-        // Carga elementos barra marcador
-        this.game.load.image('health', this.urlResource + 'object/health.png');
-        this.game.load.image('coin', this.urlResource + 'object/coin.png');
-        this.game.load.image('enemy', this.urlResource + 'object/death.png');
-        this.game.load.image('food', this.urlResource + 'object/food.png');
-        this.game.load.image('time', this.urlResource + 'object/time.jpeg');
-        // Carga burbujas de diálogo
-        this.game.load.image('speech_D_C', this.urlResource + 'object/speech_down_center.png');
-        this.game.load.image('speech_D_L', this.urlResource + 'object/speech_down_left.png');
-        this.game.load.image('speech_D_R', this.urlResource + 'object/speech_down_right.png');
-        this.game.load.image('speech_U_C', this.urlResource + 'object/speech_up_center.png');
-        this.game.load.image('speech_U_L', this.urlResource + 'object/speech_up_left.png');
-        this.game.load.image('speech_U_R', this.urlResource + 'object/speech_up_right.png');
-        // Carga posición objetivo
-        if (this.posGoal) {
-            this.game.load.image('pos_obj', this.urlResource + 'object/positionGoal.png');
-        }
-        // Carga posicion habilitada
-        if (this.positions.length > 0 ) {
-            this.game.load.image('pos', this.urlResource + 'object/position.png');
-        }
-        
-        this.game.load.image('food_1', this.urlResource + 'food/food_2.png');
-    }
-    
-    create() {
-        // Elementos principales
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
-        this.game.stage.backgroundColor = '#FFFFFF';
-        this.map = this.game.add.tilemap('map');
-        this.map.addTilesetImage('tiledset', 'tiledset');
-        this.layer_surface = this.map.createLayer('surface');
-        this.layer_block = this.map.createLayer('block'); 
-        this.map.setCollisionBetween(1, 3500, true, this.layer_block);
-
-        // Sonidos
-        this.sound = this.game.add.audio('song1');
-
-        // Marcador
-        let scoreBoard = this.game.add.graphics();
-        scoreBoard.lineStyle(2, 0x000000, 1);
-        scoreBoard.drawRect(0, 383, 515, 64);
-        let healthBoard = this.game.add.graphics();
-        healthBoard.lineStyle(2, 0x000000, 1);
-        healthBoard.drawRect(100, 396, this.healthBarWidth + 2, 34);
-        this.game.add.image(36, 398, 'health');      
-        
-        this.game.add.image(this.game.width / 1.4, 385, 'coin');
-        this.coinText = this.game.add.text(this.game.width / 1.28, 385, '', styleScore);
-        this.game.add.image(this.game.width / 1.4, 413, 'enemy');
-        this.enemyText = this.game.add.text(this.game.width / 1.28, 413, '', styleScore); 
-        this.game.add.image(this.game.width / 1.17, 385, 'food');
-        this.foodText = this.game.add.text(this.game.width / 1.1, 385, '', styleScore);  
-        this.game.add.image(this.game.width / 1.16, 413, 'time');
-        this.timerText = this.game.add.text(this.game.width / 1.1, 413, '', styleScore); 
-
-        
-        // Posición objetivo
-        if (this.posGoal.active) {
-            this.game.add.sprite(this.posGoal.x, this.posGoal.y, 'pos_obj');
-        }
-        // Posiciones habilitadas
-        this.positions.forEach( (p) => {
-            this.game.add.sprite(p.x, p.y, 'pos');
+        // Objetivos conseguidos
+        this._goals.forEach(g => {
+            g[1] = false;
         });
 
-        // Player
-        this.player = this.game.add.sprite(this.posInitial.x, this.posInitial.y, 'player');
-        this.player.width = this.size_player;
-        this.player.height = this.size_player;
-        this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-        this.player.body.collideWorldBounds = true;
-        this.player.body.onWorldBounds = new Phaser.Signal();
-        this.player.body.onWorldBounds.add(this.eventCollisionBlock, this);
-
-        // Mostrar posición click
-        this.game.input.onDown.add(this.drawSpeechClick, this);
-        this.game.input.onUp.add(
-            () => {
-                if (this.clickPositionText) {
-                    this.clickPositionText.kill();
-                }   
-                
-                if (this.clickPositionImage) {
-                    this.clickPositionImage.kill();
-                }
-            },
-        this);
-        
-              
-
-        // Barra de vida        
-        let bmd = this.game.add.bitmapData(this.healthBarWidth, 32);
-        bmd.ctx.beginPath();
-        bmd.ctx.rect(0, 0, this.healthBarWidth, 32);
-        bmd.ctx.fillStyle = '#21610B';
-        bmd.ctx.fill();
-        this.healthBar = this.game.add.sprite(101, 397, bmd);                       
-
-        // Dibujar objetos aleatorios             
-        this.groupFood = this.game.add.physicsGroup();        
-
-
-        // Pausar juego
-        this.reload();  
+        // Marcadores
+        this._healthCurrent = this._healthMax;        
+        this._coinCurrent = 0; 
+        this._coinText.text = this._coinCurrent;
+        this._deathCurrent = 0;
+        this._deathText.text = this._deathCurrent;
+        this._foodCurrent = 0; 
+        this._foodText.text = this._foodCurrent;
+        this._timeCurrent = this._timeMax;
+        this._timeText.text = this._timeCurrent;                            
     }
 
-    drawSpeechClick() {
-        let posX = parseInt(this.game.input.mousePointer.x, 10);
-        let posY = parseInt(this.game.input.mousePointer.y, 10);    
+    preload() {
+        // Carga map, player y tiledset        
+        this._game.load.tilemap('map', Global.url_api + 'level-load/' + this._fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);
+        this._game.load.image('player', Global.url_api + 'evolution-load/' + this._filePlayer + '/P');        
+        this._game.load.image('tiledset', Global.url_api + 'evolution-load/' + this._fileTiledset + '/T');    
+        // Carga de audios
+        this._game.load.audio('song-main', Global.url_sound + 'song-main.mp3');
+        // Carga burbujas de diálogo
+        this._game.load.image('speech_D_C', Global.url_resource + 'object/speech_down_center.png');
+        this._game.load.image('speech_D_L', Global.url_resource + 'object/speech_down_left.png');
+        this._game.load.image('speech_D_R', Global.url_resource + 'object/speech_down_right.png');
+        this._game.load.image('speech_U_C', Global.url_resource + 'object/speech_up_center.png');
+        this._game.load.image('speech_U_L', Global.url_resource + 'object/speech_up_left.png');
+        this._game.load.image('speech_U_R', Global.url_resource + 'object/speech_up_right.png');
+        // Carga elementos barra marcador
+        this._game.load.image('health', Global.url_resource + 'object/health.png');
+        this._game.load.image('coin', Global.url_resource + 'object/coin.png');
+        this._game.load.image('death', Global.url_resource + 'object/death.png');
+        this._game.load.image('food', Global.url_resource + 'object/food.png');
+        this._game.load.image('time', Global.url_resource + 'object/time.jpeg');                
+        // Carga posicion habilitada
+        if (this._groupPosition ) {
+            this._game.load.image('pos', Global.url_resource + 'object/position.png');
+        }            
+        // Carga posición objetivo
+        if (this._posGoal) {
+            this._game.load.image('pos_obj', Global.url_resource + 'object/positionGoal.png');
+        }
+    }
+
+    create() {
+        // Elementos principales
+        this._game.physics.startSystem(Phaser.Physics.ARCADE);
+        this._game.stage.backgroundColor = '#FFFFFF';
+        this._map = this._game.add.tilemap('map');
+        this._map.addTilesetImage('tiledset', 'tiledset');
+        this._layerSurface = this._map.createLayer('surface');
+        this._layerBlock = this._map.createLayer('block'); 
+        this._map.setCollisionBetween(1, 3500, true, this._layerBlock);
+
+        // Player
+        this._player = this._game.add.sprite(this._posInitial.x, this._posInitial.y, 'player');        
+        this._player.width = this._sizeSprite;
+        this._player.height = this._sizeSprite;
+        this._game.physics.enable(this._player, Phaser.Physics.ARCADE);
+        this._player.body.collideWorldBounds = true;
+        this._player.body.onWorldBounds = new Phaser.Signal();
+        this._player.body.onWorldBounds.add(this.eventCollisionBlock, this);        
+
+        // Sonido
+        this._soundMain = this._game.add.audio('song-main');
+
+        // Marcador: click posición
+        this._game.input.onDown.add(this.eventClick, this);
+        this._game.input.onUp.add(
+            () => {
+                if (this._clickText) {
+                    this._clickText.kill();
+                }   
+                
+                if (this._clickImage) {
+                    this._clickImage.kill();
+                }
+            },
+            this);
+
+        // Marcador: barra de salud 
+        this._game.add.image(36, this._canvasH + 10, 'health');      
+        let scoreBoard = this._game.add.graphics();
+        scoreBoard.lineStyle(2, 0x000000, 1);
+        scoreBoard.drawRect(0, this._canvasH, this._canvasW, this._scoreH);
+        let healthBoard = this._game.add.graphics();
+        healthBoard.lineStyle(2, 0x000000, 1);
+        healthBoard.drawRect(100, this._canvasH + 10, this._widthHealthBar + 2, (this._scoreH / 2) + 2);                  
+        let bmd = this._game.add.bitmapData(this._widthHealthBar, this._scoreH / 2);
+        bmd.ctx.beginPath();
+        bmd.ctx.rect(0, 0, this._widthHealthBar, this._scoreH);
+        bmd.ctx.fillStyle = '#21610B';
+        bmd.ctx.fill();
+        this._healthBar = this._game.add.sprite(101, this._canvasH + 11, bmd);    
         
-        if (posY > 380) {
+        // Marcador: coin
+        this._game.add.image(this._game.width / 1.4, this._canvasH + 2, 'coin');
+        this._coinText = this._game.add.text(this._game.width / 1.28, this._canvasH + 2, '', styleScore);
+        // Marcador: death
+        this._game.add.image(this._game.width / 1.4, this._canvasH + 30, 'death');
+        this._deathText = this._game.add.text(this._game.width / 1.28, this._canvasH + 30, '', styleScore); 
+        // Marcador: food
+        this._game.add.image(this._game.width / 1.17, this._canvasH + 2, 'food');
+        this._foodText = this._game.add.text(this._game.width / 1.1, this._canvasH + 2, '', styleScore);  
+        // Marcador: time
+        this._game.add.image(this._game.width / 1.16, this._canvasH + 30, 'time');
+        this._timeText = this._game.add.text(this._game.width / 1.1, this._canvasH + 30, '', styleScore); 
+
+        // Posiciones habilitadas
+        if (this._groupPosition) {
+            this._groupPosition.forEach( (p) => {
+                let s = this._game.add.sprite(p.x, p.y, 'pos');
+                s.width = this._sizeSprite;
+                s.height = this._sizeSprite;
+            });
+        }
+                
+        // Posición objetivo
+        if (this._posGoal) {
+            let s = this._game.add.sprite(this._posGoal.x, this._posGoal.y, 'pos_obj');
+            s.width = this._sizeSprite;
+            s.height = this._sizeSprite;
+        }                         
+    }
+
+    update() {
+
+        // Comprobar colisión con pared
+        this._game.physics.arcade.collide(this._layerBlock, this._player, this.eventCollisionBlock, null, this);
+
+        // Comprobar objetivo temporal
+        if (this._posGoalTmp) {
+            if (this._posGoalTmp.inRange(this._player.x, this._player.y, 2)) {
+                this.stopPlayer();
+                delete this._posGoalTmp;
+                this._wait = false; 
+            }
+        }  
+
+        // Comprobar objetivos finales
+        if (this.checkGoals()) {
+            this.stateGame = GameState.LevelUp;   
+        }        
+    }
+
+    // Eventos
+
+    eventClick() {
+        let posX = parseInt(this._game.input.mousePointer.x, 10);
+        let posY = parseInt(this._game.input.mousePointer.y, 10);    
+        
+        if (posY > this._canvasH) {
             return;
         }
         let messagge = 'x = ' + posX + '\ny = ' + posY;
@@ -268,7 +423,7 @@ export class StateMain extends Phaser.State {
         let image = 'speech_U_C';              
         
         // Abajo centro
-        if (posY < 60 && posX > 40 && posX  < (this.game.width - 40)) {                    
+        if (posY < 60 && posX > 40 && posX  < (this._game.width - 40)) {                    
             posText.y = posY + 25;
             posSpeech.x = posX - 45;
             posSpeech.y = posY;
@@ -285,7 +440,7 @@ export class StateMain extends Phaser.State {
         }
 
         // Abajo derecha
-        if (posY < 60 && posX  >= (this.game.width - 40)) {
+        if (posY < 60 && posX  >= (this._game.width - 40)) {
             posText.x = posX - 50;
             posText.y = posY + 25;
             posSpeech.x = posX - 85;
@@ -301,117 +456,92 @@ export class StateMain extends Phaser.State {
         }
 
         // Abajo derecha
-        if (posY >= 60 && posX  >= (this.game.width - 40)) {
+        if (posY >= 60 && posX  >= (this._game.width - 40)) {
             posText.x = posX - 50;
             posSpeech.x = posX - 85;                    
             image = 'speech_U_L';
         }
 
         
-        this.clickPositionImage = this.game.add.sprite(posSpeech.x, posSpeech.y , image);
-        this.clickPositionText = this.game.add.text(posText.x, posText.y, messagge, stylePositionClick);
+        this._clickImage = this._game.add.sprite(posSpeech.x, posSpeech.y , image);
+        this._clickText = this._game.add.text(posText.x, posText.y, messagge, stylePositionClick);
     }
 
     eventTime() {
-        this.timeCurrent --;
-        this.timerText.text = this.timeCurrent;
-        if (this.timeCurrent <= 0) {
-            this.game.time.events.remove(this.timerGameOver);                
-            this.stateGame = GameState.GameOver;                           
+        this._timeCurrent --;
+        this._timeText.text = this._timeCurrent;
+        if (this._timeCurrent <= 0) {
+            this.eventGameOver('Fin del tiempo');                         
         }
     }
 
     eventCollisionBlock() {
-        this.stateGame = GameState.GameOver;
-        this.code_error = 'Colisión';
+        this.eventGameOver('Colisión');        
     }
 
-    eventCollisionFood(player, food) {
+    eventCollisionFood(player, food) { 
         food.kill();
-        this.groupFood.remove(food);
-        this.foodCanvas --;
-        this.foodCurrent ++;        
-        this.foodText.text = this.foodCurrent;
+        this._groupFood.remove(food);        
+        this._foodCurrent ++;        
+        this._foodText.text = this._foodCurrent;        
     }
 
-    update() {                
-        /*if (this.lifeCurrent > 0) {
-            this.lifeCurrent -= 1;            
-            this.healthBar.width = (this.lifeCurrent * this.healthBarWidth) / this.lifeMax;                      
-        }*/ 
-        if (this.foodCanvas === 0 && this.posInitial.inRange(this.player.x, this.player.y, 2)) {
-            let number = this.game.rnd.between(1, this.positions.length - 1);   
-            this.groupFood.create(this.positions[number].x, this.positions[number].y, 'food_1');
-            this.foodCanvas ++;
-        }        
+    eventAttacked (hurt: number) {
+        this._healthCurrent -= hurt;
 
-        this.game.physics.arcade.collide(this.player, this.groupFood, this.eventCollisionFood, null, this);
-        
-        this.game.physics.arcade.collide(this.layer_block, this.player, this.eventCollisionBlock, null, this);
-
-
-        // Comprobar objetivos temporales
-        if (this.posGoalTmp.active && 
-            this.posGoalTmp.inRange(this.player.x, this.player.y, 2)) {             
-            this.stopPlayer();
-            this.waitMove = false; 
-                   
-        }  
-
-        // Comprobar objetivos finales
-        if (this.checkGoals()) {
-            this.stateGame = GameState.LevelUp;   
-        }        
+        if (this._healthCurrent <= 0) {
+            this._healthCurrent = 0;
+            this.stateGame = GameState.GameOver;
+        }
+        this._healthBar.width = (this._healthCurrent * this._widthHealthBar) / this._healthMax;
     }
+
+    eventGameOver (msg: string) {
+        this._game.time.events.remove(this._timeEvent);                
+        this.stateGame = GameState.GameOver;  
+        this._msgError = msg;
+    }
+
+    // Checked
 
     checkGoals() {
         let checked = true;
 
         // Posición objetivo
-        if (this.posGoal.active) {
-            if (!this.posGoal.inRange(this.player.x, this.player.y, 2)) {
-                checked = false;
-            }
+        if (this._posGoal) {
+            if (!this._goals[this._indexPos][1]) {
+                if (!this._posGoal.inRange(this._player.x, this._player.y, 2)) {
+                    checked = false;
+                } else {
+                    this._goals[this._indexPos][1] = true;                    
+                }
+            }            
         }
 
         // Alimentos recorridos
-        if (this.foodGoal && checked) {
-            if (this.foodGoal > this.foodCurrent) {
-                checked = false;
+        if (this._foodGoal) {
+            if (!this._goals[this._indexFood][1]) {
+                if (this._foodGoal > this._foodCurrent) {
+                    checked = false;
+                } else {
+                    this._goals[this._indexFood][1] = true;
+                }
             }
         }
 
         return checked;
     }
-
-    addGoal(key, v1, v2) {
-
-        switch (key) {
-            case 'POSITION':
-                this.posGoal = new Position(v1 - (this.size_player / 2), v2 - (this.size_player / 2));
-                break;
-            case 'FOOD':
-                this.foodGoal = v1;
-        }
-        
-    }
-
-    addPosition (x, y, init = false) {
-        if (init) {
-            this.posInitial = new Position(x - (this.size_player / 2), y - (this.size_player / 2));
-        } else {
-            let p = new Position(x - (this.size_player / 2), y - (this.size_player / 2));            
-            this.positions.push(p);
-        }
-    }
-
-    nextPosition(direction): Position {        
-        let posPlayer = new Position (this.player.x, this.player.y);                
-        let posNext = new Position (0, 0, false);     
-        let positions_tmp = Object.assign([], this.positions);
+    
+    checkPosition(direction): Position {        
+        let posPlayer = new Position (this._player.x, this._player.y);                
+        let posNext = new Position (0, 0, false);
+        let positions_tmp = Object.assign([], this._groupPosition);
         let range = 2;
         
-        positions_tmp.push(this.posGoal);
+        if (this._posGoal) {
+            positions_tmp.push(this._posGoal);
+        }
+            
         positions_tmp.forEach(p => {
             if (!posPlayer.inRange(p.x, p.y, range)) {                 
                 switch (direction) {
@@ -437,71 +567,38 @@ export class StateMain extends Phaser.State {
                         break;
                 }
             }
-        });
-
+        });        
 
         return posNext;        
+    }    
+    
+    // Funciones auxiliares
+
+    random (min, max) {
+        return this._game.rnd.between(min, max);   
     }
 
-    stopPlayer() {
-        this.player.body.velocity.x = 0;
-        this.player.body.velocity.y = 0;                
-        this.posGoalTmp.active = false;
-    }
-
-    set stateGame (s: GameState) {
-        
-        this._stateGame = s; 
-        
-        switch (s) {
-            case GameState.Init:                
-                this.game.paused = true; 
-                this.waitMove = false;
-                this.response = null;
-                this.code_error = null;               
-                break;
-            case GameState.Run:
-                this.game.paused = false; 
-                // this.sound.play();               
-                break;        
-            case GameState.Pause:
-                this.game.paused = true;
-                break;
-            case GameState.LevelUp:
-                this.game.paused = true;
-                break;
-            case GameState.GameOver:
-                this.game.paused = true;   
-                break;             
-        }        
-    }
-
-    get stateGame () {
-        return this._stateGame;
-    }
-
-
-    /* Métodos ejecutables por el jugador */
+    /* Acciones jugador */
     moveDirection(direction: string) {        
         
-        this.posGoalTmp = this.nextPosition(direction);
-
-        if (this.posGoalTmp.active) {
+        this._posGoalTmp = this.checkPosition(direction);
+        
+        if (this._posGoalTmp.active) {
             switch (direction) {
                 case 'D':                
-                    this.player.body.velocity.y = this.velocity;                                
+                    this._player.body.velocity.y = this._velocity;                                
                     break;
                 case 'U':
-                    this.player.body.velocity.y = -this.velocity;                                    
+                    this._player.body.velocity.y = -this._velocity;                                    
                     break;
                 case 'R':
-                    this.player.body.velocity.x = this.velocity;                                    
+                    this._player.body.velocity.x = this._velocity;                                    
                     break;  
                 case 'L':
-                    this.player.body.velocity.x = -this.velocity;                                    
+                    this._player.body.velocity.x = -this._velocity;                                    
                     break;
             }  
-            this.waitMove = true;
+            this._wait = true;
         } else {            
             let action = '';
 
@@ -519,98 +616,40 @@ export class StateMain extends Phaser.State {
                     action = 'moveLeft()';
                     break;
             }
-            this.stateGame = GameState.GameOver;             
-            this.code_error = 'No existe posición para ' + action;
+            this.eventGameOver ('No existe posición para ' + action);                    
         }        
     } 
 
-    move (x: number, y: number) {        
-        this.posGoalTmp = new Position (x - (this.size_player / 2), y - (this.size_player / 2)); 
-        this.waitMove = true;                              
-        this.game.physics.arcade.moveToXY(this.player, this.posGoalTmp.x, this.posGoalTmp.y, this.velocity);
+    move (x: number, y: number) {            
+        if (y < (this._canvasH - this._sizeSprite / 2)) {
+            this._posGoalTmp = new Position (x - (this._sizeSprite / 2), y - (this._sizeSprite / 2)); 
+            this._wait = true;                              
+            this._game.physics.arcade.moveToXY(this._player, this._posGoalTmp.x, this._posGoalTmp.y, this._velocity);
+        } else {
+            this.eventGameOver ('Movimiento no válido a (' + x + ',' + y + ')');
+        }    
+        
     }
 
     findNearestFood () {
 
-        let p = null;
+        let p = new Position(0, 0, false);
         let d_min = null, d;        
-        this.groupFood.forEach(element => {            
-            d = Phaser.Math.distance(element.world.x, element.world.y, this.player.x, this.player.y).toFixed(2);            
+        this._groupFood.forEach(element => {            
+            d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y).toFixed(2);            
             if (!d_min || d_min > d) {
-                d_min = d;
-                p = new Position(element.world.x, element.world.y);
+                d_min = d;                
                 p.x = element.world.x;
                 p.y = element.world.y;
+                p.active = true;
             }                      
         });        
 
         return p;
     }
 
+    stopPlayer() {
+        this._player.body.velocity.x = 0;
+        this._player.body.velocity.y = 0;        
+    } 
 }
-
-export class Position {
-    private _x: number;
-    private _y: number;
-    private _active: boolean;    
-
-    constructor(x, y, active = true) {
-        this._x = x;
-        this._y = y;        
-        this._active = active;
-    }
-
-    get x(): number {
-        return this._x;
-    }
-    set x(value: number) {
-        this._x = value;
-    }
-
-    get y(): number {
-        return this._y;
-    }
-    set y(value: number) {
-        this._y = value;
-    }
-
-    get active(): boolean {
-        return this._active;
-    }
-    set active(value: boolean) {
-        this._active = value;
-    }
-
-    inRange (x: number, y: number, range: number, coord: string = 'xy'): boolean {
-
-        let result = true;
-
-        switch (coord) {
-            case 'x':            
-                if ( x >= this._x + range || x <= this._x - range) {
-                    result = false;
-                }
-                break;
-            case 'y':            
-                if ( y >= this._y + range || y <= this._y - range) {
-                    result = false;
-                }
-                break;                
-            case 'xy':
-                if ( x >= this._x + range || x <= this._x - range || y >= this._y + range || y <= this._y - range) {
-                    result = false;
-                }
-                break;
-            default:
-                result = false;
-        }
-        return result;        
-    }
-
-    assign(p: Position) {
-        this._x = p.x;
-        this._y = p.y;
-        this._active = p.active;
-    }
-}
-

@@ -7,6 +7,7 @@ export class Level {
         public title: string,
         public description: string,
         public evolution: string,
+        public state: string,
         public active: number,
         public image: string,
         public time: number,

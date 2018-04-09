@@ -1,24 +1,24 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
 
-import { UserService } from '../../services/user.service';
-import { EvolutionService } from '../../services/evolution.service';
-import { LevelService } from '../../services/level.service';
-import { GoalService } from '../../services/goal.service';
-import { LearningService } from '../../services/learning.service';
-import { ActionService } from '../../services/action.service';
-
+// Modelos
 import { Evolution } from '../../models/evolution.model';
 import { Level } from '../../models/level.model';
 import { LevelGoal } from '../../models/level_goal.model';
 import { LevelLearning } from '../../models/level_learning.model';
 import { LevelAction } from '../../models/level_action.model';
 import { Position } from '../../models/position.model';
-
+// Clases
 import { Game } from '../../class/game';
 import { GameAction } from '../../enum/game-action';
 import { GameState } from '../../enum/game-state';
-import { element } from 'protractor';
+// Servicios
+import { UserService } from '../../services/user.service';
+import { EvolutionService } from '../../services/evolution.service';
+import { LevelService } from '../../services/level.service';
+import { GoalService } from '../../services/goal.service';
+import { LearningService } from '../../services/learning.service';
+import { ActionService } from '../../services/action.service';
 
 @Component({
   selector: 'app-level-play',
@@ -29,22 +29,21 @@ import { element } from 'protractor';
 export class LevelPlayComponent implements OnInit {
   
   @ViewChild('editor') editor;
-  public title: string;
-  public errorMessage: string;
-  public code: string;
+  
+  // Variables string
+  private title: string;
+  private code: string;
+  private errorMsg: string;
+  // Variables principales
+  private game: Game;
+  private evolution: Evolution;
+  private level: Level;
+  private goals: LevelGoal[];  
+  private learnings: LevelLearning[];
+  private actions: LevelAction[];
+  private positions: Array <Position>; 
+  private lastAction: GameAction;   
 
-  public game: Game;
-  // Variables para mostrar los botones cuando el juego este iniciado
-  public gameStarted: boolean;  
-
-  public evolution: Evolution;
-  public level: Level;
-  public goals: LevelGoal[];
-  public goalStr: Array <string>;
-  public learnings: LevelLearning[];
-  public actions: LevelAction[];
-  public positions: Position[]; 
-  public lastAction: GameAction; 
 
   constructor(
     private _userService: UserService,    
@@ -58,8 +57,7 @@ export class LevelPlayComponent implements OnInit {
   ) {
     this.title = 'Disfrute del nivel';  
     this.code = '';     
-    this.errorMessage = ''; 
-    this.gameStarted = false;       
+    this.errorMsg = '';         
   }
 
   ngOnInit() {      
@@ -73,20 +71,18 @@ export class LevelPlayComponent implements OnInit {
   loadLevel() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];
-      
       this._levelSercice.getLevel(id).subscribe(
         res => {
           if (!res.level) {
-            this.errorMessage += res.message;            
-          } else {            
-            this.level = res.level;            
-            this.evolution = res.level.evolution;
-            this.loadPropertyLevel();          
-            this.loadCode();                                                     
+            this.errorMsg += res.message;
+          } else {
+            this.level = res.level;
+            this.loadEvolution();            
+            this.loadCode();
           }
         },
-        err => {          
-          this.errorMessage += err.error.message;                    
+        err => {
+          this.errorMsg += err.error.message;
         }
       );
     });
@@ -98,33 +94,15 @@ export class LevelPlayComponent implements OnInit {
   loadEvolution() {
     this._evolutionService.getEvolution(this.level.evolution).subscribe(
       res => {
-        if (!res.evolution) {          
-          this.errorMessage += res.message;
+        if (!res.evolution) {
+          this.errorMsg += res.message;
         } else {
-          this.evolution = res.evolution;          
-                                  
+          this.evolution = res.evolution;
+          this.loadPropertyLevel();
         }
       },
-      err => {        
-        this.errorMessage += err.error.message;
-      }
-    );    
-  }
-
-  /**
-   * Carga del código a mostrar en el editor
-   */
-  loadCode() {
-    this._levelSercice.loadCode(this.level._id).subscribe(
-      res => {
-        if (!res.code) {
-          this.errorMessage += res.message;
-        } else {          
-          this.code = res.code;
-        }        
-      },
       err => {
-        this.errorMessage += err.error.message;    
+        this.errorMsg += err.error.message;
       }
     );
   }
@@ -137,66 +115,83 @@ export class LevelPlayComponent implements OnInit {
     this._goalService.getGoalsLevel(this.level._id).subscribe(
       res => {
         if (!res.goals) {
-          this.errorMessage += res.message;
+          this.errorMsg += res.message;
         } else {
-          this.goals = res.goals;      
-          this.loadGoalStr();          
+          this.goals = res.goals;          
           // Acciones
           this._actionService.getActionsLevel(this.level._id).subscribe(
             res => {
               if (!res.actions) {
-                this.errorMessage += res.message;
+                this.errorMsg += res.message;
               } else {
-                this.actions = res.actions;                   
+                this.actions = res.actions;
                 // Posiciones
                 this._levelSercice.getPositions(this.level._id).subscribe(
                   res => {
                     if (!res.positions) {
-                      this.errorMessage += res.message;
+                      this.errorMsg += res.message;
                     } else {
-                      this.positions = res.positions;                          
-                      this.loadGame();               
+                      this.positions = res.positions;
+                      this.loadGame();
                     }
                   },
                   err => {
-                    this.errorMessage += err.error.message;
+                    this.errorMsg += err.error.message;
                   }
-                );       
+                );
               }
             },
             err => {
-              this.errorMessage += err.error.message;
+              this.errorMsg += err.error.message;
             }
-          );          
+          ); 
         }
       },
       err => {
-        this.errorMessage += err.error.message;
+        this.errorMsg += err.error.message;
       }
-    ); 
+    );
 
     // Aprendizaje
     this._learningService.getLearningsLevel(this.level._id).subscribe(
       res => {
         if (!res.learnings) {
-          this.errorMessage += res.message;
+          this.errorMsg += res.message;
         } else {
           this.learnings = res.learnings;
         }
       },
       err => {
-        this.errorMessage += err.error.message;
+        this.errorMsg += err.error.message;
       }
     );          
+  }
+
+  /**
+   * Carga del código a mostrar en el editor
+   */
+  loadCode() {
+    this._levelSercice.loadCode(this.level._id).subscribe(
+      res => {
+        if (!res.code) {
+          this.errorMsg += res.message;
+        } else {
+          this.code = res.code;
+        }
+      },
+      err => {
+        this.errorMsg += err.error.message;
+      }
+    );
   }
 
   /**
    * Carga del juego
    */
   loadGame() {
-    this.game = new Game('phaser-game', this._levelSercice, this._userService);  
-    this.game.initState(this.level, this.evolution, this.goals, this.actions, this.positions);       
-    this.gameStarted = true;
+    this.game = new Game(this._userService, this._levelSercice);
+    this.game.loadState(this.level, this.evolution, this.goals, this.positions);
+    this.game.loadWorker(this.actions);
   }  
 
   /**
@@ -206,7 +201,7 @@ export class LevelPlayComponent implements OnInit {
     this.editor.setTheme('eclipse');
     this.editor.setMode('python');
 
-    this.editor.setOptions({        
+    this.editor.setOptions({
         fontSize: '14px'
     });
   }
@@ -221,17 +216,17 @@ export class LevelPlayComponent implements OnInit {
     }    
 
     if (action === GameAction.Play) {
-      if (this.stateGame === GameState.Init) {
+      if (this.game.stateGame === GameState.Init) {
         this._levelSercice.registerCode(this.code, this.level._id).subscribe(
           res => {        
             this.game.doAction(GameAction.Play, this.code);           
           },
           err => {
-            this.errorMessage += err.error.message;
+            this.errorMsg += err.error.message;
           }
         );          
       }
-      if (this.stateGame === GameState.Pause) {
+      if (this.game.stateGame === GameState.Pause) {
         this.game.doAction(GameAction.Continue);           
       }
     } else {
@@ -239,37 +234,4 @@ export class LevelPlayComponent implements OnInit {
     }
 
   }
-
-  loadGoalStr () {
-    this.goalStr =  new Array<string>();          
-          
-    for (let e of this.goals) {
-      let aux = e.goal.title;      
-      
-      switch (e.goal.key) {
-        case 'POSITION':
-          aux += ': (' + e.value1 + ',' + e.value2 + ')';
-          break;
-        case 'FOOD':
-          aux += ': ' + e.value1;
-          break;
-      }
-      this.goalStr.push (aux);
-    }
-  }
-
-  /**
-   * Obtener estado de la partida
-   */
-  get stateGame () {
-    return this.game.stateGame;
-  }
-
-  /**
-   * Obtener estado de la partida
-   */
-  get strError () {
-    return this.game.code_error;
-  }
-
 }

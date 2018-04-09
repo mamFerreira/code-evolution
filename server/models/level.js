@@ -8,6 +8,7 @@ var LevelSchema = new Schema({
     title: String,
     description: String,
     evolution: {type: Schema.ObjectId, ref: 'Evolution'},
+    state: String,
     active: {type: Number, default: 1},
     image: String,
     time: {type: Number, default:0},

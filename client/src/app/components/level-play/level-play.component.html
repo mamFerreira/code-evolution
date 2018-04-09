@@ -1,17 +1,17 @@
 
     <div class="row">        
         <div class="col-lg-12 col-md-12">
-            <div *ngIf="level && evolution" class="page-header">
+            <div *ngIf="game" class="page-header">
                 <h1>{{title}}</h1> 
                 <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>   
-                <div *ngIf="gameStarted" class="buttons">
-                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 0 }" [disabled]="stateGame === 0 || stateGame === 1" (click)="doAction(0);">
+                <div class="buttons">
+                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 0 }" [disabled]="game.stateGame === 0 || game.stateGame === 1" (click)="doAction(0);">
                         <span class="glyphicon glyphicon-refresh"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 1}" [disabled]="stateGame !== 0 && stateGame !== 2" (click)="doAction(1);">
+                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 1}" [disabled]="game.stateGame !== 0 && game.stateGame !== 2" (click)="doAction(1);">
                         <span class="glyphicon glyphicon-play"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 2 }" [disabled]="stateGame !== 1" (click)="doAction(2);">
+                    <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 2 }" [disabled]="game.stateGame !== 1" (click)="doAction(2);">
                         <span class="glyphicon glyphicon-pause"></span>
                     </button>
                     <button type="button" class="btn btn-primary-ce" *ngIf="game.volume" (click)="doAction(5);" >
@@ -33,15 +33,15 @@
                 <div id="phaser-game" class="canvas"></div>                
             </div>
             <div class="col-lg-2 col-md-2 float-right container-goal-actions">
-                <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="goalStr">
+                <table class="table table-striped table-bordered table-hover table-condensed" cellspacing="0" width="100%" *ngIf="game && game.goals">
                     <thead>
                         <tr>
                             <th>Objetivos</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let g of goalStr">
-                            <td class="goal-no-check">{{g}}</td>                  
+                        <tr *ngFor="let g of game.goals">
+                            <td [ngClass]="{'goal-no-check': !g[1], 'goal-check': g[1]}">{{g[0]}}</td>                  
                         </tr>            
                     </tbody>
                 </table>
@@ -84,14 +84,14 @@
             </div>
             <div class="col-lg-5 col-md-5 float-right container-editor">                
                 <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
-                <div class="shell" [ngClass]="{'shell-error': game.code_error }" *ngIf="game"><p [innerHTML]="game.code_shell"></p></div>                                
+                <div class="shell" [ngClass]="{'shell-error': game.error }" *ngIf="game"><p [innerHTML]="game.codeShell"></p></div>                                
             </div>
             <div class ="col-lg-12 col-md-12 container_help">                
             </div>
         </div>
     </div>
-    <div *ngIf="level && evolution && game">
-        <app-dialog-level-up [(stateGame)]="stateGame" [(level)]="level._id" [(evolution)]="evolution._id" (doAction)="doAction($event)"></app-dialog-level-up>
-        <app-dialog-game-over [(stateGame)]="stateGame" [(evolution)]="level.evolution" [(strError)]="strError" (doAction)="doAction($event)"></app-dialog-game-over>
+    <div *ngIf="game">    
+        <app-dialog-level-up [(stateGame)]="game.stateGame" [(level)]="level._id" [(evolution)]="evolution._id" (doAction)="doAction($event)"></app-dialog-level-up>
+        <app-dialog-game-over [(stateGame)]="game.stateGame" [(evolution)]="level.evolution" [(strError)]="game.msgError" (doAction)="doAction($event)"></app-dialog-game-over>
     </div>
     

@@ -88,7 +88,7 @@ export class ConfigureLevelComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir nivel';
-        this.level = new Level (null, null, '', '', null, null, '', null, '', '');
+        this.level = new Level ('', null, '', '', '', '', null, '', null, '', '');
       }      
     });
     this.getEvolutions();
@@ -117,7 +117,7 @@ export class ConfigureLevelComponent implements OnInit {
         if (!res.level) {
           this.errorMessage.push('No se ha podido obtener el nivel del servidor');
         } else {
-          this.level = res.level;                      
+          this.level = res.level;                 
         }
       },
       err => {
