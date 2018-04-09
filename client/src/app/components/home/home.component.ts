@@ -9,7 +9,8 @@ export class HomeComponent implements OnInit {
 
   public title: string;
 
-  constructor() { 
+  constructor(
+  ) { 
     this.title = 'Bienvenido a CodeEvolution';   
   }
 

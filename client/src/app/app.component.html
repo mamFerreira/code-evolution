@@ -1,9 +1,10 @@
-<div *ngIf="token">
-    <app-navigation-menu></app-navigation-menu>
-    <div class="container central col-11" >
-        <router-outlet></router-outlet>
+<div *ngIf="tokenChecked">    
+    <div *ngIf="token">
+        <app-navigation-menu></app-navigation-menu>
+        <div class="container central col-11" >
+            <router-outlet></router-outlet>
+        </div>
     </div>
-</div>
-<div *ngIf="!token">
-    <app-login></app-login>
+    <div *ngIf="!token"><app-login></app-login></div>
+    <div *ngIf="errorMsg" class="alert alert-warning"> <strong>Error: </strong>{{errorMsg}}</div>
 </div>
