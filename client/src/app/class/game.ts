@@ -26,6 +26,8 @@ export class Game {
     private _level: Level;
     private _evolution: Evolution; 
     private _fullLoad: boolean;  
+    private _soundLU;  
+    private _soundGO;  
 
     // Variables intervalos
     private _idIntervalM; 
@@ -33,8 +35,8 @@ export class Game {
 
     // Variables intercamio de información
     private _codeShell: string;   
-    private _msgError: string;    
-                         
+    private _msgError: string;       
+                             
     constructor (
         private _userService: UserService,
         private _levelService: LevelService,                
@@ -42,7 +44,14 @@ export class Game {
         this._identity = _userService.getIdentity();        
         this._checker = new Checker();              
         this._codeShell = '';   
-        this._msgError = '';                             
+        this._msgError = '';   
+
+        this._soundLU = new Audio('../../../assets/audio/sound/level-up.mp3');    
+        this._soundGO = new Audio('../../../assets/audio/sound/game-over.mp3'); 
+        this._soundLU.volume = 0.2;        
+        this._soundGO.volume = 0.2;           
+        this._soundLU.load();        
+        this._soundGO.load();                         
     }
 
     // Propiedades
@@ -59,10 +68,10 @@ export class Game {
         return this._msgError;
     }
 
-    get error () {
-        if (this._msgError.length === 0) {
+    get error () {        
+        if (this._msgError.length === 0) {            
             return false;
-        } else {
+        } else {            
             return true;
         }
     }
@@ -71,10 +80,13 @@ export class Game {
         return this._state.goals;
     }
 
+    get volume () {
+        return this._state.volume;
+    }
+
     // Métodos de carga
 
-    loadState (l: Level, e: Evolution, g: LevelGoal[], p: Position[]) {
-                
+    loadState (l: Level, e: Evolution, g: LevelGoal[], p: Position[]) {        
         import('./states/' + l.state).then(s => {
             
             this._level = l;
@@ -152,8 +164,11 @@ export class Game {
                     }
                     this._state.move (e.data.value[0], e.data.value[1]);                                        
                     break;
-                case 'findNearestFood':
+                case 'findNearestFood':                                                            
                     this.postMessage('loadValue', this._state.findNearestFood());
+                    break;
+                case 'positionPlayer':                     
+                    this.postMessage('loadValue', this._state.positionPlayer());
                     break;
                 case 'print':
                     console.log(e.data.value[0]);
@@ -198,9 +213,11 @@ export class Game {
                 this._idIntervalM = setInterval(() => {                                        
 
                     if (this._state.stateGame === GameState.LevelUp) { 
+                        this._soundLU.play();
                         this.nextLevel();                                                   
                         this.finish();                        
                     } else if (this._state.stateGame === GameState.GameOver) {                        
+                        this._soundGO.play();                     
                         this.addCodeShell('Error: ' + this._state.msgError, true);                        
                         this.finish();
                     }                                                            
@@ -214,13 +231,23 @@ export class Game {
                 this.addCodeShell('Continue');
                 this._state.stateGame = GameState.Run;
                 break;
-            case GameAction.Stop:                                              
+            case GameAction.Stop:      
+                this._soundGO.play();                    
                 this.addCodeShell('Stop: Corrija y recarga para volver a intentarlo');                    
                 this._state.stateGame = GameState.GameOver;
                 this.finish();
                 break;
             case GameAction.ChangeVolume:                
-                this._state.volume = !this._state.volume;
+                this._state.ChangeVolume();
+
+                if (this._state.volume) {
+                    this._soundLU.volume = 0.2;        
+                    this._soundGO.volume = 0.2; 
+                } else {
+                    this._soundLU.volume = 0;        
+                    this._soundGO.volume = 0; 
+                }
+
                 break;
         }
     }  
@@ -228,9 +255,7 @@ export class Game {
     nextLevel() {
         this._levelService.nextLevel(this._level._id).subscribe(
             res => {
-                if (!res.level) {                    
-                    this._msgError = res.message;
-                } else { 
+                if (res.level) {                                                                         
                     if (this._level._id === this._identity.level._id) {                                                     
                         this._identity.level = res.level;                                           
                         localStorage.setItem('identity', JSON.stringify(this._identity)); 

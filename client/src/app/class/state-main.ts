@@ -25,7 +25,9 @@ export class StateMain extends Phaser.State {
     private _map: Phaser.Tilemap;
     private _layerSurface: Phaser.TilemapLayer;
     private _layerBlock: Phaser.TilemapLayer;
-    private _soundMain: Phaser.Sound;
+    // Variables sonido
+    private _soundMain: Phaser.Sound;        
+    private _soundFood: Phaser.Sound;
     // Variable configuración
     private _canvasH: number;
     private _canvasW: number;
@@ -91,8 +93,8 @@ export class StateMain extends Phaser.State {
         this._scoreH = 64;        
         this._velocity = 64;
         this._widthHealthBar = 250; 
-        this._sizeSprite = 36; 
-        this._volume = false;     
+        this._sizeSprite = 32; 
+        this._volume = true;     
         this._goals = new Array<[string, boolean]> ();   
         this._index = 0;
 
@@ -102,9 +104,10 @@ export class StateMain extends Phaser.State {
     }
 
     // Propiedades
-
+    
     set stateGame (s: GameState) {
         
+        let interval;
         this._stateGame = s; 
         
         switch (s) {
@@ -115,16 +118,17 @@ export class StateMain extends Phaser.State {
                 break;
             case GameState.Run:
                 this._game.paused = false; 
-                // this.sound.play();               
+                this._soundMain.play();               
                 break;        
             case GameState.Pause:
                 this._game.paused = true;
                 break;
-            case GameState.LevelUp:
-                this._game.paused = true;
+            case GameState.LevelUp:                  
+                this._game.paused = true; 
                 break;
             case GameState.GameOver:
-                this._game.paused = true;                   
+                this._soundMain.stop();
+                this._game.paused = true;                                   
                 break;             
         }        
     }
@@ -133,16 +137,16 @@ export class StateMain extends Phaser.State {
         this._groupFood  = g;
     }
 
-    set volume (v: boolean) {
-        this._volume = v;
-    }
-
     get game () {
         return this._game;
     }
 
     get player () {
         return this._player;
+    }
+
+    get sizeSprite () {
+        return this._sizeSprite;
     }
 
     get volume () {
@@ -278,11 +282,14 @@ export class StateMain extends Phaser.State {
 
     preload() {
         // Carga map, player y tiledset        
-        this._game.load.tilemap('map', Global.url_api + 'level-load/' + this._fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);
-        this._game.load.image('player', Global.url_api + 'evolution-load/' + this._filePlayer + '/P');        
+        this._game.load.tilemap('map', Global.url_api + 'level-load/' + this._fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);         
+        this._game.load.spritesheet('player', Global.url_api + 'evolution-load/' + this._filePlayer + '/P', 45, 34);            
         this._game.load.image('tiledset', Global.url_api + 'evolution-load/' + this._fileTiledset + '/T');    
         // Carga de audios
-        this._game.load.audio('song-main', Global.url_sound + 'song-main.mp3');
+        this.game.load.audio('song-main', Global.url_sound + 'song-main.mp3');        
+        this.game.load.audio('level-up', Global.url_sound + '/sound/level-up.mp3');
+        this.game.load.audio('game-over', Global.url_sound + '/sound/game-over.wav');
+        this.game.load.audio('sound-food', Global.url_sound + '/sound/eating.mp3');
         // Carga burbujas de diálogo
         this._game.load.image('speech_D_C', Global.url_resource + 'object/speech_down_center.png');
         this._game.load.image('speech_D_L', Global.url_resource + 'object/speech_down_left.png');
@@ -317,9 +324,11 @@ export class StateMain extends Phaser.State {
         this._map.setCollisionBetween(1, 3500, true, this._layerBlock);
 
         // Player
-        this._player = this._game.add.sprite(this._posInitial.x, this._posInitial.y, 'player');        
-        this._player.width = this._sizeSprite;
-        this._player.height = this._sizeSprite;
+        this._player = this._game.add.sprite(this._posInitial.x, this._posInitial.y, 'player', 0);           
+        this._player.animations.add('right', [0, 1, 2, 3], 10, true);
+        this._player.animations.add('up', [4, 5, 6, 7], 10, true);
+        this._player.animations.add('left', [8, 9, 10, 11], 10, true);
+        this._player.animations.add('down', [12, 13, 14, 15], 10, true);        
         this._game.physics.enable(this._player, Phaser.Physics.ARCADE);
         this._player.body.collideWorldBounds = true;
         this._player.body.onWorldBounds = new Phaser.Signal();
@@ -327,6 +336,10 @@ export class StateMain extends Phaser.State {
 
         // Sonido
         this._soundMain = this._game.add.audio('song-main');
+        this._soundMain.volume = 0.3;
+        this._soundMain.loop = true;   
+        this._soundFood = this._game.add.audio('sound-food');        
+        this._soundMain.volume = 0.5;
 
         // Marcador: click posición
         this._game.input.onDown.add(this.eventClick, this);
@@ -395,7 +408,7 @@ export class StateMain extends Phaser.State {
         // Comprobar objetivo temporal
         if (this._posGoalTmp) {
             if (this._posGoalTmp.inRange(this._player.x, this._player.y, 2)) {
-                this.stopPlayer();
+                this.stopPlayer();                             
                 delete this._posGoalTmp;
                 this._wait = false; 
             }
@@ -483,7 +496,8 @@ export class StateMain extends Phaser.State {
         food.kill();
         this._groupFood.remove(food);        
         this._foodCurrent ++;        
-        this._foodText.text = this._foodCurrent;        
+        this._foodText.text = this._foodCurrent;       
+        this._soundFood.play(); 
     }
 
     eventAttacked (hurt: number) {
@@ -497,9 +511,9 @@ export class StateMain extends Phaser.State {
     }
 
     eventGameOver (msg: string) {
-        this._game.time.events.remove(this._timeEvent);                
-        this.stateGame = GameState.GameOver;  
+        this._game.time.events.remove(this._timeEvent);         
         this._msgError = msg;
+        this.stateGame = GameState.GameOver;                  
     }
 
     // Checked
@@ -532,7 +546,7 @@ export class StateMain extends Phaser.State {
         return checked;
     }
     
-    checkPosition(direction): Position {        
+    checkPosition(direction): Position {
         let posPlayer = new Position (this._player.x, this._player.y);                
         let posNext = new Position (0, 0, false);
         let positions_tmp = Object.assign([], this._groupPosition);
@@ -575,27 +589,43 @@ export class StateMain extends Phaser.State {
     // Funciones auxiliares
 
     random (min, max) {
-        return this._game.rnd.between(min, max);   
+        return this._game.rnd.integerInRange(min, max);   
+    }
+
+    ChangeVolume () {
+        this._volume = !this._volume;
+
+        if (!this._volume) {
+            this._soundMain.volume = 0;
+            this._soundFood.volume = 0;
+        } else {
+            this._soundMain.volume = 0.3;
+            this._soundFood.volume = 0.5;
+        }
     }
 
     /* Acciones jugador */
-    moveDirection(direction: string) {        
+    moveDirection(direction: string) {
         
         this._posGoalTmp = this.checkPosition(direction);
         
         if (this._posGoalTmp.active) {
             switch (direction) {
                 case 'D':                
-                    this._player.body.velocity.y = this._velocity;                                
+                    this._player.body.velocity.y = this._velocity;
+                    this._player.play('down');
                     break;
                 case 'U':
-                    this._player.body.velocity.y = -this._velocity;                                    
+                    this._player.body.velocity.y = -this._velocity;
+                    this._player.play('up');
                     break;
                 case 'R':
-                    this._player.body.velocity.x = this._velocity;                                    
+                    this._player.body.velocity.x = this._velocity;
+                    this._player.play('right');
                     break;  
                 case 'L':
-                    this._player.body.velocity.x = -this._velocity;                                    
+                    this._player.body.velocity.x = -this._velocity;
+                    this._player.play('left');
                     break;
             }  
             this._wait = true;
@@ -620,11 +650,12 @@ export class StateMain extends Phaser.State {
         }        
     } 
 
-    move (x: number, y: number) {            
+    move (x: number, y: number) {
         if (y < (this._canvasH - this._sizeSprite / 2)) {
             this._posGoalTmp = new Position (x - (this._sizeSprite / 2), y - (this._sizeSprite / 2)); 
             this._wait = true;                              
             this._game.physics.arcade.moveToXY(this._player, this._posGoalTmp.x, this._posGoalTmp.y, this._velocity);
+            this._player.animations.play('walk', 4, true);
         } else {
             this.eventGameOver ('Movimiento no válido a (' + x + ',' + y + ')');
         }    
@@ -639,17 +670,18 @@ export class StateMain extends Phaser.State {
             d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y).toFixed(2);            
             if (!d_min || d_min > d) {
                 d_min = d;                
-                p.x = element.world.x;
-                p.y = element.world.y;
+                p.x = element.world.x + (this._sizeSprite / 2);
+                p.y = element.world.y + (this._sizeSprite / 2);
                 p.active = true;
             }                      
-        });        
+        });      
 
         return p;
     }
 
     stopPlayer() {
         this._player.body.velocity.x = 0;
-        this._player.body.velocity.y = 0;        
+        this._player.body.velocity.y = 0; 
+        this._player.animations.stop(true);               
     } 
 }

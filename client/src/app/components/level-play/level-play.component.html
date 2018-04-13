@@ -3,7 +3,7 @@
         <div class="col-lg-12 col-md-12">
             <div *ngIf="game" class="page-header">
                 <h1>{{title}}</h1> 
-                <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>   
+                <h2>{{evolution.name}}: {{level.order}}. {{level.title}}</h2>                 
                 <div class="buttons">
                     <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 0 }" [disabled]="game.stateGame === 0 || game.stateGame === 1" (click)="doAction(0);">
                         <span class="glyphicon glyphicon-refresh"></span>
@@ -14,10 +14,10 @@
                     <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 2 }" [disabled]="game.stateGame !== 1" (click)="doAction(2);">
                         <span class="glyphicon glyphicon-pause"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce" *ngIf="game.volume" (click)="doAction(5);" >
+                    <button type="button" class="btn btn-primary-ce" *ngIf="!game.volume" (click)="doAction(5);" >
                         <span class="glyphicon glyphicon-volume-off"></span>
                     </button>
-                    <button type="button" class="btn btn-primary-ce" *ngIf="!game.volume" (click)="doAction(5);">
+                    <button type="button" class="btn btn-primary-ce" *ngIf="game.volume" (click)="doAction(5);">
                         <span class="glyphicon glyphicon-volume-up"></span>
                     </button> 
                     <button type="button" class="btn btn-primary-ce">

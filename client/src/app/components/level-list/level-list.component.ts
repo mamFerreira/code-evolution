@@ -84,13 +84,13 @@ export class LevelListComponent implements OnInit {
             this.levels = res.levels;                    
             // Selección del nivel activo
             if (this.identity.level.evolution._id === id) {            
-              this.level = this.identity.level;
-              this.getGoals();
-              this.getLearnings();
-              this.getActions();                                                                            
+              this.level = this.identity.level;                                                                                          
             } else {
               this.level = res.levels[0];
             }   
+            this.getGoals();
+            this.getLearnings();
+            this.getActions();
           }
         },
         err => {          

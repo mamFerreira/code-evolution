@@ -1,0 +1,34 @@
+"""
+En este caso, aparecerán dos alimentos aleatoriamente
+entre las 4 posiciones marcadas del mapa. Añada los 
+if...elif...else necesarios para que el pez se alimente
+de ellos
+
+¡!Revise el aprendizaje de IF...ELSE
+"""
+
+# Primer alimento
+
+food = findNearestFood()
+
+if food.x == 250 and food.y < 200:
+	moveUp()
+	moveDown()
+elif food.x == 250 and food.y > 200:
+	moveDown()
+	moveUp()
+#Añada los operadores relaciones que faltan
+elif food.x 250 and food.y 200: 
+	moveLeft()
+	moveRight()
+else:
+	moveRight()
+	moveLeft()
+
+# Complete otro IF...ELSEIF....ELSE para recoger el segundo alimento
+
+if:
+	...
+elif:
+	...
+...

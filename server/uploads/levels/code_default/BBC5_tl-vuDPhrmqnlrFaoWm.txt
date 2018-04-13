@@ -1,0 +1,25 @@
+"""
+En este caso, aparecerán dos alimentos en las posiciones 
+marcadas del mapa. Utiliza la sencencia if...else.. para
+determinar hacia que lado debe dirigirse el pez.
+
+Revise el aprendizaje de IF...ELSE
+"""
+
+# Primer alimento
+
+food = findNearestFood()
+
+if food.y < 200:
+	moveUp()
+	moveDown()
+else:
+	moveDown()
+	moveUp()
+
+# Complete otro IF...ELSE para recoger el segundo alimento
+
+if:
+	...
+else:
+	...

@@ -1,0 +1,18 @@
+"""
+El alimento irá apareciendo en las posiciones marcadas
+que se encuentren junto al pez. Utilice la nueva función
+para conocer su posición y lo aprendido para recogerlos
+todos.
+"""
+
+# Complete el rango para cumplir el objetivo
+for i in range(,): 
+	player = positionPlayer()
+	food = findNearestFood()
+	
+	# Añade la condición al if
+	if:
+		moveUp()
+	else:
+		moveDown()
+

@@ -89,9 +89,12 @@ function addMethod (method){
                 waitResponse(callback);               
             };
             break;
-        case 'findNearestFood':
+        case 'findNearestFood':            
             wrapperObject = () => {};
-            break;        
+            break;   
+        case 'positionPlayer':             
+            wrapperObject = () => {};
+            break;       
     }
 
     if (wrapperNative != null){        
@@ -130,15 +133,24 @@ function initApi (i,s){
     
     for (var index=0; index<ObjectFunctions.length; index++){
 
-        var key = ObjectFunctions[index].key;
+        switch(ObjectFunctions[index].key){
+            case 'findNearestFood':
+                var wrapper = (callback) => {                                      
+                    json = null;            
+                    reply('findNearestFood');          
+                    waitResponseObject(i, callback);
+                };
+                break;
+            case 'positionPlayer':
+                var wrapper = (callback) => {                                      
+                    json = null;            
+                    reply('positionPlayer');          
+                    waitResponseObject(i, callback);
+                };
+                break;
+        }
 
-        var wrapper = (callback) => {                
-            json = null;
-            reply(key);          
-            waitResponseObject(i, callback);
-        };    
-
-        i.setProperty(s, key, i.createAsyncFunction(wrapper));
+        i.setProperty(s, ObjectFunctions[index].key, i.createAsyncFunction(wrapper));
     }
     
     i.setProperty(s, 'print', i.createNativeFunction((v) => {reply('print',v);}));
@@ -193,7 +205,7 @@ function waitResponseObject(i, callback){
     
     idIntevalResponse = setInterval(()=>{                
         if (json){                        
-            if (json._active){
+            if (json._active){                
                 var obj = i.createObject(i.OBJECT);
                 i.setProperty(obj, 'x', i.createPrimitive(json._x));
                 i.setProperty(obj, 'y', i.createPrimitive(json._y));            

@@ -42,7 +42,8 @@ export class LevelPlayComponent implements OnInit {
   private learnings: LevelLearning[];
   private actions: LevelAction[];
   private positions: Array <Position>; 
-  private lastAction: GameAction;   
+  private lastAction: GameAction;
+  
 
 
   constructor(
@@ -57,7 +58,7 @@ export class LevelPlayComponent implements OnInit {
   ) {
     this.title = 'Disfrute del nivel';  
     this.code = '';     
-    this.errorMsg = '';         
+    this.errorMsg = '';    
   }
 
   ngOnInit() {      
@@ -209,7 +210,7 @@ export class LevelPlayComponent implements OnInit {
   /**
    * Gestión de acciones botones de reproducción
    */
-  doAction (action: GameAction) {
+  doAction (action: GameAction) {    
 
     if (action !== GameAction.ChangeVolume) {
       this.lastAction = action;

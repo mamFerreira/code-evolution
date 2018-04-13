@@ -10,7 +10,7 @@ export class State extends StateMain {
 
     preload() {
         super.preload();        
-        this.loadResource('food_fish', 'food/food_fish.png');
+        this.loadResource('food_fish', 'food/food_fish.png');        
     }
 
     create() {
