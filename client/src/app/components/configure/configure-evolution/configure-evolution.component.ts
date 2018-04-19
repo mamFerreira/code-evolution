@@ -57,7 +57,7 @@ export class ConfigureEvolutionComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir evolución';
-        this.evolution = new Evolution (null, null, '', '', '', '', '', null , '');
+        this.evolution = new Evolution (null, null, '', '', '', '', '', null , '', null, null);
       }      
     });    
   }
@@ -102,10 +102,7 @@ export class ConfigureEvolutionComponent implements OnInit {
         break;
       case 'tiledset': // 'ts_surface':
         this.fileTiledSet = <Array<File>> fileInput.target.files;   
-        break;
-      // case 'ts_block':
-        // this.fileBlock = <Array<File>> fileInput.target.files;   
-        // break;
+        break;      
       default:
         this.errorMessage.push('Tipo de imagen desconocido');
     }           
@@ -192,17 +189,6 @@ export class ConfigureEvolutionComponent implements OnInit {
                   }                       
               }
           ); }
-
-          /*if (this.fileBlock) {
-            this.makeFileRequest(this.url + 'evolution-upload-T/' +  this.evolution._id + '/B', [], this.fileBlock).then(
-              (res: any) => {
-                  if (res.image) {
-                    this.evolution.tiledset_block = res.image;
-                  } else {
-                    this.errorMessage.push('Subida de TS Block no realizada: ' + res.message);
-                  }                       
-              }
-          ); }*/
 
           this.successMessage = 'Evolución actualizada correctamente';
         }

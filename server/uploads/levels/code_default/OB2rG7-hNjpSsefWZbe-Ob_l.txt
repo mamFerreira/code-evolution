@@ -1,0 +1,16 @@
+"""
+Algo más complicado. En este caso las posiciones donde puede 
+aparecer el alimento son 4. Utilice lo que ya conoce de las
+estructuras FOR, IF...ELIF...ELSE para cumplir los objetivos
+
+RECUERDA QUE EL PRÓXIMO VEGETAL NO APARECE HASTA QUE EL PEZ
+NO SE ENCUENTRE EN SU POSICIÓN INICIAL
+"""
+
+p = player.position();
+
+for: # Complete el for con range
+	food = player.findNearestFood()
+
+	#Añade un if...elif...else para mover el pez en función
+	#a la posición del pez

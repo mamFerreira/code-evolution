@@ -1,0 +1,13 @@
+"""
+El alimento irá apareciendo en las posiciones marcadas
+que se encuentren junto al pez. Compara las posiciones
+del alimento y el pez para saber hacia que lado realizar
+el desplazamiento.
+"""
+
+# Complete el for para que se ejecute 10 veces
+for:
+	food = player.findNearestFood()
+	fish = player.position()
+
+	#Añada el if...elif...else correspondiente

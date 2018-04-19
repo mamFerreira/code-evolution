@@ -1,5 +1,0 @@
-"""
-Avanza en el aprendizaje sobre el flujo de ejecución de un
-programa en Python llevando a la célula hasta la posición objetivo. 
-Para ello utiliza los distintos tipos de desplazamientos disponibles.
-"""

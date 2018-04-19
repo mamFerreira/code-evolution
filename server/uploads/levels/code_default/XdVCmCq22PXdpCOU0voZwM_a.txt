@@ -1,0 +1,21 @@
+"""
+Realiza tres movimientos modificando el valor de las variables
+para llevar al organismo unicelular hasta la posición objetivo.
+
+Recuerda que puedes ver las coordenadas de una posición haciendo
+click en ella.
+"""
+
+x = 150
+y = 300
+player.move(x,y)
+
+# Asigna un valor a la x
+x = 
+player.move(x,y)
+
+#Asigna un calor a la y
+y =
+player.move(x,y)
+
+

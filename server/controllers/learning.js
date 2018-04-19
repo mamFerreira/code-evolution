@@ -12,11 +12,13 @@ function addLearning (req, res){
     var tuple = new Learning();
     var params = req.body; //Recogemos los datos que llegan por POST
 
+    tuple.order = params.order;
     tuple.title = params.title;
+    tuple.key = params.key;
     tuple.description = params.description;
     tuple.example = params.example;
     
-    if (tuple.title && tuple.description){
+    if (tuple.order && tuple.title && tuple.key && tuple.description){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -98,7 +100,7 @@ function updateLearning (req, res){
     var id = req.params.id;
     var update = req.body;     
     
-    if (update.title.length > 0 && update.description.length > 0) {
+    if (update.order && update.title.length > 0 && update.key.length > 0  && update.description.length > 0) {
         Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
             if (err){
                 res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
@@ -111,7 +113,7 @@ function updateLearning (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: nombre, descripción, ejemplo'});
+        res.status(200).send({message:'Rellena los campos obligatorios: nombre, clave, descripción, ejemplo'});
     }
 }
 

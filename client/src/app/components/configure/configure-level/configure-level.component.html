@@ -126,14 +126,14 @@
             <table *ngIf="levelLearnings.length>0" class="table">
                 <thead class="thead-inverse">
                     <tr>
-                        <th>#</th>              
+                        <th>Order</th>              
                         <th>Title</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let element of levelLearnings; let i = index">
-                        <th scope="row">{{i+1}}</th>              
+                    <tr *ngFor="let element of levelLearnings; let i = index">                                     
+                        <td>{{element.learning.order}}</td>
                         <td>{{element.learning.title}}</td>
                         <td>
                             <a (click)="removeLearning(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
@@ -144,7 +144,7 @@
             <form *ngIf="learnings" (ngSubmit)="addLearning()" #form="ngForm" class="form-inline">
                 <div class="form-group mb-2">                    
                     <select  class="form-control" [(ngModel)]="levelLearning.learning" name="learning">
-                        <option *ngFor="let l of learnings" [ngValue]="l">{{l.title}}</option>
+                        <option *ngFor="let l of learnings" [ngValue]="l">{{l.order}} {{l.title}}</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Añadir</button>

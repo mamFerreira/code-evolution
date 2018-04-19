@@ -3,9 +3,8 @@ importScripts('./rapydscript.js');
 
 var myInterpreter;
 var compiler;
-var AsyncFunctions = [];
-var NativeFunctions = [];
-var ObjectFunctions = [];
+var PlayerFunctions = [];
+var PlayerObjectFunctions = [];
 var timeWait = 10;
 var json, block;
 var idInterval;
@@ -25,7 +24,8 @@ var queryableFunctions = {
     execute: (data) => {
 
         try{
-            var code_translate = compiler.compile(data);
+            var code_format = formatCode(data)
+            var code_translate = compiler.compile(code_format);
         }catch(e){            
             reply('error','Line:'+e.lineNumber + ' Colum: ' + e.col + '  ' + e.message);
             return;
@@ -37,7 +37,7 @@ var queryableFunctions = {
     },
 
     // Cargar valor en JSON
-    loadValue: (data) => {                   
+    loadValue: (data) => {        
         json = data;         
     },
 
@@ -65,96 +65,63 @@ self.addEventListener('message', (e) => {
     }
 });
 
+function formatCode(c) {
+    var c_aux = 'player = generatePlayer()\n' + c;    
+    c_aux = c_aux.replace(/' '+\n$/,'\n');   // Eliminamos salto de linea
+    c_aux = c_aux.replace(/\t/g,'    ');     // Remplazamos tabulador por 4 saltos de linea
+    return c_aux;
+}
+
 // Añadir método ejecutable por el worker en el diccionario
 function addMethod (method){
-    var wrapperAsync = null;
-    var wrapperNative = null;
-    var wrapperObject = null;
+    var wrapperPlayer = null;  
+    var wrapperObject = false; 
 
     switch(method){
         case 'moveUp':
         case 'moveDown': 
         case 'moveRight': 
         case 'moveLeft':
-            wrapperAsync = (callback) => {                
+            wrapperPlayer = (callback) => {                
                 block = true;
                 reply(method);          
-                waitResponse(callback);
+                waitUnblock(callback);
             };
             break;
         case 'move':
-            wrapperAsync = (v1, v2, callback) => {
+            wrapperPlayer = (v1, v2, callback) => {                
                 block = true;
-                reply(method,v1, v2); 
-                waitResponse(callback);               
+                reply(method,v1, v2);          
+                waitUnblock(callback);
             };
             break;
-        case 'findNearestFood':            
-            wrapperObject = () => {};
-            break;   
-        case 'positionPlayer':             
-            wrapperObject = () => {};
-            break;       
-    }
-
-    if (wrapperNative != null){        
-        NativeFunctions.push({
-            key:   method,
-            value: wrapperNative
-        })
+        case 'food':
+            wrapperPlayer = (callback) => {
+                json = null;
+                reply(method);
+                waitResponse(callback);
+            };
+            break;
+        case 'position':
+            wrapperObject = true;
+            break;
+        case 'findNearestFood':
+            wrapperObject = true;
+            break;
     }  
 
-    if (wrapperAsync != null){        
-        AsyncFunctions.push({
+    if (wrapperPlayer != null){             
+        PlayerFunctions.push({
             key:   method,
-            value: wrapperAsync
-        })
-    } 
+            value: wrapperPlayer
+        });
+    }             
 
-    if (wrapperObject != null){        
-        ObjectFunctions.push({
-            key:   method,
-            value: wrapperObject
-        })        
-    }  
-            
-}
-
-// Función de inicialización de la API del worker
-function initApi (i,s){ 
-    
-    for (var index=0; index<NativeFunctions.length; index++){
-        i.setProperty(s, NativeFunctions[index].key, i.createNativeFunction(NativeFunctions[index].value));
+    if (wrapperObject) {
+        PlayerObjectFunctions.push({
+            key: method            
+        });
     }
-    
-    for (var index=0; index<AsyncFunctions.length; index++){
-        i.setProperty(s, AsyncFunctions[index].key, i.createAsyncFunction(AsyncFunctions[index].value));
-    }
-    
-    for (var index=0; index<ObjectFunctions.length; index++){
-
-        switch(ObjectFunctions[index].key){
-            case 'findNearestFood':
-                var wrapper = (callback) => {                                      
-                    json = null;            
-                    reply('findNearestFood');          
-                    waitResponseObject(i, callback);
-                };
-                break;
-            case 'positionPlayer':
-                var wrapper = (callback) => {                                      
-                    json = null;            
-                    reply('positionPlayer');          
-                    waitResponseObject(i, callback);
-                };
-                break;
-        }
-
-        i.setProperty(s, ObjectFunctions[index].key, i.createAsyncFunction(wrapper));
-    }
-    
-    i.setProperty(s, 'print', i.createNativeFunction((v) => {reply('print',v);}));
-
 }
 
 // Envío de mensaje al hilo principal
@@ -188,9 +155,58 @@ function stop(){
     clearInterval(idInterval);        
 }
 
-// Esperar respuesta del hilo principal
-function waitResponse(callback){
+// Función de inicialización de la API del worker
+function initApi (i,s){ 
 
+    // Funciones player
+    i.setProperty(s, 'generatePlayer', i.createAsyncFunction(
+        (callback) => {
+            initApiPlayer(i, callback);
+        }
+    ));
+
+    // Función print
+    i.setProperty(s, 'print', i.createNativeFunction((v) => {reply('print',v);}));
+}
+
+// Función de inicialización de la API del player
+function initApiPlayer(i, callback){
+    
+    var obj = i.createObject(i.OBJECT);    
+    
+    for (var index=0; index<PlayerFunctions.length; index++){        
+        i.setProperty(obj, PlayerFunctions[index].key, i.createAsyncFunction(PlayerFunctions[index].value));        
+    }  
+    
+    for (var index=0; index<PlayerObjectFunctions.length; index++){
+
+        switch(PlayerObjectFunctions[index].key){
+            case 'position':
+                var wrapper = (callback) => {                                      
+                    json = null;            
+                    reply('position');          
+                    waitResponseObject(i, callback);
+                };
+                break;
+            case 'findNearestFood':
+                var wrapper = (callback) => {                                      
+                    json = null;            
+                    reply('findNearestFood');          
+                    waitResponseObject(i, callback);
+                };
+                break;
+        }
+
+        i.setProperty(obj, PlayerObjectFunctions[index].key, i.createAsyncFunction(wrapper));
+
+    }
+
+    callback(obj);
+
+}
+
+// Esperar desbloquo del hilo principal
+function waitUnblock(callback){
     idIntervalResponse = setInterval(()=>{        
         if (!block){
             callback(block)
@@ -198,6 +214,16 @@ function waitResponse(callback){
         }
     },timeWait) 
 
+}
+
+// Esperar respuesta del hilo principal
+function waitResponse(callback){
+    idIntervalResponse = setInterval(()=>{        
+        if (json != null){                               
+            callback(json)
+            clearInterval(idIntervalResponse);                
+        }
+    },timeWait)
 }
 
 // Esperar respuesta del hilo principal con objeto
@@ -218,17 +244,3 @@ function waitResponseObject(i, callback){
     },timeWait) 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

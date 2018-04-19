@@ -23,8 +23,9 @@ export class StateMain extends Phaser.State {
     private _game: Phaser.Game;
     private _player: Phaser.Sprite; 
     private _map: Phaser.Tilemap;
-    private _layerSurface: Phaser.TilemapLayer;
-    private _layerBlock: Phaser.TilemapLayer;
+    private _layerBackground: Phaser.TilemapLayer;
+    private _layerObject: Phaser.TilemapLayer;
+    private _layerCollision: Phaser.TilemapLayer;
     // Variables sonido
     private _soundMain: Phaser.Sound;        
     private _soundFood: Phaser.Sound;
@@ -34,11 +35,13 @@ export class StateMain extends Phaser.State {
     private _scoreH: number;
     private _velocity: number;
     private _sizeSprite: number;
+    private _sizePlayer: Array<number>;
     private _widthHealthBar: number;
     private _posInitial: Position;
     private _healthMax: number;
     private _timeMax: number;
     private _volume: boolean;
+    private _numLevel: number;
     // Variables file BBDD
     private _filePlayer: string;
     private _fileMap: string;
@@ -94,6 +97,7 @@ export class StateMain extends Phaser.State {
         this._velocity = 64;
         this._widthHealthBar = 250; 
         this._sizeSprite = 32; 
+        this._sizePlayer = new Array<number>(32, 32);
         this._volume = true;     
         this._goals = new Array<[string, boolean]> ();   
         this._index = 0;
@@ -149,12 +153,32 @@ export class StateMain extends Phaser.State {
         return this._sizeSprite;
     }
 
+    get sizePlayer_x () {
+        return this._sizePlayer[0];
+    }
+
+    get sizePlayer_y () {
+        return this._sizePlayer[1];
+    }
+
+    get sizeCanvas() {
+        return [this._canvasW, this._canvasH];
+    }
+
     get volume () {
         return this._volume;
     }
 
+    get numLevel () {
+        return this._numLevel;
+    }
+
     get posInitial () {
         return this._posInitial;
+    }
+
+    get posGoalTmp () {
+        return this._posGoalTmp;
     }
 
     get stateGame () {
@@ -187,7 +211,11 @@ export class StateMain extends Phaser.State {
 
     get groupFood () {
         return this._groupFood;
-    }    
+    }   
+    
+    get foodCurrent() {        
+        return this._foodCurrent;
+    }
 
     // Funciones de carga
 
@@ -197,9 +225,19 @@ export class StateMain extends Phaser.State {
         this._fileTiledset = file_T;
     }
 
-    loadConfigure (time, health) {
+    loadConfigure (time, health, playerW, playerH, n) {
         this._timeMax = time;
         this._healthMax = health;
+        this._numLevel = n;
+
+        if (playerW) {
+            this._sizePlayer[0] = playerW;
+        }
+
+        if (playerH) {
+            this._sizePlayer[1] = playerH;
+        }
+
     }
 
     loadGoal(title, key, v1, v2) {            
@@ -208,7 +246,7 @@ export class StateMain extends Phaser.State {
 
         switch (key) {
             case 'POSITION':                
-                this._posGoal = new Position(v1 - (this._sizeSprite / 2), v2 - (this._sizeSprite / 2));
+                this._posGoal = new Position(v1, v2);
                 msg = title + ': (' + v1 + ',' + v2 + ')';
                 this._indexPos = this._index;
                 break;
@@ -222,12 +260,12 @@ export class StateMain extends Phaser.State {
         this._index ++;        
     }
 
-    loadPositionPlayer (x, y) {
-        this._posInitial = new Position(x - (this._sizeSprite / 2), y - (this._sizeSprite / 2));
+    loadPositionPlayer (v1, v2) {
+        this._posInitial = new Position(v1, v2);
     }
 
-    loadPosition (x, y) { 
-        let p = new Position(x - (this._sizeSprite / 2), y - (this._sizeSprite / 2));            
+    loadPosition (v1, v2) { 
+        let p = new Position(v1, v2);            
 
         if (!this._groupPosition) {
             this._groupPosition = new Array<Position>();
@@ -251,8 +289,8 @@ export class StateMain extends Phaser.State {
         this.stateGame = GameState.Init;
 
         // Jugador
-        this._player.x = this._posInitial.x;
-        this._player.y = this._posInitial.y;
+        this._player.x = this._posInitial.x - (this.sizePlayer_x / 2);
+        this._player.y = this._posInitial.y - (this.sizePlayer_y / 2);
         this.stopPlayer();
         this._game.world.bringToTop(this._player);
         
@@ -283,12 +321,10 @@ export class StateMain extends Phaser.State {
     preload() {
         // Carga map, player y tiledset        
         this._game.load.tilemap('map', Global.url_api + 'level-load/' + this._fileMap + '/M', null, Phaser.Tilemap.TILED_JSON);         
-        this._game.load.spritesheet('player', Global.url_api + 'evolution-load/' + this._filePlayer + '/P', 45, 34);            
+        this._game.load.spritesheet('player', Global.url_api + 'evolution-load/' + this._filePlayer + '/P', this._sizePlayer[0], this._sizePlayer[1]);         
         this._game.load.image('tiledset', Global.url_api + 'evolution-load/' + this._fileTiledset + '/T');    
         // Carga de audios
-        this.game.load.audio('song-main', Global.url_sound + 'song-main.mp3');        
-        this.game.load.audio('level-up', Global.url_sound + '/sound/level-up.mp3');
-        this.game.load.audio('game-over', Global.url_sound + '/sound/game-over.wav');
+        this.game.load.audio('song-main', Global.url_sound + 'song-main.mp3');                
         this.game.load.audio('sound-food', Global.url_sound + '/sound/eating.mp3');
         // Carga burbujas de diálogo
         this._game.load.image('speech_D_C', Global.url_resource + 'object/speech_down_center.png');
@@ -319,12 +355,13 @@ export class StateMain extends Phaser.State {
         this._game.stage.backgroundColor = '#FFFFFF';
         this._map = this._game.add.tilemap('map');
         this._map.addTilesetImage('tiledset', 'tiledset');
-        this._layerSurface = this._map.createLayer('surface');
-        this._layerBlock = this._map.createLayer('block'); 
-        this._map.setCollisionBetween(1, 3500, true, this._layerBlock);
+        this._layerBackground = this._map.createLayer('background');
+        this._layerObject = this._map.createLayer('object'); 
+        this._layerCollision = this._map.createLayer('collision'); 
+        this._map.setCollisionBetween(1, 1000, true, this._layerCollision);
 
         // Player
-        this._player = this._game.add.sprite(this._posInitial.x, this._posInitial.y, 'player', 0);           
+        this._player = this._game.add.sprite(this._posInitial.x - (this.sizePlayer_x / 2), this._posInitial.y - (this.sizePlayer_y / 2), 'player', 0);           
         this._player.animations.add('right', [0, 1, 2, 3], 10, true);
         this._player.animations.add('up', [4, 5, 6, 7], 10, true);
         this._player.animations.add('left', [8, 9, 10, 11], 10, true);
@@ -386,7 +423,7 @@ export class StateMain extends Phaser.State {
         // Posiciones habilitadas
         if (this._groupPosition) {
             this._groupPosition.forEach( (p) => {
-                let s = this._game.add.sprite(p.x, p.y, 'pos');
+                let s = this._game.add.sprite(p.x - (this._sizeSprite / 2), p.y - (this._sizeSprite / 2), 'pos');
                 s.width = this._sizeSprite;
                 s.height = this._sizeSprite;
             });
@@ -394,7 +431,7 @@ export class StateMain extends Phaser.State {
                 
         // Posición objetivo
         if (this._posGoal) {
-            let s = this._game.add.sprite(this._posGoal.x, this._posGoal.y, 'pos_obj');
+            let s = this._game.add.sprite(this._posGoal.x - (this._sizeSprite / 2), this._posGoal.y - (this._sizeSprite / 2), 'pos_obj');
             s.width = this._sizeSprite;
             s.height = this._sizeSprite;
         }                         
@@ -403,15 +440,20 @@ export class StateMain extends Phaser.State {
     update() {
 
         // Comprobar colisión con pared
-        this._game.physics.arcade.collide(this._layerBlock, this._player, this.eventCollisionBlock, null, this);
+        this._game.physics.arcade.collide(this._layerCollision, this._player, this.eventCollisionBlock, null, this);
 
         // Comprobar objetivo temporal
         if (this._posGoalTmp) {
-            if (this._posGoalTmp.inRange(this._player.x, this._player.y, 2)) {
+            let dist = this.game.physics.arcade.distanceToXY(this._player, this._posGoalTmp.x - (this.sizePlayer_x / 2) , this.posGoalTmp.y - (this.sizePlayer_y / 2));
+
+            if (Math.round(dist) >= -1 && Math.round(dist) <= 1) {
                 this.stopPlayer();                             
                 delete this._posGoalTmp;
-                this._wait = false; 
+                this._wait = false;  
+            } else {
+                this.game.physics.arcade.moveToXY(this._player, this._posGoalTmp.x - (this.sizePlayer_x / 2) , this.posGoalTmp.y - (this.sizePlayer_y / 2), this._velocity);
             }
+
         }  
 
         // Comprobar objetivos finales
@@ -524,7 +566,8 @@ export class StateMain extends Phaser.State {
         // Posición objetivo
         if (this._posGoal) {
             if (!this._goals[this._indexPos][1]) {
-                if (!this._posGoal.inRange(this._player.x, this._player.y, 2)) {
+                let p_aux = this.positionPlayer();
+                if (!this._posGoal.inRange(p_aux.x, p_aux.y, 5)) {
                     checked = false;
                 } else {
                     this._goals[this._indexPos][1] = true;                    
@@ -547,35 +590,34 @@ export class StateMain extends Phaser.State {
     }
     
     checkPosition(direction): Position {
-        let posPlayer = new Position (this._player.x, this._player.y);                
+        let posPlayer = this.positionPlayer();                
         let posNext = new Position (0, 0, false);
         let positions_tmp = Object.assign([], this._groupPosition);
-        let range = 2;
+        let range = 5;
         
         if (this._posGoal) {
             positions_tmp.push(this._posGoal);
-        }
-            
+        }          
         positions_tmp.forEach(p => {
-            if (!posPlayer.inRange(p.x, p.y, range)) {                 
+            if (!p.inRange(posPlayer.x, posPlayer.y, range)) {                 
                 switch (direction) {
                     case 'D':                                                                      
-                        if (posPlayer.inRange(p.x, p.y, range, 'x') && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
+                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'x') && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
                             posNext.assign(p);
                         }
                         break;
                     case 'U':                                                
-                        if (posPlayer.inRange(p.x, p.y, range, 'x') && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
+                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'x') && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
                             posNext.assign(p);
                         }
                         break;
                     case 'R':                             
-                        if (posPlayer.inRange(p.x, p.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {
+                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {
                             posNext.assign(p);
                         }
                         break;
                     case 'L':                        
-                        if (posPlayer.inRange(p.x, p.y, range, 'y') && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
+                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
                             posNext.assign(p);
                         }
                         break;
@@ -592,7 +634,7 @@ export class StateMain extends Phaser.State {
         return this._game.rnd.integerInRange(min, max);   
     }
 
-    ChangeVolume () {
+    changeVolume () {
         this._volume = !this._volume;
 
         if (!this._volume) {
@@ -604,27 +646,55 @@ export class StateMain extends Phaser.State {
         }
     }
 
+    stopPlayer() {        
+        this._player.body.velocity.x = 0;
+        this._player.body.velocity.y = 0; 
+        this._player.animations.stop(true);               
+    }
+
     /* Acciones jugador */
+
+    positionPlayer(posFixed: boolean = false) {   
+        let p = null;
+        let p_x = Math.round(this.player.x) + (this.sizePlayer_x / 2);
+        let p_y = Math.round(this.player.y) + (this.sizePlayer_y / 2);  
+                
+        if (!posFixed) {
+            return new Position (p_x, p_y);
+        } else {
+            for (let i = 0; i < this._groupPosition.length; i++) {
+                if (this._groupPosition[i].inRange(p_x, p_y, 5)) {                    
+                    p =   this._groupPosition[i];                 
+                } 
+            }           
+
+            if (!p && this._posInitial.inRange(p_x, p_y, 5)) {
+                return this._posInitial;
+            }
+
+            return p;
+
+        }        
+
+        return new Position (0, 0, false);
+    }
+
     moveDirection(direction: string) {
         
         this._posGoalTmp = this.checkPosition(direction);
         
         if (this._posGoalTmp.active) {
             switch (direction) {
-                case 'D':                
-                    this._player.body.velocity.y = this._velocity;
+                case 'D':                                    
                     this._player.play('down');
                     break;
-                case 'U':
-                    this._player.body.velocity.y = -this._velocity;
+                case 'U':                    
                     this._player.play('up');
                     break;
-                case 'R':
-                    this._player.body.velocity.x = this._velocity;
+                case 'R':                    
                     this._player.play('right');
                     break;  
-                case 'L':
-                    this._player.body.velocity.x = -this._velocity;
+                case 'L':                    
                     this._player.play('left');
                     break;
             }  
@@ -651,11 +721,22 @@ export class StateMain extends Phaser.State {
     } 
 
     move (x: number, y: number) {
-        if (y < (this._canvasH - this._sizeSprite / 2)) {
-            this._posGoalTmp = new Position (x - (this._sizeSprite / 2), y - (this._sizeSprite / 2)); 
-            this._wait = true;                              
-            this._game.physics.arcade.moveToXY(this._player, this._posGoalTmp.x, this._posGoalTmp.y, this._velocity);
-            this._player.animations.play('walk', 4, true);
+        if (y < (this._canvasH - (this.sizePlayer_y / 2))) {
+            // Animación
+
+            let aux_x = this._player.x - x;
+            let aux_y = this._player.y - y;
+            if (aux_y > 0 && Math.abs(aux_y) > Math.abs(aux_x)) {
+                this._player.play('up');
+            } else if (aux_y < 0 && Math.abs(aux_y) > Math.abs(aux_x)) {
+                this._player.play('down');
+            } else if (aux_x > 0 && Math.abs(aux_x) >= Math.abs(aux_y)) {
+                this._player.play('left');
+            } else {
+                this._player.play('right');
+            }
+            this._posGoalTmp = new Position (x, y); 
+            this._wait = true;            
         } else {
             this.eventGameOver ('Movimiento no válido a (' + x + ',' + y + ')');
         }    
@@ -665,23 +746,18 @@ export class StateMain extends Phaser.State {
     findNearestFood () {
 
         let p = new Position(0, 0, false);
-        let d_min = null, d;        
+        let d_min = null, d;         
+        
         this._groupFood.forEach(element => {            
             d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y).toFixed(2);            
             if (!d_min || d_min > d) {
                 d_min = d;                
-                p.x = element.world.x + (this._sizeSprite / 2);
-                p.y = element.world.y + (this._sizeSprite / 2);
+                p.x = element.world.x + (this.sizeSprite / 2);
+                p.y = element.world.y + (this.sizeSprite / 2);
                 p.active = true;
             }                      
         });      
 
         return p;
-    }
-
-    stopPlayer() {
-        this._player.body.velocity.x = 0;
-        this._player.body.velocity.y = 0; 
-        this._player.animations.stop(true);               
     } 
 }

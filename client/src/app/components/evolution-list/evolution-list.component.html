@@ -49,7 +49,7 @@
                             <td>
                                 <button *ngFor="let l of learnings; let i = index;" class="btn-learning" (click)="changeLearning(l)"
                                 [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
-                                    {{l.title}}
+                                    {{l.key}}
                                 </button>
                             </td>
                         </tr>                                                                                          

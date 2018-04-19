@@ -42,7 +42,7 @@ export class ConfigureLearningComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir aprendizaje';
-        this.learning = new Learning (null, '', '', '');
+        this.learning = new Learning (null, null, '', '', '', '');
       }      
     });
   }

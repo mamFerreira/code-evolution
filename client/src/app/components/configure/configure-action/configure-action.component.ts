@@ -43,7 +43,7 @@ export class ConfigureActionComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir acción';
-        this.action = new Action (null, '', '', '');
+        this.action = new Action (null, '', '', '', '');
       }      
     });
   }

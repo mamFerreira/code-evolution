@@ -13,10 +13,11 @@ function addAction (req, res){
     var params = req.body; //Recogemos los datos que llegan por POST
 
     tuple.method = params.method;
+    tuple.key = params.key;
     tuple.description = params.description;
     tuple.example = params.example;
     
-    if (tuple.method && tuple.description && tuple.example){
+    if (tuple.method && tuple.key && tuple.description && tuple.example){
         tuple.save((err,tupleAdd) => {
             if(err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});
@@ -98,7 +99,7 @@ function updateAction (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    if (update.method.length > 0 && update.description.length > 0 && update.example.length > 0) {
+    if (update.method.length > 0 && update.key.length > 0 && update.description.length > 0 && update.example.length > 0) {
         Action.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
             if (err){
                 res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 

@@ -131,17 +131,17 @@
           <table class="table">
               <thead class="thead-inverse">
                 <tr>
-                  <th>#</th>
-                  <th>Title</th>
-                  <th>Description</th>   
+                  <th>Order</th>
+                  <th>Title</th> 
+                  <th>Key</th>                 
                   <th>Actions</th>                                
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let element of list; let i = index">
-                  <th scope="row">{{i+1}}</th>
-                  <td>{{element.title}}</td>
-                  <td>{{element.description}}</td>
+                  <td>{{element.order}}</td>
+                  <td>{{element.title}}</td>   
+                  <td>{{element.key}}</td>                   
                   <td>
                       <a [routerLink]="['edit/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                       <a (click)="removeLearning(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
@@ -157,16 +157,16 @@
               <thead class="thead-inverse">
                 <tr>
                   <th>#</th>
-                  <th>Method</th>
-                  <th>Description</th> 
-                  <th>Actions</th>                 
+                  <th>Method</th>   
+                  <th>Key</th>               
+                  <th>Actions</th>                                     
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let element of list; let i = index">
                   <th scope="row">{{i+1}}</th>
-                  <td>{{element.method}}</td>
-                  <td>{{element.description}}</td>
+                  <td>{{element.method}}</td>                  
+                  <td>{{element.key}}</td> 
                   <td>
                       <a [routerLink]="['edit/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                       <a (click)="removeAction(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>

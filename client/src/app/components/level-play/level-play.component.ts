@@ -218,14 +218,19 @@ export class LevelPlayComponent implements OnInit {
 
     if (action === GameAction.Play) {
       if (this.game.stateGame === GameState.Init) {
-        this._levelSercice.registerCode(this.code, this.level._id).subscribe(
-          res => {        
-            this.game.doAction(GameAction.Play, this.code);           
-          },
-          err => {
-            this.errorMsg += err.error.message;
-          }
-        );          
+
+        if (this.code.length === 0) {
+          this.game.doAction(GameAction.Stop);
+        } else {
+          this._levelSercice.registerCode(this.code, this.level._id).subscribe(
+            res => {        
+              this.game.doAction(GameAction.Play, this.code);           
+            },
+            err => {
+              this.errorMsg += err.error.message;            
+            }
+          ); 
+        }                 
       }
       if (this.game.stateGame === GameState.Pause) {
         this.game.doAction(GameAction.Continue);           

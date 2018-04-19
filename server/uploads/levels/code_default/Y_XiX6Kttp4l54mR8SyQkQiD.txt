@@ -1,0 +1,11 @@
+"""
+Ahora algo más complicado.
+Utiliza las acciones disponibles para llevar al organismo
+unicelular hasta la posición objetivo.
+
+Recuerda que puedes obtener más ayuda en el botón de información
+y haciendo click en la acción. Y no olvides revisar el listado de
+aprendizaje para ver que conocimientos Python vas adquieriendo.
+"""
+
+player.moveUp()

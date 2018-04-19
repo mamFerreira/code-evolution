@@ -1,6 +1,6 @@
 .container-image {
     height: 325px;
-    width: 440px;
+    width: 430px;
     border: 2px solid black;
     margin-top: 5%;
     border-radius: 20px;
@@ -18,7 +18,8 @@
     margin:auto;
   }
 
-.level-detail{
+
+  .level-detail{
     margin-top: 15px;
 }
 

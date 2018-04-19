@@ -94,7 +94,7 @@ export class Game {
             this._state = new s.State();
             
             this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
-            this._state.loadConfigure(this._level.time, this._evolution.health);        
+            this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
 
 
             g.forEach((g, index) => {    
@@ -118,11 +118,7 @@ export class Game {
         
         // Cargamos las acciones disponibles del nivel en el worker
         actions.forEach(a => {
-            let method = a.action.method;            
-            let index = method.indexOf('(');
-            if (index > 0) {
-                method = method.substring(0, index);
-            }
+            let method = a.action.key;
             actionJson.push({'method' : method} );
         });        
 
@@ -139,11 +135,11 @@ export class Game {
     addEventListener() {
         this._worker.addEventListener('message', (e) => {            
 
-            switch (e.data.action) {
+            switch (e.data.action) {            
                 case 'moveDown':
                     this._state.moveDirection('D');                                                     
                     break;
-                case 'moveUp':
+                case 'moveUp': 
                     this._state.moveDirection('U');                                                       
                     break;
                 case 'moveRight':
@@ -164,14 +160,18 @@ export class Game {
                     }
                     this._state.move (e.data.value[0], e.data.value[1]);                                        
                     break;
-                case 'findNearestFood':                                                            
-                    this.postMessage('loadValue', this._state.findNearestFood());
+                case 'food':                     
+                    this.postMessage('loadValue', this._state.foodCurrent);
                     break;
-                case 'positionPlayer':                     
-                    this.postMessage('loadValue', this._state.positionPlayer());
+                case 'position':
+                    this.postMessage('loadValue', this._state.position());
+                    break;
+                case 'findNearestFood':
+                    this.postMessage('loadValue', this._state.findNearestFood());
                     break;
                 case 'print':
                     console.log(e.data.value[0]);
+                    this.addCodeShell(e.data.value[0]);
                     break;
                 case 'finish':
                     this.registerError('Ejecución finalizada sin contemplar los objetivos');
@@ -207,11 +207,9 @@ export class Game {
                 break;
             case GameAction.Play:
                 this._state.stateGame = GameState.Run;
-                this.postMessage('execute', code);                                
+                this.postMessage('execute', code);                
                 this.addCodeShell('Play...');
-
                 this._idIntervalM = setInterval(() => {                                        
-
                     if (this._state.stateGame === GameState.LevelUp) { 
                         this._soundLU.play();
                         this.nextLevel();                                                   
@@ -221,8 +219,8 @@ export class Game {
                         this.addCodeShell('Error: ' + this._state.msgError, true);                        
                         this.finish();
                     }                                                            
-                }, 50);
-                break;
+                }, 50);                
+                break;                
             case GameAction.Pause:                                                
                 this.addCodeShell('Pause');
                 this._state.stateGame = GameState.Pause;
@@ -238,7 +236,7 @@ export class Game {
                 this.finish();
                 break;
             case GameAction.ChangeVolume:                
-                this._state.ChangeVolume();
+                this._state.changeVolume();
 
                 if (this._state.volume) {
                     this._soundLU.volume = 0.2;        
