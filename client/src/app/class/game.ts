@@ -170,8 +170,20 @@ export class Game {
                     this.postMessage('loadValue', this._state.findNearestFood());
                     break;
                 case 'print':
-                    console.log(e.data.value[0]);
                     this.addCodeShell(e.data.value[0]);
+                    break;
+                case 'printArray':
+                    let index = 0;
+                    let v = '(';
+                    while (e.data.value[0][index]) {
+                        v += e.data.value[0][index];
+                        index += 1;
+                        if (e.data.value[0][index]) {
+                            v += ', ';
+                        }
+                    } 
+                    v +=  ')';   
+                    this.addCodeShell(v);
                     break;
                 case 'finish':
                     this.registerError('Ejecución finalizada sin contemplar los objetivos');

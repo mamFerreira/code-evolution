@@ -89,6 +89,7 @@ pre{
   position: relative; 
   margin-top: 50px;
   min-width: 900px;
+  max-width: 1200px;
 }
 
 /*Marcas inicio y fin de la linea de tiempo*/

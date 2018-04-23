@@ -166,7 +166,13 @@ function initApi (i,s){
     ));
 
     // Función print
-    i.setProperty(s, 'print', i.createNativeFunction((v) => {reply('print',v);}));
+    i.setProperty(s, 'print', i.createNativeFunction((v) => {
+        if (v.G === 'Array'){
+            reply('printArray',v.a);
+        } else {
+            reply('print',v);      
+        }
+    }));
 }
 
 // Función de inicialización de la API del player

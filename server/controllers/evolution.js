@@ -275,8 +275,7 @@ function getEvolutionLearning (req, res) {
                 foreignField: '_id',
                 as: 'tmp2'
             }
-        },
-        { $sort : { 'tmp2.order' : -1 } },
+        },        
         {
             $project: {
                 "_id": 0,
@@ -285,7 +284,7 @@ function getEvolutionLearning (req, res) {
         },
         {
             $group: {_id: null, uniqueValues: {$addToSet: "$tmp2"}}
-        },        
+        },
     ]).exec ((err,tuples) => {
         if (err){
             res.status(500).send({message:'Error en el servidor: ' + table, messageError: err.message});

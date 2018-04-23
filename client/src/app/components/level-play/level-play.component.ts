@@ -124,7 +124,7 @@ export class LevelPlayComponent implements OnInit {
             res => {
               if (!res.actions) {
                 this.errorMsg += res.message;
-              } else {
+              } else {                
                 this.actions = res.actions;
                 // Posiciones
                 this._levelSercice.getPositions(this.level._id).subscribe(
@@ -159,7 +159,7 @@ export class LevelPlayComponent implements OnInit {
         if (!res.learnings) {
           this.errorMsg += res.message;
         } else {
-          this.learnings = res.learnings;
+          this.learnings = res.learnings;          
         }
       },
       err => {

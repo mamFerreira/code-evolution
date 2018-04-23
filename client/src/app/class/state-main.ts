@@ -655,28 +655,24 @@ export class StateMain extends Phaser.State {
     /* Acciones jugador */
 
     positionPlayer(posFixed: boolean = false) {   
-        let p = null;
+        let p = new Position (0, 0);
         let p_x = Math.round(this.player.x) + (this.sizePlayer_x / 2);
         let p_y = Math.round(this.player.y) + (this.sizePlayer_y / 2);  
                 
-        if (!posFixed) {
-            return new Position (p_x, p_y);
+        if (!posFixed) {            
+            p.x = p_x;
+            p.y = p_y;            
         } else {
             for (let i = 0; i < this._groupPosition.length; i++) {
                 if (this._groupPosition[i].inRange(p_x, p_y, 5)) {                    
-                    p =   this._groupPosition[i];                 
+                    p.assign(this._groupPosition[i]);
                 } 
             }           
-
             if (!p && this._posInitial.inRange(p_x, p_y, 5)) {
-                return this._posInitial;
-            }
-
-            return p;
-
+                p.assign(this._posInitial);
+            }            
         }        
-
-        return new Position (0, 0, false);
+        return p;
     }
 
     moveDirection(direction: string) {

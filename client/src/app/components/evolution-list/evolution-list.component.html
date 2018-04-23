@@ -68,16 +68,13 @@
                 <div class="col-md-6 col-lg-6 float-left">
                     <table *ngIf="learning" class="table">
                         <tbody>
-                            <tr>
-                                <td class="col-xs-2"><strong>Titulo</strong></td>
-                                <td><pre [innerHTML]="learning.title"></pre></td>
+                            <tr>                            
+                                <td><strong><p [innerHTML]="learning.title" style="font-size:14px;"></p></strong></td>
                             </tr>
                             <tr>
-                                <td><strong>Descripción</strong></td>
-                                <td><pre [innerHTML]="learning.description"></pre></td>
+                                <td><p [innerHTML]="learning.description"></p></td>
                             </tr>
-                            <tr>
-                                <td><strong>Ejemplo</strong></td>
+                            <tr *ngIf="learning.example">
                                 <td><pre [innerHTML]="learning.example"></pre></td>
                             </tr>
                         </tbody>

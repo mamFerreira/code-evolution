@@ -73,7 +73,7 @@
                         <tr *ngFor="let l of learnings">
                         <td>
                             <popover-content #ppLearning title= "{{l.learning.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
-                                <p class="popover-description">{{l.learning.description}}</p>
+                                <p class="popover-description" [innerHTML]="l.learning.description"></p>
                                 <pre *ngIf="l.learning.example" [innerHTML]="l.learning.example" class="popover-example"></pre>                            
                             </popover-content>
                             <a [popover]="ppLearning" class="popover-botton">{{l.learning.key}}</a>

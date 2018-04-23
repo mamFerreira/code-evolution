@@ -77,7 +77,7 @@ function getLearnings (req, res){
             }
         });
     }else{
-        Learning.find({}).exec((err,tuples) => {
+        Learning.find({}).sort({order:1}).exec((err,tuples) => {
             if (err){
                 res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
             }else{
@@ -98,7 +98,7 @@ function getLearnings (req, res){
  */
 function updateLearning (req, res){
     var id = req.params.id;
-    var update = req.body;     
+    var update = req.body;         
     
     if (update.order && update.title.length > 0 && update.key.length > 0  && update.description.length > 0) {
         Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
