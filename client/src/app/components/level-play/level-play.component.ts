@@ -125,7 +125,13 @@ export class LevelPlayComponent implements OnInit {
               if (!res.actions) {
                 this.errorMsg += res.message;
               } else {                
-                this.actions = res.actions;
+                this.actions = res.actions.sort( (o1, o2) => {
+                  if (o1.order > o2.order) {
+                    return 1;
+                  } else {
+                    return 0;
+                  }
+                }); 
                 // Posiciones
                 this._levelSercice.getPositions(this.level._id).subscribe(
                   res => {
@@ -159,7 +165,13 @@ export class LevelPlayComponent implements OnInit {
         if (!res.learnings) {
           this.errorMsg += res.message;
         } else {
-          this.learnings = res.learnings;          
+          this.learnings = res.learnings.sort( (o1, o2) => {
+            if (o1.learning.order > o2.learning.order) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });                    
         }
       },
       err => {
@@ -173,14 +185,14 @@ export class LevelPlayComponent implements OnInit {
    */
   loadCode() {
     this._levelSercice.loadCode(this.level._id).subscribe(
-      res => {
+      res => {        
         if (!res.code) {
           this.errorMsg += res.message;
-        } else {
+        } else {          
           this.code = res.code;
         }
       },
-      err => {
+      err => {        
         this.errorMsg += err.error.message;
       }
     );

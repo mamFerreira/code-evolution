@@ -1,0 +1,21 @@
+'''
+Posiciones:
+Alimento 1: x = 50, y = 190
+Alimento 2: x = 150, y = 190
+Alimento 3: x = 250, y = 190
+Alimento 4: x = 350, y = 190
+Alimento 5: x = 450, y = 190
+'''
+
+
+# !!!Asigna un valor a y
+y = 
+
+# !!!Define la tupla
+tupla_x = 
+
+# !!! Completa el for
+for:
+    
+ 
+# !!! Movimiento hasta la posición objetivo

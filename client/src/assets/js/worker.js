@@ -105,8 +105,22 @@ function addMethod (method){
         case 'position':
             wrapperObject = true;
             break;
+        case 'eat':
+            wrapperPlayer = (callback) => {                
+                block = true;
+                reply(method);          
+                waitUnblock(callback);
+            };
+            break;
         case 'findNearestFood':
             wrapperObject = true;
+            break;
+        case 'existsFood':
+            wrapperPlayer = (callback) => {
+                json = null;
+                reply(method);
+                waitResponse(callback);
+            };
             break;
     }  
 

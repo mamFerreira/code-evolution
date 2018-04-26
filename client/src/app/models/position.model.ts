@@ -3,6 +3,7 @@ export class Position {
         public _id: string,
         public level: string,
         public value_x: number,
-        public value_y: number
+        public value_y: number,
+        public initial: boolean
     ) {}
 }

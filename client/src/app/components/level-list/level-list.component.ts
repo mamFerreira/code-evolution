@@ -117,7 +117,13 @@ export class LevelListComponent implements OnInit {
     this._learningService.getLearningsLevel(this.level._id).subscribe(
       res => {
         if (res.learnings) {
-          this.learnings = res.learnings;          
+          this.learnings = res.learnings.sort( (o1, o2) => {
+            if (o1.order > o2.order) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });          
         }
       },
       err => {
@@ -129,8 +135,14 @@ export class LevelListComponent implements OnInit {
   getActions() {
     this._actionService.getActionsLevel(this.level._id).subscribe(
       res => {
-        if (res.actions) {
-          this.actions = res.actions;
+        if (res.actions) {          
+          this.actions = res.actions.sort( (o1, o2) => {
+            if (o1.order > o2.order) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });  
         }
       },
       err => {

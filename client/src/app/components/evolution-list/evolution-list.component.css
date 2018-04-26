@@ -14,6 +14,7 @@
   border: 2px solid #343434;
   font-weight: bold;
   color: #343434;
+  padding: 3px 5px 3px 5px;
 }
 
 .btn-learning:hover {  
@@ -38,19 +39,20 @@
 
 
 .container-image {
-  height: 150px;
-  width: 150px;    
+  width: 250px;
+  height: 250px;  
   margin: 0 auto;
   overflow: hidden;  
   position: relative; 
 }
 
 .container-image img{
-  height: 150px;
+  height: 250px;
   position:absolute;
   left:0px;
   right:0px;
-  top:0px;
+  top: 0px;
+  bottom: 0px;
   margin:auto;
 }
 pre{

@@ -4,6 +4,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var ActionSchema = new Schema({
+    order: Number,
     method: String,
     key: String,
     description: String,

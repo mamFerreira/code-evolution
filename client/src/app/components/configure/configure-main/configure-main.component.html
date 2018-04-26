@@ -156,7 +156,7 @@
           <table class="table">
               <thead class="thead-inverse">
                 <tr>
-                  <th>#</th>
+                  <th>Order</th>
                   <th>Method</th>   
                   <th>Key</th>               
                   <th>Actions</th>                                     
@@ -164,7 +164,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let element of list; let i = index">
-                  <th scope="row">{{i+1}}</th>
+                  <td>{{element.order}}</td>
                   <td>{{element.method}}</td>                  
                   <td>{{element.key}}</td> 
                   <td>

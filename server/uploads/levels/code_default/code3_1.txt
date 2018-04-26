@@ -1,0 +1,16 @@
+''' Introducción a tuplas
+'''
+
+tupla_x = (150, 250, 350)
+tupla_y = (140, 200)
+
+player.move(tupla_x[0], tupla_y[0])
+player.eat()
+
+player.move(tupla_x[1], tupla_y[0])
+player.eat()
+
+# !!!Añade lo necesario para recoger el resto de alimento
+
+
+# !!!Y llega a la posición objetivo

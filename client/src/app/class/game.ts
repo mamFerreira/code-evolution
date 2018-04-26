@@ -101,8 +101,8 @@ export class Game {
                 this._state.loadGoal(g.goal.title, g.goal.key, g.value1, g.value2);                                       
             });
             
-            p.forEach((p, index) => {
-                if (index === 0) {
+            p.forEach((p) => {
+                if (p.initial) {
                     this._state.loadPositionPlayer(p.value_x, p.value_y);
                 } else {
                     this._state.loadPosition(p.value_x, p.value_y);
@@ -160,6 +160,9 @@ export class Game {
                     }
                     this._state.move (e.data.value[0], e.data.value[1]);                                        
                     break;
+                case 'eat':
+                    this._state.eat();
+                    break;
                 case 'food':                     
                     this.postMessage('loadValue', this._state.foodCurrent);
                     break;
@@ -169,6 +172,9 @@ export class Game {
                 case 'findNearestFood':
                     this.postMessage('loadValue', this._state.findNearestFood());
                     break;
+                case 'existsFood':
+                    this.postMessage('loadValue', this._state.existsFood());     
+                    break;               
                 case 'print':
                     this.addCodeShell(e.data.value[0]);
                     break;

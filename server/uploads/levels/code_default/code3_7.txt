@@ -1,0 +1,6 @@
+#Hasta 10 alimentos aleatorios
+while player.existsFood():
+    food = player.findNearestFood()
+    player.move(food.x, food.y)
+    player.eat()
+player.move(465,45)

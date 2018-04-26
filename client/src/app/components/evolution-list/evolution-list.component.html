@@ -47,10 +47,13 @@
                             <td><strong>Aprendizaje</strong></td>
                             <td *ngIf="errorLearning" class="alert alert-warning"> <strong>Error: </strong>{{errorLearning}}</td>
                             <td>
-                                <button *ngFor="let l of learnings; let i = index;" class="btn-learning" (click)="changeLearning(l)"
-                                [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
-                                    {{l.key}}
-                                </button>
+                                <div *ngFor="let l of learnings; let i = index;" class="btn-learning" [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
+                                    <popover-content #ppLearning title= "{{l.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
+                                        <p class="popover-description" [innerHTML]="l.description"></p>
+                                        <pre *ngIf="l.example" [innerHTML]="l.example" class="popover-example"></pre>                            
+                                    </popover-content>                                                                    
+                                    <a [popover]="ppLearning" class="popover-botton">{{l.key}}</a>
+                                </div>
                             </td>
                         </tr>                                                                                          
                         </tbody>
@@ -60,26 +63,11 @@
                         <button class="btn btn-play" [routerLink]="['/home']">VOLVER</button>  
                     </div>                                       
                 </div>
-                <!--<div class="col-md-4 col-lg-4 float-right">
+                <div class="col-md-4 col-lg-4 float-right">
                     <div class="container-image">
                             <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
                     </div>                                                                                                            
-                </div>-->                                        
-                <div class="col-md-6 col-lg-6 float-left">
-                    <table *ngIf="learning" class="table">
-                        <tbody>
-                            <tr>                            
-                                <td><strong><p [innerHTML]="learning.title" style="font-size:14px;"></p></strong></td>
-                            </tr>
-                            <tr>
-                                <td><p [innerHTML]="learning.description"></p></td>
-                            </tr>
-                            <tr *ngIf="learning.example">
-                                <td><pre [innerHTML]="learning.example"></pre></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>                           
+                </div>-                    
             </div>                    
         </div>
     </div>  

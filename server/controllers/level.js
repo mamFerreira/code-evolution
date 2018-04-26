@@ -528,6 +528,7 @@ function addPosition (req, res) {
     position.level = id_level;
     position.value_x = params.value_x;
     position.value_y = params.value_y;
+    position.initial = params.initial;
 
     if (position.value_x && position.value_y){
         position.save((err,tupleAdd) => {

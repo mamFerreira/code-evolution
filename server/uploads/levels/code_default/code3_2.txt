@@ -1,0 +1,29 @@
+''' Definición de tuplas
+Posiciones alimentos:
+Alimento 1- x = 125, y = 175
+Alimento 2- x = 275, y = 175
+Alimento 3- x = 400, y = 175
+Alimento 4- x = 275, y = 230
+Alimento 5- x = 125, y = 300
+Alimento 6- x = 275, y = 300
+Alimento 7- x = 400, y = 300
+'''
+
+# !!!Define las tuplas con los datos de las posiciones del comentario
+tupla_x = 
+tupla_y = 
+
+
+# !!!Realiza los movimientos con los valores de las tuplas y 
+# recoge todos los alimentos
+
+#Alimento 1
+player.move(tupla_x[], tupla_y[])
+player.eat()
+
+# ...
+
+
+# !!! Una vez recogidos todo el alimento, lleva al 
+# anfibio hasta la posición objetivo
+

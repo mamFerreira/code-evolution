@@ -60,7 +60,9 @@ export class StateMain extends Phaser.State {
     private _deathGoal: number;
     private _indexDeath: number;
     private _foodGoal: number;
+    private _foodAll: boolean;
     private _indexFood: number;
+    private _indexFoodAll: number;
     // Variables objetivos temporales
     private _posGoalTmp: Position;
     // Variables grupos de objetos
@@ -99,7 +101,8 @@ export class StateMain extends Phaser.State {
         this._sizeSprite = 32; 
         this._sizePlayer = new Array<number>(32, 32);
         this._volume = true;     
-        this._goals = new Array<[string, boolean]> ();   
+        this._goals = new Array<[string, boolean]> ();
+        this._foodAll = false;   
         this._index = 0;
 
         this._game = new Phaser.Game(this._canvasW, this._canvasH + this._scoreH, Phaser.CANVAS, Global.id_canvas);
@@ -197,6 +200,10 @@ export class StateMain extends Phaser.State {
         return this._goals;
     }
 
+    get foodGoal() {
+        return this._foodGoal;
+    }
+
     get groupPosition () {
         return this._groupPosition;
     }
@@ -254,6 +261,11 @@ export class StateMain extends Phaser.State {
                 this._foodGoal = v1;
                 msg = title + ': ' + v1;
                 this._indexFood = this._index;
+                break;
+            case 'FOOD_ALL':
+                this._foodAll = true;
+                msg = title;         
+                this._indexFoodAll = this._index;       
                 break;
         }        
         this._goals.push([msg, false]);        
@@ -534,14 +546,6 @@ export class StateMain extends Phaser.State {
         this.eventGameOver('Colisión');        
     }
 
-    eventCollisionFood(player, food) { 
-        food.kill();
-        this._groupFood.remove(food);        
-        this._foodCurrent ++;        
-        this._foodText.text = this._foodCurrent;       
-        this._soundFood.play(); 
-    }
-
     eventAttacked (hurt: number) {
         this._healthCurrent -= hurt;
 
@@ -582,6 +586,17 @@ export class StateMain extends Phaser.State {
                     checked = false;
                 } else {
                     this._goals[this._indexFood][1] = true;
+                }
+            }
+        }
+
+        // Todos los alimentos recogidos
+        if (this._foodAll) {
+            if (!this._goals[this._indexFoodAll][1]) {
+                if (this._groupFood.length > 0) {
+                    checked = false;
+                } else {
+                    this._goals[this._indexFoodAll][1] = true;
                 }
             }
         }
@@ -633,6 +648,9 @@ export class StateMain extends Phaser.State {
     random (min, max) {
         return this._game.rnd.integerInRange(min, max);   
     }
+    distance (x1, y1, x2, y2) {
+        return  Phaser.Math.distance(x1, x2, y1, y2);   
+    }
 
     changeVolume () {
         this._volume = !this._volume;
@@ -651,7 +669,7 @@ export class StateMain extends Phaser.State {
         this._player.body.velocity.y = 0; 
         this._player.animations.stop(true);               
     }
-
+        
     /* Acciones jugador */
 
     positionPlayer(posFixed: boolean = false) {   
@@ -744,16 +762,49 @@ export class StateMain extends Phaser.State {
         let p = new Position(0, 0, false);
         let d_min = null, d;         
         
-        this._groupFood.forEach(element => {            
-            d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y).toFixed(2);            
-            if (!d_min || d_min > d) {
+        this._groupFood.forEach((element) => {            
+            d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y);              
+            if (!d_min || d_min > d) {                
                 d_min = d;                
                 p.x = element.world.x + (this.sizeSprite / 2);
                 p.y = element.world.y + (this.sizeSprite / 2);
                 p.active = true;
-            }                      
-        });      
-
+            } 
+        });        
         return p;
-    } 
+    }
+    
+    eat () {
+        let d;
+        let exists = false;
+
+        if (this._groupFood.length > 0) {
+            this._wait = true;
+        }
+        
+        this._groupFood.forEach((f) => {
+            d = Phaser.Math.distance(f.world.x, f.world.y, this._player.x, this._player.y);                          
+            if (d < (this._sizeSprite / 2)) {
+                exists = true;
+                this._soundFood.play();               
+                let _id = setInterval(
+                    () => { 
+                        f.kill();                        
+                        this._groupFood.remove(f);        
+                        this._foodCurrent ++;        
+                        this._foodText.text = this._foodCurrent;                        
+                        this._wait = false;
+                        clearInterval(_id);                                             
+                    }, 1000);
+            }            
+        });          
+
+        if (!exists) {
+            this.eventGameOver ('Ningún alimento cerca con el que alimentarse');
+        }                 
+    }
+
+    existsFood() {
+        return this._groupFood.length > 0;
+    }
 }

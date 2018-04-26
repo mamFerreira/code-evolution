@@ -98,7 +98,7 @@ export class ConfigureLevelComponent implements OnInit {
     this.levelGoal = new LevelGoal (null, id, null, null, null);
     this.levelLearning = new LevelLearning (null, id, null);
     this.levelAction = new LevelAction (null, id, null);
-    this.position = new Position (null, id, null, null);
+    this.position = new Position (null, id, null, null, false);
     // Array    
     this.levelGoals = new Array<LevelGoal>(); 
     this.levelLearnings = new Array<LevelLearning>();
@@ -466,6 +466,7 @@ export class ConfigureLevelComponent implements OnInit {
           this.position._id = null;    
           this.position.value_x = null;
           this.position.value_y = null;
+          this.position.initial = false;
           this.getPositions(this.level._id);                              
         }
       },

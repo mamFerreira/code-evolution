@@ -89,7 +89,13 @@ export class EvolutionListComponent implements OnInit {
         if (!res.learnings) {
           this.errorLearning = res.message;          
         } else {
-          this.learnings = res.learnings;          
+          this.learnings = res.learnings.sort( (o1, o2) => {
+            if (o1.order > o2.order) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });          
         }
       },
       err => {
@@ -102,9 +108,5 @@ export class EvolutionListComponent implements OnInit {
     this.evolution = evolution_selected;
     this.getLearnings();
   }
-
-  changeLearning (learning_selected) {
-    this.learning = learning_selected;
-  }
-
+  
 }

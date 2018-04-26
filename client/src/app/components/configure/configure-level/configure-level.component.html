@@ -185,14 +185,16 @@
                         <th>#</th>              
                         <th>Coord. X</th>
                         <th>Coord. Y</th>                        
-                        <th>Action</th>
+                        <th>Initial</th>
+                        <th>Action</th>                        
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let element of levelPositions; let i = index">
                         <th scope="row">{{i+1}}</th>              
                         <td>{{element.value_x}}</td>
-                        <td>{{element.value_y}}</td>                    
+                        <td>{{element.value_y}}</td>   
+                        <td>{{element.initial}}</td>
                         <td>
                             <a (click)="removePosition(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
                         </td>
@@ -200,13 +202,17 @@
                 </tbody>
             </table> 
             <form (ngSubmit)="addPosition()" #form="ngForm" class="form-inline">
-                <div class="form-group mb-2">
+                <div class="form-group mb-1">
                     <label for="name" class="control-label">Cood. X:</label>
                     <input type="text" class="form-control" [(ngModel)]="position.value_x" name="value_x" required #value_x="ngModel">           
                 </div>
-                <div class="form-group mb-2">
+                <div class="form-group mb-1">
                     <label for="name" class="control-label">Cood. Y:</label>
                     <input type="text" class="form-control" [(ngModel)]="position.value_y" name="value_y" required #value_y="ngModel">          
+                </div>
+                <div class="form-group mb-1">
+                    <label for="name" class="control-label">Initial:</label>
+                    <input type="checkbox" class="form-control" [(ngModel)]="position.initial" name="initial" required #initial="ngModel">          
                 </div>
                 <button type="submit" class="btn btn-primary mb-2">Añadir</button>
             </form> 
