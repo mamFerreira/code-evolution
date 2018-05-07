@@ -1,4 +1,4 @@
-// Importación Modelos
+// Importamos movelos
 import { User } from '../models/user.model';
 import { Evolution } from '../models/evolution.model';
 import { Level } from '../models/level.model';
@@ -6,16 +6,17 @@ import { LevelGoal } from '../models/level_goal.model';
 import { LevelAction } from '../models/level_action.model';
 import { Position } from '../models/position.model';
 
-// Importación de servicios
+// Importamos servicios
 import { UserService } from '../services/user.service';
 import { LevelService } from '../services/level.service';
 
-// Importación de clases
+// Importamos clases
 import { Checker} from './checker';
 import { GameAction } from '../enum/game-action';
 import { GameState } from '../enum/game-state';
+import { Food } from './food';
 
-
+// Declaramos la clase
 export class Game {   
     
     // Variables principales
@@ -45,7 +46,7 @@ export class Game {
         this._checker = new Checker();              
         this._codeShell = '';   
         this._msgError = '';   
-
+        // Sonidos de levelUp y gameOver
         this._soundLU = new Audio('../../../assets/audio/sound/level-up.mp3');    
         this._soundGO = new Audio('../../../assets/audio/sound/game-over.mp3'); 
         this._soundLU.volume = 0.2;        
@@ -135,75 +136,27 @@ export class Game {
     addEventListener() {
         this._worker.addEventListener('message', (e) => {            
 
-            switch (e.data.action) {            
-                case 'moveDown':
-                    this._state.moveDirection('D');                                                     
-                    break;
-                case 'moveUp': 
-                    this._state.moveDirection('U');                                                       
-                    break;
-                case 'moveRight':
-                    this._state.moveDirection('R');                                                        
-                    break;
-                case 'moveLeft':
-                    this._state.moveDirection('L');                                                        
-                    break;
-                case 'move':
-                    if (! this._checker.checkArray(e.data.value, 2)) {
-                        this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
-                        return;
-                    }          
-                    
-                    if (! this._checker.checkIntPos(e.data.value[0]) || !this._checker.checkIntPos(e.data.value[1])) {
-                        this.registerError('Los valores de la acción "move" no son enteros positivos');
-                        return;
-                    }
-                    this._state.move (e.data.value[0], e.data.value[1]);                                        
-                    break;
-                case 'eat':
-                    this._state.eat();
-                    break;
-                case 'food':                     
-                    this.postMessage('loadValue', this._state.foodCurrent);
+            switch (e.data.type) {            
+                case 'primary':
+                    this.addEventListeningPrimary(e.data.action, e.data.value);
                     break;
                 case 'position':
-                    this.postMessage('loadValue', this._state.position());
+                    this.addEventLisneningPosition(e.data.action, e.data.value);
                     break;
-                case 'findNearestFood':
-                    this.postMessage('loadValue', this._state.findNearestFood());
-                    break;
-                case 'existsFood':
-                    this.postMessage('loadValue', this._state.existsFood());     
-                    break;               
-                case 'print':
-                    this.addCodeShell(e.data.value[0]);
-                    break;
-                case 'printArray':
-                    let index = 0;
-                    let v = '(';
-                    while (e.data.value[0][index]) {
-                        v += e.data.value[0][index];
-                        index += 1;
-                        if (e.data.value[0][index]) {
-                            v += ', ';
-                        }
-                    } 
-                    v +=  ')';   
-                    this.addCodeShell(v);
-                    break;
+                case 'food':
+                    this.addEventListeningFood(e.data.action, e.data.value);
+                    break;                                                                                                                                       
                 case 'finish':
                     this.registerError('Ejecución finalizada sin contemplar los objetivos');
                     break;
                 case 'error':
                     this.registerError(e.data.value);
-                    break;
-                default:                
-                    this.registerError ('Acción ' + e.data.action + ' no definida');
+                    break;                
             }
 
             if (this._state.wait) {
                 this._idIntervalB = setInterval(() => {
-                    if (!this._state.wait) {                        
+                    if (!this._state.wait) {                                              
                         this.postMessage('unblock', true);
                         clearInterval(this._idIntervalB);                            
                     }                        
@@ -212,6 +165,112 @@ export class Game {
 
         }, false); 
     }
+
+    addEventListeningPrimary(action, value) {
+        switch (action) {
+            case 'print':
+                this.addCodeShell(value[0]);
+                break;
+            case 'printArray':
+                let index = 0;
+                let v = '(';
+                while (value[0][index]) {
+                    v += value[0][index];
+                    index += 1;
+                    if (value[0][index]) {
+                        v += ', ';
+                    }
+                } 
+                v +=  ')';   
+                this.addCodeShell(v);
+                break;
+            default:
+                this.registerError ('Acción primaria ' + action + ' no definida');
+        }
+    }
+
+    addEventLisneningPosition(action, value) {
+        switch (action) {
+            case 'position':
+                this.postMessage('loadValue', this._state.position());
+                break;  
+            case 'move':
+                if (! this._checker.checkArray(value, 2)) {
+                    this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
+                    return;
+                }          
+                
+                if (! this._checker.checkIntPos(value[0]) || !this._checker.checkIntPos(value[1])) {
+                    this.registerError('Los valores de la acción "move" no son enteros positivos');
+                    return;
+                }
+                this._state.move (value[0], value[1]);                                        
+                break;
+            case 'moveUp': 
+                this._state.moveDirection('U');                                                       
+                break;
+            case 'moveDown':
+                this._state.moveDirection('D');
+                break;            
+            case 'moveLeft':
+                this._state.moveDirection('L');                                                        
+                break;
+            case 'moveRight':
+                this._state.moveDirection('R');                                                        
+                break;
+            default:
+                this.registerError ('Acción de movimiento ' + action + ' no definida');
+        }
+    }
+
+    addEventListeningFood(action, value) {
+
+        let food;
+
+        switch (action) {
+            case 'food':                     
+                this.postMessage('loadValue', this._state.foodCurrent);
+                break;
+            case 'existsFood':
+                this.postMessage('loadValue', this._state.existsFood());     
+                break;
+            case 'findNearestFood': 
+                this.postMessage('loadValue', this._state.findNearestFood());             
+                break;  
+            case 'eat':  
+            
+                if (! this._checker.checkArray(value, 1)) {
+                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
+                    return;
+                }
+            
+                if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
+                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
+                    return;
+                }   
+
+                food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);                
+                this._state.eat(food);
+                break;
+            case 'discardFood':
+                if (! this._checker.checkArray(value, 1)) {
+                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
+                    return;
+                }
+            
+                if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
+                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
+                    return;
+                }   
+
+                food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);
+
+                this._state.discardFood(food);
+                break;
+            default:
+                this.registerError ('Acción de alimento ' + action + ' no definida');
+        }
+    }    
 
     // Métodos principales
 
@@ -224,9 +283,10 @@ export class Game {
                 this._msgError = '';                               
                 break;
             case GameAction.Play:
-                this._state.stateGame = GameState.Run;
-                this.postMessage('execute', code);                
+                this._state.stateGame = GameState.Run;                                
                 this.addCodeShell('Play...');
+                this.postMessage('execute', code);
+                
                 this._idIntervalM = setInterval(() => {                                        
                     if (this._state.stateGame === GameState.LevelUp) { 
                         this._soundLU.play();

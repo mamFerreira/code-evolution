@@ -1,10 +1,10 @@
 import { StateMain } from '../state-main';
+import { Food } from '../food';
 
 export class State extends StateMain {
     
     private _addedFood: boolean; 
-    private _food: Array<string>;    
-
+    private _food: Array <[string, boolean]>;
 
     reload() {
         super.reload();   
@@ -21,7 +21,7 @@ export class State extends StateMain {
     }
     
     create() {
-        this._food = ['acorn', 'chestnut', 'mushroom', 'seed'];        
+        this._food = [['acorn', false], ['chestnut', false], ['mushroom', true], ['seed', true]];        
         super.create();    
         this.groupFood = this.loadGroup();                            
         super.reload();
@@ -37,26 +37,26 @@ export class State extends StateMain {
     }
 
     addFoodRandom() {  
-        let x, y;      
-        let min_x = 125;
-        let max_x = 375;
-        let min_y = 100;
+        let x, y, tmp;      
+        let min_x = 50;
+        let max_x = 450;
+        let min_y = 120;
         let max_y = 350;
         for (let i = 0; i < this.foodGoal * 2; i++) {
-            /*let check = true;
-            let d;
-            do {
-                x = this.random(min_x, max_x);
-                y = this.random(min_y, max_y);                
-                this.groupFood.forEach(element => {
-                    if (this.distance(element.world.x, element.world.y, x, y) < this.sizeSprite / 1.8) {
-                        check = false;                        
-                    }
-                });
-            } while (!check);*/
             x = this.random(min_x, max_x);
-            y = this.random(min_y, max_y);                
-            this.groupFood.create(x - (this.sizeSprite / 2), y - (this.sizeSprite / 2), this._food[i % 4]);
+            y = this.random(min_y, max_y);   
+            tmp = this.game.add.sprite(x, y, this._food[i % 4][0]);
+            this.groupFood.add(tmp);            
         }
+    }
+
+    eat(f: Food) {
+
+        for (let i = 0; i < this._food.length; i++) {
+            if (this._food[i][0] === f.type) {
+                super.eat(f, this._food[i][1]);                
+                return;
+            }         
+        }        
     }
 }

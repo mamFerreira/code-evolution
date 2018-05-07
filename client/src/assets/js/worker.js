@@ -26,8 +26,8 @@ var queryableFunctions = {
         try{
             var code_format = formatCode(data)
             var code_translate = compiler.compile(code_format);
-        }catch(e){            
-            reply('error','Line:'+e.lineNumber + ' Colum: ' + e.col + '  ' + e.message);
+        }catch(e){  
+            replyError('Line:' + e.lineNumber + ' Colum: ' + e.col + '  ' + e.message)                      
             return;
         }        
 
@@ -37,8 +37,12 @@ var queryableFunctions = {
     },
 
     // Cargar valor en JSON
-    loadValue: (data) => {        
-        json = data;         
+    loadValue: (data) => {   
+        if (data != null){
+            json = data;     
+        } else {
+            json = false;
+        }                          
     },
 
     // Desbloquear la ejecución de código
@@ -57,14 +61,15 @@ self.addEventListener('message', (e) => {
     if (e.data instanceof Object && e.data.hasOwnProperty("action") && e.data.hasOwnProperty("value")) {         
         if (queryableFunctions.hasOwnProperty(e.data.action)){
             queryableFunctions[e.data.action].apply(self, e.data.value);
-        }else{
-            reply('error','Función ' + e.data.action +  'no declarada');
+        }else{            
+            replyError('Función ' + e.data.action +  'no declarada');
         }                     
-    } else {
-        reply("error", e.data);
+    } else {        
+        replyError(e.data);
     }
 });
 
+// Formatear código
 function formatCode(c) {
     var c_aux = 'player = generatePlayer()\n' + c;    
     c_aux = c_aux.replace(/' '+\n$/,'\n');   // Eliminamos salto de linea
@@ -84,21 +89,21 @@ function addMethod (method){
         case 'moveLeft':
             wrapperPlayer = (callback) => {                
                 block = true;
-                reply(method);          
+                reply('position',method);          
                 waitUnblock(callback);
             };
             break;
         case 'move':
             wrapperPlayer = (v1, v2, callback) => {                
                 block = true;
-                reply(method,v1, v2);          
+                reply('position',method,v1, v2);          
                 waitUnblock(callback);
             };
             break;
         case 'food':
             wrapperPlayer = (callback) => {
-                json = null;
-                reply(method);
+                json = null;                                
+                reply('food',method);
                 waitResponse(callback);
             };
             break;
@@ -106,9 +111,16 @@ function addMethod (method){
             wrapperObject = true;
             break;
         case 'eat':
-            wrapperPlayer = (callback) => {                
-                block = true;
-                reply(method);          
+            wrapperPlayer = (v,callback) => {                
+                block = true;                
+                reply('food',method,v.a);          
+                waitUnblock(callback);
+            };
+            break;
+        case 'discardFood':
+            wrapperPlayer = (v,callback) => {                
+                block = true;                
+                reply('food',method,v.a);          
                 waitUnblock(callback);
             };
             break;
@@ -118,7 +130,7 @@ function addMethod (method){
         case 'existsFood':
             wrapperPlayer = (callback) => {
                 json = null;
-                reply(method);
+                reply('food',method);
                 waitResponse(callback);
             };
             break;
@@ -126,7 +138,7 @@ function addMethod (method){
 
     if (wrapperPlayer != null){             
         PlayerFunctions.push({
-            key:   method,
+            key: method,
             value: wrapperPlayer
         });
     }             
@@ -138,26 +150,31 @@ function addMethod (method){
     }
 }
 
-// Envío de mensaje al hilo principal
+// Envío de mensajes al hilo principal
 function reply () {
     if (arguments.length < 1) { 
         throw new TypeError("reply - not enough arguments"); 
         return; 
-    }
-    postMessage({ "action": arguments[0], "value": Array.prototype.slice.call(arguments, 1) });
+    }    
+    postMessage({ "type": arguments[0], "action": arguments[1], "value": Array.prototype.slice.call(arguments, 2) });
+}
+
+// Envío de mensajes de error al hilo principal
+function replyError (msg) {
+    postMessage({ "type": "error", "action": "", "value": msg });
 }
 
 // Ejecución paso a paso del código enviado por el hilo principal
 function nextStep() {                
     idInterval = setInterval(
         () => { 
-            try{
+            try{                
                 if (!myInterpreter.step()){                    
                     stop();
                     reply('finish');
                 }
-            }catch(e){                
-                reply('error',e.message);
+            }catch(e){                                
+                replyError(e.message)
             }                         
         }, timeWait);
     myInterpreter.step();
@@ -182,9 +199,9 @@ function initApi (i,s){
     // Función print
     i.setProperty(s, 'print', i.createNativeFunction((v) => {
         if (v.G === 'Array'){
-            reply('printArray',v.a);
+            reply('primary','printArray',v.a);
         } else {
-            reply('print',v);      
+            reply('primary','print',v);      
         }
     }));
 }
@@ -204,15 +221,15 @@ function initApiPlayer(i, callback){
             case 'position':
                 var wrapper = (callback) => {                                      
                     json = null;            
-                    reply('position');          
-                    waitResponseObject(i, callback);
+                    reply('position','position');          
+                    waitResponsePosition(i, callback);
                 };
                 break;
             case 'findNearestFood':
                 var wrapper = (callback) => {                                      
                     json = null;            
-                    reply('findNearestFood');          
-                    waitResponseObject(i, callback);
+                    reply('food','findNearestFood');          
+                    waitResponseFood(i, callback);
                 };
                 break;
         }
@@ -228,7 +245,7 @@ function initApiPlayer(i, callback){
 // Esperar desbloquo del hilo principal
 function waitUnblock(callback){
     idIntervalResponse = setInterval(()=>{        
-        if (!block){
+        if (!block){                   
             callback(block)
             clearInterval(idIntervalResponse);                
         }
@@ -246,15 +263,36 @@ function waitResponse(callback){
     },timeWait)
 }
 
-// Esperar respuesta del hilo principal con objeto
-function waitResponseObject(i, callback){
+// Esperar respuesta del hilo principal con posición
+function waitResponsePosition(i, callback){
     
-    idIntevalResponse = setInterval(()=>{                
+    idIntevalResponse = setInterval(()=>{                               
         if (json){                        
-            if (json._active){                
+            if (json._active){                                
                 var obj = i.createObject(i.OBJECT);
                 i.setProperty(obj, 'x', i.createPrimitive(json._x));
                 i.setProperty(obj, 'y', i.createPrimitive(json._y));            
+                callback(obj);
+            }else{
+                callback(null);
+            }            
+            clearInterval(idIntevalResponse);                
+        }
+    },timeWait) 
+
+}
+
+// Esperar respuesta del hilo principal con objeto alimento
+function waitResponseFood(i, callback){
+    
+    idIntevalResponse = setInterval(()=>{          
+        if (json != null){                                        
+            if (json){                                     
+                var obj = i.createObject(i.OBJECT);
+                i.setProperty(obj, 'id', i.createPrimitive(json._id));
+                i.setProperty(obj, 'type', i.createPrimitive(json._type));                
+                i.setProperty(obj, 'x', i.createPrimitive(json._position._x));
+                i.setProperty(obj, 'y', i.createPrimitive(json._position._y));                        
                 callback(obj);
             }else{
                 callback(null);

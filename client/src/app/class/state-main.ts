@@ -3,6 +3,8 @@ import 'phaser-ce/build/custom/p2';
 import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 
 import { Position } from './position';
+import { Food } from './food';
+
 import { Global } from '../enum/global';
 import { GameState } from '../enum/game-state';
 
@@ -319,7 +321,8 @@ export class StateMain extends Phaser.State {
         });
 
         // Marcadores
-        this._healthCurrent = this._healthMax;        
+        this._healthCurrent = this._healthMax;
+        this._healthBar.width = (this._healthCurrent * this._widthHealthBar) / this._healthMax;        
         this._coinCurrent = 0; 
         this._coinText.text = this._coinCurrent;
         this._deathCurrent = 0;
@@ -547,11 +550,10 @@ export class StateMain extends Phaser.State {
     }
 
     eventAttacked (hurt: number) {
-        this._healthCurrent -= hurt;
-
+        this._healthCurrent -= hurt;        
         if (this._healthCurrent <= 0) {
             this._healthCurrent = 0;
-            this.stateGame = GameState.GameOver;
+            this.eventGameOver('El organismo ha muerto');
         }
         this._healthBar.width = (this._healthCurrent * this._widthHealthBar) / this._healthMax;
     }
@@ -648,6 +650,7 @@ export class StateMain extends Phaser.State {
     random (min, max) {
         return this._game.rnd.integerInRange(min, max);   
     }
+
     distance (x1, y1, x2, y2) {
         return  Phaser.Math.distance(x1, x2, y1, y2);   
     }
@@ -671,6 +674,8 @@ export class StateMain extends Phaser.State {
     }
         
     /* Acciones jugador */
+
+    // Posición
 
     positionPlayer(posFixed: boolean = false) {   
         let p = new Position (0, 0);
@@ -737,7 +742,6 @@ export class StateMain extends Phaser.State {
     move (x: number, y: number) {
         if (y < (this._canvasH - (this.sizePlayer_y / 2))) {
             // Animación
-
             let aux_x = this._player.x - x;
             let aux_y = this._player.y - y;
             if (aux_y > 0 && Math.abs(aux_y) > Math.abs(aux_x)) {
@@ -757,54 +761,73 @@ export class StateMain extends Phaser.State {
         
     }
 
-    findNearestFood () {
-
-        let p = new Position(0, 0, false);
-        let d_min = null, d;         
-        
-        this._groupFood.forEach((element) => {            
-            d = Phaser.Math.distance(element.world.x, element.world.y, this._player.x, this._player.y);              
-            if (!d_min || d_min > d) {                
-                d_min = d;                
-                p.x = element.world.x + (this.sizeSprite / 2);
-                p.y = element.world.y + (this.sizeSprite / 2);
-                p.active = true;
-            } 
-        });        
-        return p;
-    }
-    
-    eat () {
-        let d;
-        let exists = false;
-
-        if (this._groupFood.length > 0) {
-            this._wait = true;
-        }
-        
-        this._groupFood.forEach((f) => {
-            d = Phaser.Math.distance(f.world.x, f.world.y, this._player.x, this._player.y);                          
-            if (d < (this._sizeSprite / 2)) {
-                exists = true;
-                this._soundFood.play();               
-                let _id = setInterval(
-                    () => { 
-                        f.kill();                        
-                        this._groupFood.remove(f);        
-                        this._foodCurrent ++;        
-                        this._foodText.text = this._foodCurrent;                        
-                        this._wait = false;
-                        clearInterval(_id);                                             
-                    }, 1000);
-            }            
-        });          
-
-        if (!exists) {
-            this.eventGameOver ('Ningún alimento cerca con el que alimentarse');
-        }                 
-    }
+    // Alimento
 
     existsFood() {
         return this._groupFood.length > 0;
     }
+
+    findNearestFood () {
+        let _d_min, _d;
+        let _id, _type, _x, _y, _food;                
+
+        for (let i = 0; i < this._groupFood.length; i++) {
+            _food = this._groupFood.getAt(i);
+            _d = Phaser.Math.distance(_food.world.x, _food.world.y, this._player.x, this._player.y);                                      
+            if (_d_min === undefined || _d_min > _d) {                
+                    _d_min = _d; 
+                    _x = _food.world.x + (this.sizeSprite / 2);
+                    _y = _food.world.y + (this.sizeSprite / 2);
+                    _id = i;
+                    _type = _food.key;                                
+            }                
+        }            
+        return new Food (_id, _type, _x, _y);
+    }
+    
+    eat (food: Food, poisonous: boolean = false) {  
+        this._wait = true;       
+        let dist =  Phaser.Math.distance(food.x, food.y, this._player.x, this._player.y);          
+        if (dist < (this.sizePlayer_x)) {
+            this._soundFood.play(); 
+            let _id = setInterval(
+                () => {
+                    let aux = this._groupFood.getAt(food.id);
+                    aux.kill();                        
+                    this._groupFood.remove(aux);                        
+
+                    if (!poisonous) {
+                        this._foodCurrent ++;        
+                        this._foodText.text = this._foodCurrent;                        
+                    } else {
+                        this.eventAttacked(this._healthCurrent);
+                    }
+                    this._wait = false;    
+                    clearInterval(_id);                                                                          
+                }, 1000);        
+        } else {
+            this.eventGameOver ('Debe de acercarse al alimento para poder alimentarse');
+        } 
+    }
+
+    discardFood(food: Food) {              
+        let dist =  Phaser.Math.distance(food.x, food.y, this._player.x, this._player.y); 
+
+        if (dist < (this.sizePlayer_x)) {            
+            this._wait = true;   
+            let _id = setInterval(
+                () => {
+                    let aux = this._groupFood.getAt(food.id);
+                    aux.kill();                        
+                    this._groupFood.remove(aux);    
+                    this._wait = false;    
+                    clearInterval(_id);                                                                                                 
+                }, 200);        
+        } else {
+            this.eventGameOver ('Debe de acercarse al alimento para poder desecharlo');
+        }
+
+    }
+
+    
 }
