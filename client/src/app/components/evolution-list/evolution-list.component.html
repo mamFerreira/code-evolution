@@ -1,74 +1,64 @@
-<div class="container" *ngIf="evolution && range && evolutions">
-    <div class="row">
-        <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="page-header">
-                <h1>{{title}}</h1>                                        
-            </div>  
-            <section class="main-timeline-section">
-                <div class="timeline-start"><p>Inicio</p></div>
-                <div class="conference-center-line"></div>
-                <div class="conference-timeline-content">
-                    <div class="timeline-article"></div>                    
-                    <div *ngFor="let i of range" class="timeline-article" [ngClass]="i%2 == 0  ? 'timeline-article-bottom' : 'timeline-article-top'">                        
-                        <div class="content-date" *ngIf="evolutions[i]">
-                                <span>{{evolutions[i].origin}}</span>
-                        </div>
-                        <div class="content-date interrogation" *ngIf="!evolutions[i]">
-                                <span>¿...?</span>
-                        </div>
-                        <div class="meta-date"></div>
-                        <div class="content-box" *ngIf="evolutions[i]" [ngClass]="{'content-box-selected': evolutions[i]._id == evolution._id }" (click)="changeEvolution(evolutions[i])">                                                                             
-                            <p>{{evolutions[i].name}}</p> 
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-end"><p>Fin</p></div>
-            </section>
-            <div class="col-md-12 col-lg-12 evolution-selected"> 
-                <h2>
-                    Organismo seleccionado: <strong>{{evolution.name}}</strong>                                          
-                </h2>                                
-                <div class="col-md-6 col-lg-6 float-right evolution-information">                    
-                    <table class="table">
-                        <tbody>
-                        <tr>
-                            <td><strong>Nombre</strong></td>
-                            <td>{{evolution.name}}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Origen</strong></td>
-                            <td>{{evolution.origin}}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Descripción</strong></td>
-                            <td>{{evolution.description}}</td>
-                        </tr> 
-                        <tr>
-                            <td><strong>Aprendizaje</strong></td>
-                            <td *ngIf="errorLearning" class="alert alert-warning"> <strong>Error: </strong>{{errorLearning}}</td>
-                            <td>
-                                <div *ngFor="let l of learnings; let i = index;" class="btn-learning" [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
-                                    <popover-content #ppLearning title= "{{l.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
-                                        <p class="popover-description" [innerHTML]="l.description"></p>
-                                        <pre *ngIf="l.example" [innerHTML]="l.example" class="popover-example"></pre>                            
-                                    </popover-content>                                                                    
-                                    <a [popover]="ppLearning" class="popover-botton">{{l.key}}</a>
-                                </div>
-                            </td>
-                        </tr>                                                                                          
-                        </tbody>
-                    </table> 
-                    <div class="container-button">
-                        <button class="btn btn-play" [routerLink]="['evolucion/'+evolution._id]">ACEPTAR</button>   
-                        <button class="btn btn-play" [routerLink]="['/home']">VOLVER</button>  
-                    </div>                                       
-                </div>
-                <div class="col-md-4 col-lg-4 float-right">
-                    <div class="container-image">
-                            <img *ngIf="evolution.image" src="{{url}}evolution-load/{{evolution.image}}/I"/>            
-                    </div>                                                                                                            
-                </div>-                    
+<h1>{{title}}</h1>                                                
+<app-alert></app-alert>
+<div class="row" *ngIf="evolutions && evolution_player && range">                            
+    <div *ngFor="let i of range" class="col-xs-12 col-md-4 full-card">
+        <div *ngIf="evolutions[i]" class="flip-card-enable" (click)="changeEvolution(evolutions[i])" data-toggle="modal" data-target="#evolution-modal">
+            <div class="card">                    
+                <i class="fa fa-user bigicon" [ngClass]="{'active-card': evolutions[i]._id == evolution_player }"></i>
+                <img *ngIf="evolutions[i].image" src="{{url}}evolution-load/{{evolutions[i].image}}/I"/>   
             </div>                    
-        </div>
-    </div>  
+            <div class="well">
+                <h1>{{evolutions[i].order}}.&nbsp;{{evolutions[i].name}}</h1>
+            </div>
+        </div> 
+        <div *ngIf="!evolutions[i]" class="flip-card">
+            <div class="card">
+                <h6>¿?</h6>
+            </div>
+            <div class="well">
+                <h1>-</h1>
+            </div>                    
+        </div>               
+    </div>                                                
+</div>    
+
+
+
+<div class="modal fade" id="evolution-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none; margin-top: 25px;">
+    <div class="well well-sm evolution-detail" *ngIf="evolution">                   
+        <h1>{{evolution.name}}</h1>                                                       
+        <table class="table">
+            <tbody>
+            <tr>
+                <td><strong>Nombre</strong></td>
+                <td>{{evolution.name}}</td>
+            </tr>
+            <tr>
+                <td><strong>Origen</strong></td>
+                <td>{{evolution.origin}}</td>
+            </tr>
+            <tr>
+                <td><strong>Descripción</strong></td>
+                <td>{{evolution.description}}</td>
+            </tr> 
+            <tr>
+                <td><strong>Aprendizaje</strong></td>
+                <td *ngIf="errorLearning" class="alert alert-warning"> <strong>Error: </strong>{{errorLearning}}</td>
+                <td>
+                    <div *ngFor="let l of learnings; let i = index;" class="btn-learning" [ngClass]="{'btn-learning_1': i%4 == 0, 'btn-learning_2': i%4 == 1, 'btn-learning_3': i%4 == 2 , 'btn-learning_4': i%4 == 3}">
+                        <popover-content #ppLearning title= "{{l.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
+                            <p class="popover-description" [innerHTML]="l.description"></p>
+                            <pre *ngIf="l.example" [innerHTML]="l.example" class="popover-example"></pre>                            
+                        </popover-content>                                                                    
+                        <a [popover]="ppLearning" class="popover-botton">{{l.key}}</a>
+                    </div>
+                </td>
+            </tr>                                                                                          
+            </tbody>
+        </table> 
+        
+            <button class="btn btn-primary btn-lg pull-left" [routerLink]="['evolucion/'+evolution._id]" data-dismiss="modal" aria-hidden="true">ELEGIR</button>   
+            <button class="btn btn-primary btn-lg pull-right" data-dismiss="modal" aria-hidden="true">VOLVER</button>  
+        
+    </div>
 </div>

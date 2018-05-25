@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { AlertService } from '../../services/alert.service';
 import { UserService } from '../../services/user.service';
 import { EvolutionService } from '../../services/evolution.service';
+
 import { Evolution } from '../../models/evolution.model';
 import { Learning } from '../../models/learning.model';
 import { Global } from '../../enum/global';
@@ -10,27 +12,27 @@ import { Global } from '../../enum/global';
 @Component({
   selector: 'app-evolution-list',
   templateUrl: './evolution-list.component.html',
-  styleUrls: ['./evolution-list.component.css']
+  styleUrls: ['./evolution-list.component.css'],
+  providers: [AlertService, UserService, EvolutionService]
 })
 export class EvolutionListComponent implements OnInit {
 
   public title: string;
   public url: string;
-  public evolution: Evolution;
+  public evolution_player: string;  
   public evolutions: Evolution[];
   public range: number[];  
-  public learnings: Learning[];
-  public learning: Learning;
-  public errorMessagge: string;
-  public errorLearning: string;
+  public evolution: Evolution;
+  public learnings: Learning[];  
   public identity;
 
   constructor(    
-    private _evolutionService: EvolutionService,
+    private _router: Router,
+    private _alertService: AlertService,
     private _userService: UserService,
-    private _router: Router
+    private _evolutionService: EvolutionService    
   ) {
-    this.title = 'Seleccione un organismo';
+    this.title = 'Seleccionar organismo';
     this.url = Global.url_api;
     this.identity = this._userService.getIdentity();        
   }
@@ -53,8 +55,8 @@ export class EvolutionListComponent implements OnInit {
           }          
         }
       },
-      err => {
-        this.errorMessagge = err.error.message;
+      err => {                 
+        this._alertService.error(err.error.message);
       }
     );
   }
@@ -69,25 +71,22 @@ export class EvolutionListComponent implements OnInit {
           this._router.navigate(['/']);
         } else {
           this.evolutions = res.evolutions;                 
-          this.evolution = this.identity.level.evolution;
-          this.getLearnings();
-                    
+          this.evolution_player = this.identity.level.evolution._id;           
         }
       },
-      err => {
-        this.errorMessagge = err.error.message;
+      err => {        
+        this._alertService.error(err.error.message);
       }
     );
   }
 
-  getLearnings() {
-     // Obtener obtener los aprendizajes asociados a la evolución
-     this.errorLearning = '';
+  getLearnings(evolution_selected) {
+     // Obtener obtener los aprendizajes asociados a la evolución    
      this.learnings = [];
-     this._evolutionService.getEvolutionLearnings(this.evolution._id).subscribe(
+     this._evolutionService.getEvolutionLearnings(evolution_selected._id).subscribe(
       res => {
-        if (!res.learnings) {
-          this.errorLearning = res.message;          
+        if (!res.learnings) {          
+          this._alertService.error(res.message);                  
         } else {
           this.learnings = res.learnings.sort( (o1, o2) => {
             if (o1.order > o2.order) {
@@ -98,15 +97,15 @@ export class EvolutionListComponent implements OnInit {
           });          
         }
       },
-      err => {
-        this.errorMessagge = err.error.message;        
+      err => {        
+        this._alertService.error(err.error.message);  
       }
     );
   }
 
   changeEvolution(evolution_selected) {
     this.evolution = evolution_selected;
-    this.getLearnings();
+    this.getLearnings(evolution_selected);
   }
   
 }

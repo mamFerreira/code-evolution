@@ -33,6 +33,10 @@ export class LevelListComponent implements OnInit {
   public actions: LevelAction[];
   public errosMessagge: string;
   public identity;
+  // Variables control menus
+  private showGoals: boolean;
+  private showActions: boolean;
+  private showLearnings: boolean;
 
   constructor(    
     private _userService: UserService,
@@ -44,9 +48,12 @@ export class LevelListComponent implements OnInit {
     private _route: ActivatedRoute,
     private _router: Router
   ) {
-    this.title = 'Seleccione un nivel';
+    this.title = 'Seleccionar nivel';
     this.url = Global.url_api;
     this.identity = this._userService.getIdentity();
+    this.showGoals = true;
+    this.showActions = true;
+    this.showLearnings = false;
   }
 
   ngOnInit() {

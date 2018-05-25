@@ -1,7 +1,5 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">
-  <div class="page-header">
-    <h1>{{title}}</h1>
-  </div>
+<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">  
+  <h1>{{title}}</h1>  
   <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
   <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
   <div *ngIf="evolution" class="col-lg-10 col-md-10" style="margin-top:50px;">

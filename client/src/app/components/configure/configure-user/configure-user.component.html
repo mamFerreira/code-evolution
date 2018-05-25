@@ -1,9 +1,5 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">
-    <div class="page-header">
-        <h1>{{title}}</h1>
-        <button *ngIf="user.active==0" (click)='activateUser();' class="btn btn-success btn-active">Activar</button>
-        <button *ngIf="user.active==1" (click)='desactivateUser();' class="btn btn-danger btn-active">Desactivar</button>
-    </div>
+<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">    
+    <h1>{{title}}</h1>        
     <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
     <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
     <div *ngIf="user && levels" class="col-lg-10 col-md-10" style="margin-top:50px;">
@@ -45,6 +41,8 @@
             <div class="col-sm-offset-2 col-sm-10">
                 <button type="submit" class="btn btn-success">Guardar</button>
                 <a [routerLink]="['/admin/user']" class="btn btn-warning">Volver</a>
+                <button *ngIf="user.active==0" (click)='activateUser();' class="btn btn-success btn-active">Habilitar</button>
+                <button *ngIf="user.active==1" (click)='desactivateUser();' class="btn btn-danger btn-active">Deshabilitar</button>
             </div>                         
         </form>
     </div>

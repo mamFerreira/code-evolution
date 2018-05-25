@@ -1,35 +1,5 @@
-input.ng-invalid.ng-touched {
-    border-left: 5px solid #a94442;
-}
-    
-input.ng-valid.ng-dirty {
-    border-left: 5px solid #42A948;
-}
 
-.check {
-    color: #42A948;
-}
-.uncheck {
-    color: #a94442;
-}
-
-.user-image{
-    height: 300px;
-    width: 400px;
-    border: 2px solid #b9b9b9;
-    margin-top: 100px;
-    border-radius: 20px;
-    margin-left: 10%;
-    margin-right: auto;
-    overflow: hidden;  
-    position: relative;        
-}
-
-.user-image img{
-    height: 300px;
-    position:absolute;
-    left:0px;
-    right:0px;
-    top:0px;
-    margin:auto;
+.bigicon {
+    font-size: 35px;
+    color: var(--main-color);
 }

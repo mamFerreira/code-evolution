@@ -1,10 +1,18 @@
 <div *ngIf="tokenChecked">    
     <div *ngIf="token">
-        <app-navigation-menu></app-navigation-menu>
-        <div class="container central col-11" >
-            <router-outlet></router-outlet>
+        <div class="row">            
+            <app-navigation-menu></app-navigation-menu>                    
+            <div class="container container-main">                             
+                <router-outlet></router-outlet>                           
+            </div>            
         </div>
+        <footer>
+            <div class="col-xs-11">
+                <p>Copyright &copy; Code Evolution 2017</p>            
+            </div>            
+        </footer>
     </div>
-    <div *ngIf="!token"><app-login></app-login></div>
-    <div *ngIf="errorMsg" class="alert alert-warning"> <strong>Error: </strong>{{errorMsg}}</div>
+    <div *ngIf="!token">
+        <app-login></app-login>
+    </div>
 </div>

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { UserService } from '../../services/user.service';
 import { Global } from '../../enum/global';
@@ -16,6 +17,7 @@ export class NavigationMenuComponent implements OnInit {
   public option: string;
 
   constructor(
+    private _router: Router,
     private _userService: UserService    
   ) {
     this.url = Global.url_api;
@@ -23,7 +25,16 @@ export class NavigationMenuComponent implements OnInit {
     this.option = '';
   }
 
-  ngOnInit() {    
+  ngOnInit() {     
+    if (this._router.url.search('jugar') > 0) {
+      this.option = 'play';
+    } else if (this._router.url.search('mis-datos') > 0) {
+      this.option = 'user';
+    } else if (this._router.url.search('ayuda') > 0) {
+      this.option = 'help';
+    } else if (this._router.url.search('admin') > 0) {
+      this.option = 'admin';
+    }    
   }
 
   logout() {
@@ -33,6 +44,7 @@ export class NavigationMenuComponent implements OnInit {
   }
 
   changeOption(type) {
+    console.log(type);
     this.option = type;    
   }
 

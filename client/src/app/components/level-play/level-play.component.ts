@@ -28,12 +28,17 @@ import { ActionService } from '../../services/action.service';
 
 export class LevelPlayComponent implements OnInit {
   
-  @ViewChild('editor') editor;
-  
+  @ViewChild('editor') editor;  
+
+  private display: string;
   // Variables string
   private title: string;
   private code: string;
   private errorMsg: string;
+  // Variables control menus
+  private showGoals: boolean;
+  private showActions: boolean;
+  private showLearnings: boolean;
   // Variables principales
   private game: Game;
   private evolution: Evolution;
@@ -44,9 +49,9 @@ export class LevelPlayComponent implements OnInit {
   private positions: Array <Position>; 
   private lastAction: GameAction;
   
+  private closeResult: string;
 
-
-  constructor(
+  constructor(    
     private _userService: UserService,    
     private _evolutionService: EvolutionService,
     private _levelSercice: LevelService,
@@ -58,12 +63,15 @@ export class LevelPlayComponent implements OnInit {
   ) {
     this.title = 'Disfrute del nivel';  
     this.code = '';     
-    this.errorMsg = '';    
+    this.showGoals = true;
+    this.showActions = false;
+    this.showLearnings = false;    
+    this.display = 'none';
   }
 
-  ngOnInit() {      
-    this.loadLevel(); 
-    this.loadEditor();    
+  ngOnInit() {               
+    this.loadLevel();
+    this.loadEditor();     
   }
 
   /**
@@ -211,24 +219,29 @@ export class LevelPlayComponent implements OnInit {
    * Carga del editor
    */
   loadEditor() {
-    this.editor.setTheme('eclipse');
-    this.editor.setMode('python');
+    this.editor.setTheme('chrome');
+    this.editor.setMode('python');          
 
     this.editor.setOptions({
-        fontSize: '14px'
-    });
+        fontSize: '12px',
+        showLineNumbers: true,
+        printMargin: false,
+        wrap: 65,   
+        tabSize: 2        
+    });    
   }
 
   /**
    * Gestión de acciones botones de reproducción
    */
-  doAction (action: GameAction) {    
+  doAction (action: GameAction) {
 
     if (action !== GameAction.ChangeVolume) {
       this.lastAction = action;
     }    
 
     if (action === GameAction.Play) {
+     
       if (this.game.stateGame === GameState.Init) {
 
         if (this.code.length === 0) {
@@ -252,4 +265,12 @@ export class LevelPlayComponent implements OnInit {
     }
 
   }
+
+
+  onCloseHandled() {
+    this.display = 'none'; 
+  }
+
+
+
 }

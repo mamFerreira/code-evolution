@@ -1,43 +1,98 @@
-/*GLOBAL*/
-html, body{
-    margin: 0;
-    height: 100%;
-    background: #f0f0f0;     
-    font-family: 'Oswald', sans-serif;       
+/*VARIABLES*/
+:root {
+    --main-color: #3f5e8c;
+    --color-selected: #3e85ed;
+    --font-color: #f0f0f0; 
+    --font-color-2: #343434;    
+    --background-color: #f0f0f0;
+    --background-color-2: #f7f7f7;
+    --background-color-success: #42A948;
+    --background-color-alert: #a94442;
+    --framework-color: #fd0;
+    --no-checked-color: #F1948A;
+    --checked-color: #A9DFBF;
 }
 
-h1, h2, h3, h4{       
-    color: #343434;  
+/*GLOBAL*/
+html, body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background: var(--background-color);
+    font-family: 'Oswald', sans-serif;      
+}
+
+footer {    
+    height: 50px;
+    background-color: var(--main-color);
+    color: var(--font-color);
+    padding-top: 10px;    
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    margin-top: 500px;
+    text-align: right;
+}
+
+h1, h2, h3, h4{           
+    color: var(--main-color);
+    margin-top: 0px;
 }
 
 h1 {
-    font-size: 20px;
+    font-size: 28px;
     font-weight: bold;    
 }
  
 h2{
-    font-size: 18px;    
+    font-size: 20px;    
 }
 
 h3{
-    font-size: 15px;    
+    font-size: 16px;    
 }
 
-.page-header {
-    margin-top: 0px;
+h4{
+    font-size: 12px;    
 }
 
-.btn-primary-ce {
-    background-color: #343434;  
-    color: #fff;
-    border-radius: 10px; 
+.form-control, .btn {
+    min-height: 38px;
+    border-radius: 2px;
+}
+.btn {        
+    font-size: 15px;
+    font-weight: bold;
 }
 
-.btn-primary-ce:hover {
-    background-color: #b9b9b9;  
-    color: #343434;
-    
+.img-fluid {
+    max-width: 100%;
+    height: auto;
 }
+
+.table-ce thead tr{
+    background-color: var(--main-color);
+    color: var(--font-color);
+}
+
+.table-ce tbody tr td{
+    font-size:13px;
+}
+
+.ace-chrome .ace_gutter {
+    width: 28px !important;;
+}
+
+.ace_gutter > .ace_layer {
+    background-color: #3f5e8c;
+    color: #f0f0f0;    
+    font-weight: bold;         
+}
+
+.ace_gutter > .ace_layer > .ace_gutter-cell{
+    padding-left: 2px;
+}
+
 
 /* POPOVER */
 
@@ -47,7 +102,7 @@ h3{
 
 .popover-botton{
     cursor: pointer;
-    color: #343434;
+    color: var(--font-color-2);
 }
 
 .popover-botton:hover{
@@ -55,8 +110,8 @@ h3{
 }
 
 .popover-title{
-    background-color: #c99e67;
-    color: #343434;
+    background-color: var(--main-color);
+    color: var(--font-color);
     font-weight: bold;
 }
 
@@ -66,15 +121,6 @@ h3{
 
 .popover-example {
     font-size: 10px;
-    color: #000000;
-    background-color: #fff;
-}
-
-
-
-
-@media (min-width: 1200px){
-    .container {
-        width: 1300px;
-    }
+    color: var(--font-color-2);
+    background-color: var(--font-color);
 }

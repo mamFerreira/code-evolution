@@ -1,83 +1,42 @@
-/*Barra de navegación*/
-.navbar{
-    background: #c99e67;
-    border: 1px solid #343434;
-    font-size: 15px;    
+.navbar-default{
+    background: var(--main-color);
+    font-size: 16px; 
+    padding-left: 10%;
+    padding-right: 10%;
 }
 
-.navbar-brand img{
-    height: 25px;
+.navbar-default .navbar-brand {
+    color: var(--font-color);
 }
 
-.navbar-right{
-    margin-right: 2.5%; 
+.navbar-default .navbar-nav > li > a {
+    color: var(--font-color);
 }
 
-.glyphicon{
-    font-size: 15px;         
-    margin-right: 5px;
+.navbar-default .navbar-header .icon-bar{
+    background-color: var(--font-color);
 }
 
-/*Color texto e iconos*/
-.glyphicon,
-.navbar-default .navbar-nav>li>a,
-.navbar-text {
-    color: #343434;
+.navbar-default .navbar-nav > .active > a, 
+.navbar-default .navbar-nav > .active > a:hover, 
+.navbar-default .navbar-nav > .active > a:focus,
+.navbar-default .navbar-nav > .open > a, 
+.navbar-default .navbar-nav > .open > a:hover, 
+.navbar-default .navbar-nav > .open > a:focus {
+    color: var(--font-color);
+    background-color: var(--color-selected);
 }
 
-.navbar-toggle {
-    border: 2px solid #343434;
-}
-
-.navbar-toggle .icon-bar{
-    background-color: #343434;
-}
-
-.nav_image {        
-    height: 40px;       
-    width: 40px;   
-    margin: 0px auto;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    overflow: hidden;
-    float: left;
-    border: 1px solid #343434;
-    border-radius: 8px;
-    background-color: #fff;
-}
-
-.nav_image img{
-    width: 40px;
-    margin: 0px 0px;       
-}
-
-
-@media (min-width: 768px) and (max-width: 1000px) {
-    .nav_user{
-        display: none;
-    }
-
-    .glyphicon{
-        font-size: 10px;         
-        margin-right: 2px;
-    }
-
-    .navbar-brand img {
-        height: 18px;
-    }
-}
-
-@media (max-width: 768px) {
-
-    .nav_user{
-        display: none;
-    }
-
+@media (max-width: 1024px){
     .navbar-default{
-        font-size: 12px;
+        padding-left: 0%;
+        padding-right: 0%;
+        font-size: 14px;
     }
+}
 
-    .navbar-brand img {
-        height: 20px;
+@media (max-width: 767px){
+    .navbar-default .navbar-nav .open .dropdown-menu>li>a{
+        color: var(--font-color);
     }
 }

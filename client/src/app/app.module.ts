@@ -5,7 +5,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { AceEditorModule } from 'ng2-ace-editor';
 import { PopoverModule } from 'ngx-popover';
-
 import { routing, appRoutingProviders } from './app.routing';
 
 // Importación de servicios
@@ -15,6 +14,7 @@ import { LevelService } from './services/level.service';
 import { ActionService } from './services/action.service';
 import { GoalService } from './services/goal.service';
 import { LearningService } from './services/learning.service';
+import { AlertService } from './services/alert.service';
 
 // Importación de componentes
 import { AppComponent } from './app.component';
@@ -27,6 +27,7 @@ import { LevelListComponent } from './components/level-list/level-list.component
 import { LevelPlayComponent } from './components/level-play/level-play.component';
 import { DialogLevelUpComponent } from './components/level-play/dialog-level-up/dialog-level-up.component';
 import { DialogGameOverComponent } from './components/level-play/dialog-game-over/dialog-game-over.component';
+import { AlertComponent } from './components/alert/alert.component';
 
 // Importación de componentes de configuración
 import { ConfigureMainComponent } from './components/configure/configure-main/configure-main.component';
@@ -58,7 +59,8 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     ConfigureLevelComponent,
     ConfigureGoalComponent,
     ConfigureLearningComponent,
-    ConfigureActionComponent
+    ConfigureActionComponent,
+    AlertComponent
   ],
   imports: [
     BrowserModule,  
@@ -69,7 +71,15 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     AceEditorModule,
     PopoverModule
   ],
-  providers: [UserService, EvolutionService, LevelService, ActionService, GoalService, LearningService, appRoutingProviders],
+  providers: [
+    UserService,
+    EvolutionService,
+    LevelService,
+    ActionService,
+    GoalService,
+    LearningService, 
+    appRoutingProviders, 
+    AlertService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

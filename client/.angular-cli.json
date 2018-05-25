@@ -25,7 +25,7 @@
         "../node_modules/jquery/dist/jquery.min.js",
         "../node_modules/bootstrap/dist/js/bootstrap.min.js",
         "../node_modules/ace-builds/src-min/ace.js",
-        "../node_modules/ace-builds/src-min/theme-eclipse.js",
+        "../node_modules/ace-builds/src-min/theme-chrome.js",
         "../node_modules/ace-builds/src-min/mode-python.js",
         "../node_modules/phaser-ce/build/custom/pixi.min.js",
         "../node_modules/phaser-ce/build/custom/p2.min.js",

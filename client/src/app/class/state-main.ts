@@ -95,9 +95,9 @@ export class StateMain extends Phaser.State {
     
     constructor() {
         super();        
-        this._canvasW = 515;
-        this._canvasH = 385;
-        this._scoreH = 64;        
+        this._canvasW = 450;
+        this._canvasH = 375;
+        this._scoreH = 75;        
         this._velocity = 64;
         this._widthHealthBar = 250; 
         this._sizeSprite = 32; 
@@ -107,7 +107,7 @@ export class StateMain extends Phaser.State {
         this._foodAll = false;   
         this._index = 0;
 
-        this._game = new Phaser.Game(this._canvasW, this._canvasH + this._scoreH, Phaser.CANVAS, Global.id_canvas);
+        this._game = new Phaser.Game(576, 480, Phaser.CANVAS, Global.id_canvas);
         this._game.state.add('gameplay', this);
         this._game.state.start('gameplay');
     }
@@ -371,8 +371,11 @@ export class StateMain extends Phaser.State {
         this._map = this._game.add.tilemap('map');
         this._map.addTilesetImage('tiledset', 'tiledset');
         this._layerBackground = this._map.createLayer('background');
+        this._layerBackground.scale.set(0.78125);        
         this._layerObject = this._map.createLayer('object'); 
+        this._layerObject.scale.set(0.78125); 
         this._layerCollision = this._map.createLayer('collision'); 
+        this._layerCollision.scale.set(0.78125); 
         this._map.setCollisionBetween(1, 1000, true, this._layerCollision);
 
         // Player
