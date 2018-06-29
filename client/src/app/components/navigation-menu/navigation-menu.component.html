@@ -17,10 +17,10 @@
           <li [ngClass]="{'active': option == 'user'}">
             <a [routerLink]="['mis-datos']" (click)='option = "user"'><span class="glyphicon glyphicon-user"></span>&nbsp;Mi cuenta</a>
           </li>
-          <li [ngClass]="{'active': option == 'help'}">
+          <!--<li [ngClass]="{'active': option == 'help'}">
             <a [routerLink]="['ayuda']" (click)='option = "help"'><span class="glyphicon glyphicon-question-sign"></span>&nbsp;Ayuda</a>
-          </li>
-          <li class="dropdown" *ngIf="identity.role=='ROLE_ADMIN'" [ngClass]="{'active': option == 'admin'}">
+          </li>-->
+          <li class="dropdown" *ngIf="identity.admin" [ngClass]="{'active': option == 'admin'}">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
               <span class="glyphicon glyphicon-wrench"></span>&nbsp;Administración 
               <span class="caret"></span>
@@ -28,12 +28,12 @@
             <ul class="dropdown-menu">
               <li><a [routerLink]="['admin/user']" (click)='option = "admin"'>Usuarios</a></li>
               <li role="separator" class="divider"></li>
-              <li><a [routerLink]="['admin/evolution']" (click)='option = "admin"'>Evoluciones</a></li>
+              <li><a [routerLink]="['admin/evolution']" (click)='option = "admin"'>Evoluciones</a></li>              
+              <li role="separator" class="divider"></li>              
               <li><a [routerLink]="['admin/level']" (click)='option = "admin"'>Niveles</a></li>
-              <li role="separator" class="divider"></li>
-              <li><a [routerLink]="['admin/goal']" (click)='option = "admin"'>Objetivos</a></li>
-              <li><a [routerLink]="['admin/learning']" (click)='option = "admin"'>Aprendizajes</a></li>
               <li><a [routerLink]="['admin/action']" (click)='option = "admin"'>Acciones</a></li>
+              <li><a [routerLink]="['admin/learning']" (click)='option = "admin"'>Aprendizajes</a></li>
+              <li><a [routerLink]="['admin/goal']" (click)='option = "admin"'>Objetivos</a></li>
             </ul>
           </li>
         </ul>

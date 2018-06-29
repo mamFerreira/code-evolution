@@ -1,50 +1,36 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">    
-    <h1>{{title}}</h1>        
-    <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
-    <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
-    <div *ngIf="user && levels" class="col-lg-10 col-md-10" style="margin-top:50px;">
-        <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
-            <div class="form-group">
-            <label for="name" class="control-label col-sm-2">Name (*):</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" [(ngModel)]="user.name" name="name" required #name="ngModel">
-            </div>            
-            </div>
-            <div class="form-group">
-            <label for="surname" class="control-label col-sm-2">Surname:</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" [(ngModel)]="user.surname" name="surname" required #surname="ngModel">
-            </div>            
-            </div>
-            <div class="form-group">
-            <label for="email" class="control-label col-sm-2">Email (*) :</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" [(ngModel)]="user.email" name="email" required #email="ngModel">
-            </div>            
-            </div>
-            <div class="form-group">
-                <label for="level" class="control-label col-sm-2">Role (*):</label>
-                <div class="col-sm-10">
-                    <select  class="form-control" [(ngModel)]="user.role" name="role">
-                    <option *ngFor="let r of roles" [ngValue]="r">{{r}}</option>
-                    </select>
-                </div>            
-            </div>
-            <div class="form-group">
-                <label for="level" class="control-label col-sm-2">Level (*):</label>
-                <div class="col-sm-10">
-                    <select  class="form-control" [(ngModel)]="user.level" name="level">
-                    <option *ngFor="let l of levels" [ngValue]="l._id">{{l.evolution.name}}-{{l.order}}-{{l.title}}</option>
-                    </select>
-                </div>            
-            </div> 
-            <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-success">Guardar</button>
-                <a [routerLink]="['/admin/user']" class="btn btn-warning">Volver</a>
-                <button *ngIf="user.active==0" (click)='activateUser();' class="btn btn-success btn-active">Habilitar</button>
-                <button *ngIf="user.active==1" (click)='desactivateUser();' class="btn btn-danger btn-active">Deshabilitar</button>
-            </div>                         
-        </form>
+<div class="container">
+    <div class="col-md-8">
+        <app-alert></app-alert>
+        <div class="well well-sm" *ngIf="identity.admin && user">
+                <form class="form-horizontal" method="post" (ngSubmit)="onSubmit()" #formConfigureUser="ngForm">
+                    <legend class="text-center"><h1>{{title}}</h1></legend>
+
+                    <div class="form-group">
+                        <label for="name" class="control-label col-sm-2">Nombre (*):</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" [(ngModel)]="user.name" name="name" required #name="ngModel">
+                        </div>            
+                    </div>
+
+                    <div class="form-group">
+                        <label for="surname" class="control-label col-sm-2">Apellidos:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" [(ngModel)]="user.surname" name="surname" #surname="ngModel">
+                        </div>            
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="control-label col-sm-2">Email (*) :</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" [(ngModel)]="user.email" name="email" required #email="ngModel">
+                        </div>            
+                    </div>                                                                                         
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-success" [disabled]="!formConfigureUser.valid">Guardar</button>
+                        <button class="btn btn-warning" [routerLink]="['/admin/user']">Volver</button>                                
+                    </div>
+                        
+                </form>
+        </div>
     </div>
 </div>
-

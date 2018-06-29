@@ -2,21 +2,15 @@
 
 var fs = require('fs');
 var path = require('path');
-
+var mongo = require('mongodb');
 var GLOBAL = require ('../services/global');
-
-var User = require('../models/user');
 var Level = require ('../models/level');
-var Evolution = require ('../models/evolution');
+var LevelGoal = require('../models/level_goal');
+var LevelLearning = require('../models/level_learning');
+var LevelAction = require('../models/level_action');
 var Game = require('../models/game');
 
-var Position = require('../models/position');
-var Level_Goal = require('../models/level_goal');
-var Level_Learning = require('../models/level_learning');
-var Level_Action = require('../models/level_action');
 
-var ObjectID = require('mongodb').ObjectID;
-var table = 'Level';
 
 /**
  * OPERACIONES CRUD
@@ -31,153 +25,71 @@ function addLevel (req, res){
     var params = req.body; //Recogemos los datos que llegan por POST
 
     level.order = params.order;
-    level.title = params.title;
-    level.description = params.description;    
-    level.evolution = params.evolution; 
-    level.state = params.state; 
-    level.image = '';
-    level.time = params.time;   
-    level.code_default = '';
-    level.map = '';
-
-    if (level.order && level.title && level.evolution && level.time && level.state){
-        level.save((err,tupleAdd) => {
-            if(err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+    level.name = params.name;        
+    level.description = params.description;
+    level.state = params.state;
+    level.time = params.time;
+    level.evolutionID = params.evolutionID;
+    
+    if (level.order && level.name && level.state && level.time && level.evolutionID){
+        //Comprobamos si existe nivel con mismo orden
+        Level.findOne({order:level.order},(err,level_db) => {
+            if(err){                
+                res.status(500).send({message:'Error en el servidor', messageError:err.message});  
             }else{
-                if(!tupleAdd){
-                    res.status(404).send({message:'Nivel no registrado'});
+                if (level_db){
+                    res.status(200).send({message:'Error: Existe otro nivel con el mismo orden ' + level.order});
                 }else{
-                    res.status(200).send({level: tupleAdd});
+                    level.save((err,levelAdd) => {
+                        if(err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                        }else{
+                            if(!levelAdd){
+                                res.status(404).send({message:'Error: El nivel no ha sido creado'});
+                            }else{
+                                res.status(200).send({level: levelAdd});
+                            }
+                        }
+                    });
                 }
             }
-        });
+        });        
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
+        res.status(200).send({message:'Error: Los campos orden, nombre, estado y tiempo son obligatorios'});
     }
 }
 
 /**
- * Obtener nivel a partir de su identificador
- * @return level: Nivel asociado al id
- */
-function getLevel (req, res){
-    var id = req.params.id;
-
-    Level.findById(id).exec((err,tuple)=>{
-        if(err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tuple){
-                res.status(404).send({message:'Nivel no existe'});
-            }else{    
-                if (req.user.role != 'ROLE_ADMIN') {
-                    Evolution.findById(tuple.evolution).exec((err,tupleEvolution) => {
-                        if (err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if (!tupleEvolution){
-                                res.status(404).send({message:'Evolución no existe'});
-                            }else{
-                                User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tupleUser) => {
-                                    if (err) {
-                                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                                    }else{
-                                        if(!tupleUser){
-                                            res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
-                                        }else{                                
-                                            if (tupleEvolution.order > tupleUser.level.evolution.order 
-                                                || 
-                                                ( tupleEvolution.order == tupleUser.level.evolution.order && tuple.order > tupleUser.level.order  )){
-                                                res.status(401).send({message:"Sin permisos de acceso al nivel"});
-                                            }else{
-                                                res.status(200).send({level:tuple});
-                                            }                                
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });   
-                }else{
-                    res.status(200).send({level:tuple});
-                }                                                           
-            }
-        }
-    });   
-}
-
-/**
- * Obtener todos los niveles
+ * Obtener niveles registradas
+ * @param id: Identificador del nivel deseado (opcional)
+ * @param order: Orden del nivel deseado (opcional)
+ * @param evolutionID: Evolución de los niveles deseados (opcional)
  * @returns levels: Niveles solicitados
  */
 function getLevels (req, res){
+    var query = {}
 
-    Level.find({}).populate({path:'evolution'}).sort({evolution: 1, order: 1}).exec((err,tuples) => {
+    if (req.params.id){
+        var o_id = new mongo.ObjectID(req.params.id);
+        query = { '_id' : o_id };
+    }   
+    
+    if (req.params.order && req.params.evolutionID){        
+        query = { 'order' : req.params.order, 'evolutionID' : req.params.evolutionID };
+    } 
+
+    if (!req.params.order && req.params.evolutionID){        
+        query = { 'evolutionID' : req.params.evolutionID };
+    } 
+
+    Level.find(query).sort({order:1}).exec((err,levels) => {
         if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
         }else{
-            if(tuples.length==0){
-                res.status(404).send({message: 'Ningún nivel cumple los requisitos'}); 
-            }else{                                                                         
-                res.status(200).send({levels:tuples});
-            }
-        }
-    });
-}
-
-/**
- * Obtener todos los niveles o los asociados a una determinada evolución
- * @returns levels: Niveles solicitados
- */
-function getLevelsByEvolution (req, res){
-    var id = req.params.evolution;
-    var query = {active: 1, evolution: id};
-
-    Evolution.findById(id).exec ( (err, tuple) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if (!tuple){
-                res.status(404).send({message: 'Evolución no existe'}); 
+            if (!levels){
+                res.status(200).send({message: 'Ningún nivel registrado en el sistema'});
             }else{
-                
-                if (req.user.role != 'ROLE_ADMIN') {
-                    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
-                        if (err) {
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if(!tuple_user){
-                                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
-                            }else{
-                                if (tuple.order == tuple_user.level.evolution.order){
-                                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id , order: {$lte:tuple_user.level.order}});
-                                }else if (tuple.order > tuple_user.level.evolution.order){
-                                    res.status(404).send({message: 'Sin permisos para ver los niveles de la evolución'}); 
-                                } else{
-                                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id});
-                                }
-                            }
-                        }
-
-                    });               
-                }else{
-                    getLevelsByEvolution_2(req, res, {active: 1, evolution: id});
-                }                   
-            }
-        }
-    });
-}
-
-function getLevelsByEvolution_2 (req, res, query) {
-    Level.find(query).sort('order').exec((err,tuples) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(tuples.length==0){
-                res.status(404).send({message: 'Ningún nivel cumple los requisitos'}); 
-            }else{                                                                         
-                res.status(200).send({levels:tuples});
+                res.status(200).send({levels});                
             }
         }
     });
@@ -185,27 +97,28 @@ function getLevelsByEvolution_2 (req, res, query) {
 
 /**
  * Actualizar nivel
+ * @param id: Identificador del nivel a actualizar
  * @returns level: Nivel antes de actualizar
  */
 function updateLevel (req, res){
-    var levelId = req.params.id;
-    var update = req.body;
+    var id = req.params.id;
+    var update = req.body;     
 
-    if (update.order>0 && update.title.length>0 && update.evolution.length>0 && update.time>0){
-        Level.findByIdAndUpdate(levelId,update,(err,tupleUpdate)=>{
-            if(err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+    if (update.order && update.name && update.state && update.time && update.evolutionID) {
+        Level.findByIdAndUpdate(id,update,(err,level) => {
+            if (err){
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
             }else{
-                if(!tupleUpdate){
-                    res.status(404).send({message: 'Error al actualizar el nivel'}); 
+                if(!level){
+                    res.status(404).send({message: 'Error: el nivel no ha podido ser actualizado'});
                 }else{
-                    res.status(200).send({level: tupleUpdate}); 
+                    res.status(200).send({level});
                 }
             }
         });
     }else{
-        res.status(200).send({message:'rellene los campos obligatorios'});
-    }
+        res.status(200).send({message:'Error: Los campos orden, nombre, estado y tiempo son obligatorios'});
+    }    
 }
 
 /**
@@ -216,564 +129,171 @@ function updateLevel (req, res){
 function removeLevel (req, res){
     var id = req.params.id;
 
-    if (id !== GLOBAL.ID_FIRST_LEVEL){
-        Level.findByIdAndRemove(id,(err,tupleRemove) => {
-            if (err){
-                res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
-            }else{
-                if(!tupleRemove){
-                    res.status(404).send({message: 'Error al eliminar: ' + table});
-                }else{            
-                    res.status(200).send({level:tupleRemove});
-                }
-            }
-        });
-    }else{
-        res.status(500).send({message:'Error al eliminar nivel: este nivel no se puede borrar'}); 
-    }
-}
-
-/**
- * OPERACIONES ESPECIALES
- */
-
- /**
-  * Activar el nivel
-  * @returns level: Nivel antes de actualizar
-  */
-function activeLevel (req, res){
-    var id = req.params.id;
-    var query = {active:1};
-
-    Level.findByIdAndUpdate(id,query,(err,levelUpdate) => {
+    Level.findByIdAndRemove(id,(err,level) => {
         if (err){
-            res.status(500).send({message: 'Error al activar el nivel', messageError: err.message});
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
-            if(!levelUpdate){
-                res.status(404).send({message: 'No se ha podido activar el nivel'});
-            }else{
-                res.status(200).send({level:levelUpdate});
+            if(!level){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el nivel'}); 
+            }else{             
+                let file = GLOBAL.PATH_FILE_LEVEL + level.image;
+                fs.exists(file, (exists) => {
+                    if(exists){
+                        fs.unlink(file)
+                    }
+                });                 
+
+                LevelAction.remove({levelID:id}).exec();
+                LevelGoal.remove({levelID:id}).exec();
+                LevelLearning.remove({levelID:id}).exec();
+                Game.remove({levelID:id}).exec();
+
+                res.status(200).send({level});
             }
         }
     });
 }
 
+
 /**
- * Desactivar nivel
- * @returns level: Nivel antes de desactivar
+ * Subir imágen del nivel a partir de su id
+ * @returns image: Nombre de la imagen. 
+ *          level: Nivel antes de la actualización.
  */
-function desactiveLevel (req,res){
+function uploadLevel (req,res){
     var id = req.params.id;
-    var query = {active:0};
+    var file_name = 'No subido...';    
 
-    Level.findByIdAndUpdate(id,query,(err,levelUpdate) => {
-        if (err){
-            res.status(500).send({message: 'Error al desactivar el nivel', messageError: err.message});
-        }else{
-            if(!levelUpdate){
-                res.status(404).send({message: 'No se ha podido desactivar el nivel'});
-            }else{
-                res.status(200).send({level:levelUpdate});
-            }
-        }
-    });
-}
-
-/**
- * Registrar el código Python pasado por parámetro en BBDD
- * @returns code: código traducido a JS
- */
-function registerCode (req, res){
-    var idLevel = req.params.id;
-    var idUser = req.user.sub;
-    var code = req.body.code;    
-    var game = new Game();
-    var parama_id;        
-
-    if (code){ 
-
-        Game.find({ user:idUser, level:idLevel }).exec( (err, tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                // Registramos tupla
-                if(tuples.length==0){                    
-                    game.level = idLevel;
-                    game.user = idUser;
-                    game.code = code;
-
-                    game.save((err,tupleAdd) => {
-                        if(err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if(!tupleAdd){
-                                res.status(404).send({message:'Error al registrar el código'});
-                            }else{
-                                res.status(200).send({message: 'Código registrado correctamente'});
-                            }
-                        }
-                    });
-                // Actualizamos tupla    
-                }else{
-                    parama_id = new ObjectID(tuples[0]._id);
-                    game.code = code;                           
-                    game._id = parama_id;             
-
-                    Game.findByIdAndUpdate(parama_id, game, (err, tupleUpdate) => {
-                        if(err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if(!tupleUpdate){
-                                res.status(404).send({message: 'Error al actualizar el código'}); 
-                            }else{
-                                res.status(200).send({message: 'Código actualizado correctamente'});
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }
-}
-
-/**
- * Subir fichero con código por defecto del nivel
- * @returns level: Contenido del nivel antes de la actualización. code_default: Nombre del fichero subido
- */
-function uploadCode (req, res){
-    var id = req.params.id;
-    var file_name = 'No subido...';
-    var field;
-
-    if (req.files.file){
-        var file_path = req.files.file.path;
-        var file_name = file_path.split('\/')[3];
+    if (req.files.image){
+        var file_path = req.files.image.path;        
+        var file_name = file_path.split('\/')[2];
         var ext = file_name.split('\.')[1];        
-        field = {code_default: file_name};                   
-        if (ext=='txt'){
-            Level.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
+        var field = {image: file_name};                   
+        if (ext=='png'){
+            Level.findByIdAndUpdate(id, field, (err,level) => {
                 if (err){
-                    res.status(500).send({message:'Error en la subida del fichero: ' + table, messageError: err.message});
+                    res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
                 }else{
-                    if(!tupleUpdate){
-                        res.status(404).send({message: 'No se ha podido actualizar el fichero del nivel'});
+                    if(!level){
+                        res.status(404).send({message: 'Error: No ha podido actualizarse el registro'}); 
                     }else{
-                        if (tupleUpdate.code_default){
-                            let file_path_old = GLOBAL.PATH_FILE_LEVEL_C + tupleUpdate.code_default;                        
-                            fs.exists(file_path_old, (exists) => {
-                                if(exists){
-                                    fs.unlink(file_path_old)
-                                }
-                            });
-                        }                        
-                        res.status(200).send({file:file_name, level:tupleUpdate});
+                        // Eliminamos la imagen anterior
+                        let file_old = GLOBAL.PATH_FILE_LEVEL + level.image;
+                        fs.exists(file_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_old)
+                            }
+                        });                                              
+                        res.status(200).send({image:file_name, level});
                     }
                 }
-            });
+            });            
         }else{
-            res.status(200).send({message:'Extensión del archivo no válida (.txt)'});
+            fs.unlink(file_path, (err) => {
+                var msg = '';
+                if (err){
+                    msg = err.message;
+                }
+                res.status(200).send({message:'Extensión del archivo no válida (.png)', messageError:err.message});
+            });            
         }        
     }else{
-        res.status(200).send({message:'Fichero no subido'});
+        res.status(200).send({message:'Imagen no subida'});
     }
 }
 
-/**
- * Obtener código del nivel: de la tabla Game si existo. Sino del fichero con código por defecto
- * @returns code: código del nivel
- */
-function loadCode (req, res) {
-    var idLevel = req.params.id;
-    var idUser = req.user.sub;
-    var code = '';
-    var path = GLOBAL.PATH_FILE_LEVEL_C;
 
-    Game.find({level:idLevel, user:idUser}).exec( (err,tuples) => {
+/**
+ * Cargar imagen de nivel
+ * @return imagen de nivel
+ */
+function loadLevel (req,res){
+
+    var id = req.params.id;        
+
+    Level.findById(id).exec((err,level)=>{            
         if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
-            // Comprobar si el usuario ha modificado el código del nivel
-            if (tuples.length == 0){ 
-                Level.findById(idLevel).exec( (err, level) => {
-                    if (err){
-                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+            if(!level){
+                res.status(200).send({message: 'No existe el nivel indicado'}); 
+            }else{                               
+                var path_file = GLOBAL.PATH_FILE_LEVEL + level.image;                    
+                fs.exists(path_file, (exists) => {
+                    if(exists){
+                        res.sendFile(path.resolve(path_file));
                     }else{
-                        if (!level){
-                            res.status(404).send({message:'El nivel no existe'})
-                        }else{
-                            var path_file = path + level.code_default;
-
-                            fs.exists(path_file, (exists) => {
-                                if(exists){
-                                    fs.readFile(path_file, 'utf-8', (err, data) => {
-                                        if (err){
-                                            res.status(500).send({message: 'Error al leer fichero', messageError: err.message});
-                                        }else{                                            
-                                            res.status(200).send({code:data});
-                                        }
-                                    });
-                                }else{
-                                    res.status(404).send({message:'El fichero no existe'}); 
-                                }
-                            });                  
-                                                        
-
-                        }
+                        res.status(200).send({message:'La imagen no existe'}); 
                     }
-                });               
-                
-            }else{
-                code = tuples[0].code;
-                res.status(200).send({code});
-            }            
-        }
-    });    
-}
-
-/**
- * Pasar parámetro con el nivel pasado y actualizarlo si es el actual
- * @returns level: siguiente nivel si existe
- */ 
-
-function nextLevel (req, res){
-
-    var user, level_param;    
-    
-    // Obtenemos información usuario
-    User.findById(req.user.sub).populate({path:'level', populate : [ {path: 'evolution'}]}).exec((err,tuple_user) => {
-        if (err) {
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tuple_user){
-                res.status(404).send({message: 'No existe tupla con dicho identificador: User'});  
-            }else{                                                 
-                user = tuple_user;
-
-                // Obtenemos información nivel pasado por parametro
-                Level.findById(req.params.id).populate({path:'evolution'}).exec( (err, tuple_level) => {
-                    if (err) {
-                        res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                    }else{
-                        if(!tuple_level){
-                            res.status(404).send({message: 'No existe tupla con dicho identificador: Level'}); 
-                        }else{
-                            level_param = tuple_level;
-
-                            // Comprobamos si existe siguiente nivel en la misma evolución
-                            Level.find({evolution:level_param.evolution._id, order:{$gt: level_param.order}}).populate({path:'evolution'}).sort('order').exec ( (err, tuples_level) => {
-                                if (err){
-                                    res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                                }else{
-                                    if (tuples_level.length > 0){                                                                                
-                                        if (String(level_param._id) === String(user.level._id)){                 
-                                            user.level = tuples_level[0]._id;
-                                            User.findByIdAndUpdate(user._id, user,(err,tuple) => {                                                                        
-                                            });    
-                                        }                                           
-                                        res.status(200).send({level: tuples_level[0]}); // Siguiente nivel misma evolución
-                                    }else{
-                                        // Comprobamos si existe proxima evolución
-                                        Evolution.find({order:{$gt: level_param.evolution.order}}).sort('order').exec ( (err, tuples_evolution) => {
-                                            if (err){
-                                                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                                            }else{
-                                                if (tuples_evolution.length > 0){ 
-                                                    Level.find({evolution:tuples_evolution[0],order:1}).populate({path:'evolution'}).exec( (err,tuples_level_2) => {
-                                                        if(err){
-                                                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                                                        }else{
-                                                            if (tuples_level_2.length > 0){                                                                             
-                                                                if (String(level_param._id) === String(user.level._id)){                 
-                                                                    user.level = tuples_level_2[0]._id;
-                                                                    User.findByIdAndUpdate(user._id, user, (err,tuple) => {                                                                        
-                                                                    });  
-                                                                }                                           
-                                                                res.status(200).send({level: tuples_level_2[0]}); // Siguiente nivel siguiente evolución
-                                                            }else{
-                                                                res.status(200).send({message: 'Juego superado'});
-                                                            }
-                                                        }
-                                                    });
-                                                } else {
-                                                    res.status(200).send({message: 'Juego superado'});
-                                                }
-                                            }
-                                        }); 
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        }
-    });             
-}
-
-/**
- * OPERACIONES EDICIÓN 
- */
-
-// POSICIONES
-
-/**
- * Añadir nueva posición al nivel
- * @returns position: Posición añadida al nivel
- */
-function addPosition (req, res) {
-    var position = new Position();
-    var id_level = req.params.level;
-    var params = req.body; 
-
-    position.level = id_level;
-    position.value_x = params.value_x;
-    position.value_y = params.value_y;
-    position.initial = params.initial;
-
-    if (position.value_x && position.value_y){
-        position.save((err,tupleAdd) => {
-            if(err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                if(!tupleAdd){
-                    res.status(404).send({message:'Posición no registrada'});
-                }else{
-                    res.status(200).send({position: tupleAdd});
-                }
-            }
-        });
-    }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
-    }
-}
-
-/**
- * Eliminar posición
- * @param id: Identificador de la posición
- * @param position: Posición eliminada
- */
-function removePosition (req, res){
-    var id = req.params.id;
-    var table_2 = 'Position';
-
-    Position.findByIdAndRemove(id,(err,tupleRemove) => {
-        if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table_2, messageError: err.message}); 
-        }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table_2});
-            }else{            
-                res.status(200).send({position:tupleRemove});
+                });                  
             }
         }
     });
+
 }
 
-/**
- * Obtener todas las posiciones asociadas al nivel
- * @returns positions: Listado con las posiciones asociadas al nivel
- */
-function getPositions (req,res) {
-    var id = req.params.level;
-    var query = {level: id};
-
-    Position.find(query).exec((err,tuples) => {
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(tuples.length==0){
-                res.status(200).send({message: 'Ninguna posición marcada en el nivel'}); 
-            }else{                                                                         
-                res.status(200).send({positions:tuples});
-            }
-        }
-    });
-}
-
-// OBJETIVOS
-
-/**
- * Asociar nuevo objetivo al nivel. Si ya existe, lo actualiza con los nuevos parámetros
- * @returns level_goal: Relación nivel-objetivo añadida 
- */
-function addGoal (req, res) {
-    var level_goal = new Level_Goal();    
-    var params = req.body; 
-
-    level_goal.level = params.level;
-    level_goal.goal = params.goal;
-    level_goal.value1 = params.value1;
-    level_goal.value2 = params.value2;
-
-    if (level_goal.level && level_goal.goal){
-        Level_Goal.find({level:level_goal.level, goal: level_goal.goal}).exec( (err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                // Objetivo no asocido al nivel
-                if (tuples.length == 0){
-                    level_goal.save((err,tupleAdd) => {
-                        if(err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if(!tupleAdd){
-                                res.status(404).send({message:'Objetivo no asociado al nivel'});
-                            }else{
-                                res.status(200).send({level_goal: tupleAdd});
-                            }
-                        }
-                    });
-                }else{
-                    //Exite la relación objetivo-nivel
-                    var id = tuples[0]._id;
-                    level_goal._id = id;
-
-                    Level_Goal.findByIdAndUpdate(id,level_goal, (err, tupleUpdate) => {
-                        if (err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if (!tupleUpdate){
-                                res.status(404).send({message:'Objetivo de nivel no actualizado'});
-                            }else{
-                                res.status(200).send({level_goal: tupleUpdate});
-                            }
-                        }
-                    });
-                }
-            }
-        });
-    }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
-    }
-}
-
-/**
- * Eliminar objetivo del nivel
- * @param id: Identificador de la relación objetivo nivel
- * @returns level_goal: Relación nivel-objetivo eliminada
- */
-function removeGoal (req, res){
-    var id = req.params.id;
-    var table_2 = 'Goal-Level';
-
-    Level_Goal.findByIdAndRemove(id,(err,tupleRemove) => {
-        if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table_2, messageError: err.message}); 
-        }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table_2});
-            }else{            
-                res.status(200).send({level_goal:tupleRemove});
-            }
-        }
-    });
-}
-
-
-// LEARNING
-
-/**
- * Asociar nuevo aprendizaje al nivel. Si ya existe la asociación no hago nada.
- * @returns level_learning: Relación nivel-aprendizaje añadida 
- */
-function addLearning (req, res) {
-    var level_learning = new Level_Learning();    
-    var params = req.body; 
-
-    level_learning.level = params.level;
-    level_learning.learning = params.learning;        
-
-    if (level_learning.level && level_learning.learning){
-        Level_Learning.find({level:level_learning.level, learning: level_learning.learning}).exec( (err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                // Aprendizaje no asocido al nivel
-                if (tuples.length == 0){
-                    level_learning.save((err,tupleAdd) => {
-                        if(err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-                        }else{
-                            if(!tupleAdd){
-                                res.status(404).send({message:'Aprendizaje no asociado al nivel'});
-                            }else{
-                                res.status(200).send({level_learning: tupleAdd});
-                            }
-                        }
-                    });
-                }else{
-                    res.status(200).send({message: 'Aprendizaje ya asociado al nivel'})
-                }
-            }
-        });
-    }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
-    }
-}
-
-/**
- * Eliminar aprendizaje del nivel
- * @param id: Identificador de la relación aprendizaje nivel
- * @returns level_learning: Relación nivel-aprendizaje eliminada
- */
-function removeLearning (req, res){
-    var id = req.params.id;
-    var table_2 = 'Learning-Level';
-
-    Level_Learning.findByIdAndRemove(id,(err,tupleRemove) => {
-        if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table_2, messageError: err.message}); 
-        }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table_2});
-            }else{            
-                res.status(200).send({level_learning:tupleRemove});
-            }
-        }
-    });
-}
-
-
-// ACTION
 
 /**
  * Asociar nueva acción al nivel. Si ya existe la asociación no hago nada.
  * @returns level_action: Relación nivel-acción añadida 
  */
 function addAction (req, res) {
-    var level_action = new Level_Action();    
+    var level_action = new LevelAction();    
     var params = req.body; 
 
-    level_action.level = params.level;
-    level_action.action = params.action;        
+    level_action.levelID = params.levelID;
+    level_action.actionID = params.actionID;        
 
-    if (level_action.level && level_action.action){
-        Level_Action.find({level:level_action.level, action: level_action.action}).exec( (err,tuples) => {
+    if (level_action.levelID && level_action.actionID){
+        LevelAction.find({levelID:level_action.levelID, actionID: level_action.actionID}).exec( (err,level_action_db) => {
             if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-            }else{
-                // Acción no asocido al nivel
-                if (tuples.length == 0){
-                    level_action.save((err,tupleAdd) => {
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+            }else{                
+                if (level_action_db.length>0){                    
+                    res.status(200).send({message:'Error: Acción ya asociada al nivel'});
+                }else{
+                    level_action.save((err,level_action) => {
                         if(err){
-                            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
                         }else{
-                            if(!tupleAdd){
-                                res.status(404).send({message:'Acción no asociada al nivel'});
+                            if(!level_action){
+                                res.status(404).send({message:'Error: La acción no ha sido asociada al nivel'});
                             }else{
-                                res.status(200).send({level_action: tupleAdd});
+                                res.status(200).send({level_action});
                             }
                         }
                     });
-                }else{
-                    res.status(200).send({message: 'Acción ya asociada al nivel'})
                 }
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios'});
+        res.status(200).send({message:'Error: Los campos levelID y actionID son obligatorios'});
     }
 }
+
+
+/**
+ * Obtener acciones asociadas
+ * @param levelID: Identificador del nivel deseado
+ * @returns actions: Acciones solicitadas
+ */
+function getActions (req, res){
+
+    var levelID = req.params.levelID;
+
+    LevelAction.find({'levelID': levelID}).populate({path:'actionID'}).exec((err,actions) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{            
+            if (!actions){
+                res.status(200).send({message: 'Ninguna acción asociada al nivel'})
+            }else{
+                res.status(200).send({actions});
+            }
+        }
+    });
+}
+
 
 /**
  * Eliminar acción del nivel
@@ -782,204 +302,220 @@ function addAction (req, res) {
  */
 function removeAction (req, res){
     var id = req.params.id;
-    var table_2 = 'Learning-Action';
 
-    Level_Action.findByIdAndRemove(id,(err,tupleRemove) => {
+    LevelAction.findByIdAndRemove(id,(err,level_action) => {
         if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table_2, messageError: err.message}); 
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table_2});
-            }else{            
-                res.status(200).send({level_action:tupleRemove});
+            if(!level_action){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el registro'}); 
+            }else{                
+                res.status(200).send({level_action});
             }
         }
     });
 }
 
-/**
- * OPERACIONES CARGA Y SUBIDA DE FICHEROS
- */
-
- /**
- * Subir imágen del nivel a partir de su id
- * @returns image: Nombre de la imagen. 
- *          level: Nivel antes de la actualización.
- */
-function uploadILevel (req, res){
-    var id = req.params.id;
-    var file_name = 'No subido...';
-    var field;
-
-    if (req.files.image){
-        var file_path = req.files.image.path;
-        var file_name = file_path.split('\/')[3];
-        var ext = file_name.split('\.')[1];        
-        field = {image: file_name};                   
-        if (ext=='png' || ext == 'jpg'){
-            Level.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
-                if (err){
-                    res.status(500).send({message:'Error en la subida de la imágen: ' + table, messageError: err.message});
-                }else{
-                    if(!tupleUpdate){
-                        res.status(404).send({message: 'No se ha podido actualizar la imagen del nivel'});
-                    }else{
-                        if (tupleUpdate.image){
-                            let file_path_old = GLOBAL.PATH_FILE_LEVEL_I + tupleUpdate.image;                        
-                            fs.exists(file_path_old, (exists) => {
-                                if(exists){
-                                    fs.unlink(file_path_old)
-                                }
-                            });
-                        }                        
-                        res.status(200).send({image:file_name, level:tupleUpdate});
-                    }
-                }
-            });
-        }else{
-            res.status(200).send({message:'Extensión del archivo no válida (.png, .jpg)'});
-        }        
-    }else{
-        res.status(200).send({message:'Imagen no subida'});
-    }
-}
-
- /**
- * Subir imágen del nivel a partir de su id
- * @returns image: Nombre de la imagen. 
- *          level: Nivel antes de la actualización.
- */
-function uploadMapLevel (req, res){
-    var id = req.params.id;
-    var file_name = 'No subido...';
-    var field;
-
-    if (req.files.file){
-        var file_path = req.files.file.path;
-        var file_name = file_path.split('\/')[3];
-        var ext = file_name.split('\.')[1];        
-        field = {map: file_name};                   
-        if (ext=='json'){
-            Level.findByIdAndUpdate(id, field, (err,tupleUpdate) => {
-                if (err){
-                    res.status(500).send({message:'Error en la subida del mapa: ' + table, messageError: err.message});
-                }else{
-                    if(!tupleUpdate){
-                        res.status(404).send({message: 'No se ha podido actualizar el mapa del nivel'});
-                    }else{
-                        if (tupleUpdate.map){
-                            let file_path_old = GLOBAL.PATH_FILE_LEVEL_M + tupleUpdate.map;                        
-                            fs.exists(file_path_old, (exists) => {
-                                if(exists){
-                                    fs.unlink(file_path_old)
-                                }
-                            });
-                        }                        
-                        res.status(200).send({file:file_name, level:tupleUpdate});
-                    }
-                }
-            });
-        }else{
-            res.status(200).send({message:'Extensión del archivo no válida (.json)'});
-        }        
-    }else{
-        res.status(200).send({message:'Fichero no subido'});
-    }
-}
 
 /**
- * Cargar fichero de nivel
- * @return fichero solicitado
+ * Asociar nuevo aprendizaje al nivel. Si ya existe la asociación no hago nada.
+ * @returns level_learning: Relación nivel-aprendizaje añadida 
  */
-function loadFileLevel (req, res){
-    //Obtener parametros
-    var nameFile = req.params.nameFile;
-    var type = req.params.type;
-    var path_file;
-    var global_path;
-    var field;
-    
-    switch(type){
-        case 'I':
-            global_path = GLOBAL.PATH_FILE_LEVEL_I;            
-            break;
-        case 'M':
-            global_path = GLOBAL.PATH_FILE_LEVEL_M;            
-            break;
-        case 'C':
-            global_path = GLOBAL.PATH_FILE_LEVEL_C;            
-            break;
-        default:
-            return res.status(500).send({message: 'Error al cargar fichero: tipo indicado desconocido'});
-    }
+function addLearning (req, res) {
+    var level_learning = new LevelLearning();    
+    var params = req.body; 
 
+    level_learning.levelID = params.levelID;
+    level_learning.learningID = params.learningID;        
 
-    if (!nameFile){
-        var id = req.params.id;        
-
-        Level.findById(id).exec((err,level)=>{            
+    if (level_learning.levelID && level_learning.learningID){
+        LevelLearning.find({levelID:level_learning.levelID, learningID: level_learning.learningID}).exec( (err,level_learning_db) => {
             if (err){
-                res.status(500).send({message:'Error en la carga del fichero: ' + table, messageError: err.message});
-            }else{
-                if(!level){
-                    res.status(404).send({message: 'No existe el nivel'}); 
-                }else{        
-                    
-                    if (type == 'I'){
-                        nameFile = level.image;
-                    }
-                    if (type == 'M'){
-                        nameFile = level.map;
-                    }                
-                    path_file = global_path + nameFile;                    
-                    fs.exists(path_file, (exists) => {
-                        if(exists){
-                            res.sendFile(path.resolve(path_file));
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+            }else{                
+                if (level_learning_db.length>0){
+                    res.status(200).send({message:'Error: Aprendizaje ya asociado al nivel'});
+                }else{
+                    level_learning.save((err,level_learning) => {
+                        if(err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
                         }else{
-                            res.status(404).send({message:'El fichero no existe'}); 
+                            if(!level_learning){
+                                res.status(404).send({message:'Error: El aprendizaje no ha sido asociada al nivel'});
+                            }else{
+                                res.status(200).send({level_learning});
+                            }
                         }
-                    });                  
+                    });
                 }
             }
         });
     }else{
-        path_file = global_path + nameFile;
-        fs.exists(path_file, (exists) => {
-            if(exists){
-                res.sendFile(path.resolve(path_file));
-            }else{
-                res.status(404).send({message:'El fichero no existe'}); 
-            }
-        });
+        res.status(200).send({message:'Error: Los campos levelID y learningID son obligatorios'});
     }
 }
 
+
+/**
+ * Obtener aprendizaje asociada
+ * @param levelID: Identificador del nivel deseado
+ * @returns learnings: Aprendizaje solicitado
+ */
+function getLearnings (req, res){
+
+    var levelID = req.params.levelID;
+
+    LevelLearning.find({'levelID': levelID}).populate({path:'learningID'}).exec((err,learnings) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{
+            if (!learnings){
+                res.status(200).send({message: 'Ningún aprendizaje asociado al nivel'})
+            }else{
+                res.status(200).send({learnings});
+            }
+        }
+    });
+}
+
+
+/**
+ * Eliminar aprendizaje del nivel
+ * @param id: Identificador de la relación aprendizaje nivel
+ * @returns level_learning: Relación nivel-aprendizaje eliminada
+ */
+function removeLearning (req, res){
+    var id = req.params.id;
+
+    LevelLearning.findByIdAndRemove(id,(err,level_learning) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+        }else{
+            if(!level_learning){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el registro'}); 
+            }else{                
+                res.status(200).send({level_learning});
+            }
+        }
+    });
+}
+
+
+/**
+ * Asociar nuevo objetivo al nivel. Si ya existe actualiza sus valores.
+ * @returns level-goal: Relación nivel-aprendizaje añadida 
+ */
+function addGoal (req, res) {
+    var level_goal = new LevelGoal();    
+    var params = req.body; 
+
+    level_goal.levelID = params.levelID;
+    level_goal.goalID = params.goalID;        
+    level_goal.value_1 = params.value_1;     
+    level_goal.value_2 = params.value_2;     
+
+    if (level_goal.levelID && level_goal.goalID){
+        LevelGoal.find({levelID:level_goal.levelID, goalID: level_goal.goalID}).exec( (err,level_goal_db) => {
+            if (err){
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+            }else{                
+                if (level_goal_db.length>0){
+
+                    var id = level_goal_db[0]._id;
+                    level_goal._id = id;
+
+                    LevelGoal.findByIdAndUpdate(id,level_goal,(err,level_goal) => {
+                        if (err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+                        }else{
+                            if(!level_goal){
+                                res.status(404).send({message: 'Error: la relación objetivo-nivel no ha podido ser actualizada'});
+                            }else{
+                                res.status(200).send({level_goal});
+                            }
+                        }
+                    });
+                }else{
+                    level_goal.save((err,level_goal) => {
+                        if(err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                        }else{
+                            if(!level_goal){
+                                res.status(404).send({message:'Error: El objetivo no ha sido asociada al nivel'});
+                            }else{
+                                res.status(200).send({level_goal});
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }else{
+        res.status(200).send({message:'Error: Los campos levelID y goalID son obligatorios'});
+    }
+}
+
+
+/**
+ * Obtener objetivos asociados
+ * @param levelID: Identificador del nivel deseado
+ * @returns goals: Objetivos solicitados
+ */
+function getGoals (req, res){
+
+    var levelID = req.params.levelID;
+
+    LevelGoal.find({'levelID': levelID}).populate({path:'goalID'}).exec((err,goals) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{
+            if (!goals){
+                res.status(200).send({message: 'Ningún objetivo asociado al nivel'})
+            }else{
+                res.status(200).send({goals});
+            }
+        }
+    });
+}
+
+
+/**
+ * Eliminar objetivo del nivel
+ * @param id: Identificador de la relación objetivo nivel
+ * @returns level_goal: Relación nivel-objetivo eliminada
+ */
+function removeGoal (req, res){
+    var id = req.params.id;
+
+    LevelGoal.findByIdAndRemove(id,(err,level_goal) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+        }else{
+            if(!level_goal){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el registro'}); 
+            }else{                
+                res.status(200).send({level_goal});
+            }
+        }
+    });
+}
 
 
 
 module.exports = {
     addLevel,
-    getLevel,
     getLevels,
-    getLevelsByEvolution,
     updateLevel,
     removeLevel,
-    activeLevel,
-    desactiveLevel,
-    registerCode,
-    uploadCode,
-    loadCode,
-    nextLevel,
-    addPosition,
-    removePosition,
-    getPositions,
-    addGoal,
-    removeGoal,
-    addLearning,
-    removeLearning,
+    uploadLevel,
+    loadLevel,
     addAction,
+    getActions,
     removeAction,
-    uploadILevel,
-    uploadMapLevel,
-    loadFileLevel
+    addLearning,
+    getLearnings,
+    removeLearning,
+    addGoal,
+    getGoals,
+    removeGoal
 };

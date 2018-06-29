@@ -140,7 +140,7 @@ export class LevelListComponent implements OnInit {
   }
 
   getActions() {
-    this._actionService.getActionsLevel(this.level._id).subscribe(
+    this._actionService.getActions(this.level._id).subscribe(
       res => {
         if (res.actions) {          
           this.actions = res.actions.sort( (o1, o2) => {

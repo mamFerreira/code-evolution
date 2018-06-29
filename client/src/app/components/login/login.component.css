@@ -1,30 +1,29 @@
-/*#region login-form*/
+/*#region FORMULARIO LOGIN*/
 
 .login-form {
     width: 80%;
-    max-width: 340px;
+    max-width: 450px;
     margin: 50px auto;    
 }
 .login-form form {
     margin-bottom: 15px;
     background: var(--background-color-2);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px var(--font-color-2);
     padding: 30px;
-}
-.login-form h2 {
-    margin: 0 0 15px;
 }
 
 /*#endregion */
 
+/*#region FORMULARIO REGISTRO*/
+
 .register-form {    
     padding: 30px;
-    max-width: 500px;
+    max-width: 600px;
     width: 100% !important;
     background-color: var(--background-color-2);
     margin: 0 auto;
     border-radius: 2px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px var(--font-color-2);
     overflow: hidden;  
 }
 
@@ -32,3 +31,5 @@
     font-size: 30px;
     color: var(--main-color);
 }
+
+/*#endregion */

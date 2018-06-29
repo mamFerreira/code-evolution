@@ -5,10 +5,9 @@ export class User {
         public surname: string,
         public email: string,
         public password: string,
-        public role: string,
-        public image: string,
-        public level: string,
-        public active: number,
+        public admin: boolean,
+        public counterLogin: number,
+        public lastLogin: Date,        
         public gethash: string
-    ) {}
+    ) {}    
 }

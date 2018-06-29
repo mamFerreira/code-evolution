@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
-// Importar servicios
+
+import { AlertService } from '../../../services/alert.service';
 import { UserService } from '../../../services/user.service';
 import { ActionService } from '../../../services/action.service';
-// Importar modelos
-import { User } from '../../../models/user.model';
 import { Action } from '../../../models/action.model';
 
 @Component({
@@ -17,31 +16,37 @@ export class ConfigureActionComponent implements OnInit {
 
   public title: string;
   public identity;
-  public action: Action;
-  public errorMessage: string;
-  public successMessage: string;
-  public boolEdit: boolean;
+  public action: Action;  
+  public isEdit: boolean;
 
   constructor(
+    private _alertService: AlertService,
     private _userService: UserService,
     private _actionService: ActionService,
-    private _route: ActivatedRoute,
-    private _router: Router
+    private _route: ActivatedRoute    
   ) { 
     this.title = 'Editar acción';
-    this.identity = this._userService.getIdentity();
-    this.errorMessage = '';  
-    this.successMessage = '';
-    this.boolEdit = true;
+    this.identity = this._userService.getIdentity();    
+    this.isEdit = true;
   }
 
   ngOnInit() {
-
     this._route.params.forEach((params: Params) => {              
       if (params['id']) {
-        this.getGoal(params['id']);
+        this._actionService.getActions(params['id']).subscribe(
+          res => {
+            if (!res.actions || res.actions.length === 0) {
+              this._alertService.error(res.message); 
+            } else {
+              this.action = res.actions[0];                      
+            }
+          },
+          err => {
+            this._alertService.error(err.message); 
+          }
+        );
       } else {
-        this.boolEdit = false;
+        this.isEdit = false;
         this.title = 'Añadir acción';
         this.action = new Action (null, null, '', '', '', '');
       }      
@@ -49,50 +54,31 @@ export class ConfigureActionComponent implements OnInit {
   }
 
 
-  getGoal (id) {    
-      this._actionService.getAction(id).subscribe(
-        res => {
-          if (!res.action) {
-            this.errorMessage = 'Error: No se ha podido obtener la acción deseada';
-          } else {
-            this.action = res.action;                      
-          }
-        },
-        err => {
-          this.errorMessage = err.error.message;
-        }
-      );
-  }
-
-
   onSubmit() {
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    if (this.boolEdit) {
+    if (this.isEdit) {
       this._actionService.updateAction(this.action).subscribe(
         res => {
           if (!res.action) {
-            this.errorMessage = 'Error al actualizar acción: ' + res.message;
-          } else {        
-            this.successMessage = 'Acción actualizada correctamente';
+            this._alertService.error(res.message); 
+          } else {                    
+            this._alertService.success('Acción actualizada correctamente');
           }
         },
         err => {
-          this.errorMessage = err.error.message;
+          this._alertService.error(err.message); 
         }
       ); 
     } else {      
       this._actionService.addAction(this.action).subscribe(
         res => {
           if (!res.action) {
-            this.errorMessage = 'Error al crear acción: ' + res.message;
-          } else {        
-            this.successMessage = 'Acción creada correctamente';
+            this._alertService.error(res.message); 
+          } else {                    
+            this._alertService.success('Acción creada correctamente');
           }
         },
         err => {
-          this.errorMessage = err.error.message;
+          this._alertService.error(err.message);
         }
       ); 
     }  

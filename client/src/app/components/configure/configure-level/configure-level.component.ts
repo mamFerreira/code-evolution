@@ -357,7 +357,7 @@ export class ConfigureLevelComponent implements OnInit {
   getActions (id: string, all: boolean) {
     this.errorProperty[2] = '';    
 
-    this._actionService.getActionsLevel(id).subscribe(
+    this._actionService.getActions(id).subscribe(
       res => {
         if (!res.actions) {
           this.errorProperty[2] = 'Ninguna acción asociada al nivel';

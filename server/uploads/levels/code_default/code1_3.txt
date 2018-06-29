@@ -1,8 +1,0 @@
-"""
-Avanza en el aprendizaje del flujo de ejecución de un
-programa Python llevando el organismo unicelular hasta
-la posición objetivo (aspa roja) utilizando las acciones
-disponibles.
-"""
-
-player.moveUp()

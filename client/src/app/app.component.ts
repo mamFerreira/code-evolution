@@ -8,32 +8,26 @@ import { UserService } from './services/user.service';
 })
 export class AppComponent implements OnInit {
   private token: boolean;
-  private tokenChecked: boolean;
-  private errorMsg: string;
+  private tokenChecked: boolean;  
 
   constructor(
     private _userService: UserService    
   ) {
     this.token = false;
-    this.tokenChecked = false;
-    this.errorMsg = '';
+    this.tokenChecked = false;        
   }
 
   // Comprobamos la validez del token
-  ngOnInit() {    
+  ngOnInit() {      
     this._userService.checkToken().subscribe(
-      res => {
+      res => {        
+        this.tokenChecked = true;
         if (res.check) {
-          this.token = true;
-          this.tokenChecked = true;
-        } else {
-          this.errorMsg = res.message;
-          this.tokenChecked = true;
+          this.token = true;                  
         }
       },
-      err => {
-        this.errorMsg = err.message;
-        this.tokenChecked = true;
+      err => {                      
+        this.tokenChecked = true;        
       }
     );
   }

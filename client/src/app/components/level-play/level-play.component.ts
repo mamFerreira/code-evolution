@@ -128,7 +128,7 @@ export class LevelPlayComponent implements OnInit {
         } else {
           this.goals = res.goals;          
           // Acciones
-          this._actionService.getActionsLevel(this.level._id).subscribe(
+          this._actionService.getActions(this.level._id).subscribe(
             res => {
               if (!res.actions) {
                 this.errorMsg += res.message;

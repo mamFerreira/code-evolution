@@ -7,22 +7,21 @@ div {
     margin-top:20px;
 }
 
-.display-none{
-    display: none;
+/*#region botones*/
+.btn-primary-ce{
+    color: var(--font-color);
+    background-color: var(--main-color);
 }
 
-.display-block{
-    display: block;
+.btn-primary-ce:disabled{    
+    opacity: 0.5;
 }
 
-.backdrop{ 
-    background-color:rgba(0,0,0,0.6);        
-    position:fixed;    
-    top:0;    
-    left:0;        
-    width:100%;        
-    height:100vh;        
+.active{
+    background-color: var(--color-selected);
 }
+
+/*#endregion*/
 
 /*#region canvas*/
 
@@ -86,6 +85,39 @@ div {
     0 0 0 1px var(--font-color-2),	
 	0 0 0 2px var(--main-color),
 	0 0 0 3px var(--font-color-2);
+}
+
+/*#endregion*/
+
+/*#region modal*/
+.display-none{
+    display: none;
+}
+
+.display-block{
+    display: block;
+}
+
+.backdrop{ 
+    background-color:rgba(0,0,0,0.6);        
+    position:fixed;    
+    top:0;    
+    left:0;        
+    width:100%;        
+    height:100vh;        
+}
+
+.modal-dialog{
+    width: 350px;
+}
+
+.modal-content,
+.modal-footer{
+    text-align: center;
+}
+
+.title-game-over{
+    color: var(--background-color-alert);
 }
 
 /*#endregion*/

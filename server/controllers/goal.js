@@ -1,90 +1,72 @@
 'use strict'
 
+var mongo = require('mongodb');
 var Goal = require ('../models/goal');
 var LevelGoal = require ('../models/level_goal')
-var table = 'goal';
 
 /**
  * Registrar nuevo objetivo en BBDD
  * @returns goal: Objetivo creado
  */
 function addGoal (req, res){
-    var tuple = new Goal();
+    var goal = new Goal();
     var params = req.body; //Recogemos los datos que llegan por POST        
-    tuple.title = params.title;
-    tuple.key = params.key;
     
-    if (tuple.title && tuple.key){
-        tuple.save((err,tupleAdd) => {
-            if(err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+    goal.key = params.key;
+    goal.name = params.name;        
+    
+    if (goal.key && goal.name){
+        //Comprobamos si existe objetivo con la misma clave
+        Goal.findOne({key:goal.key},(err,goal_db) => {
+            if(err){                
+                res.status(500).send({message:'Error en el servidor', messageError:err.message});  
             }else{
-                if(!tupleAdd){
-                    res.status(404).send({message:'Tupla no registrada: ' + table});
+                if (goal_db){
+                    res.status(200).send({message:'Error: Existe otro objetivo con la misma clave ' + goal.key});
                 }else{
-                    res.status(200).send({goal: tupleAdd});
+                    goal.save((err,goalAdd) => {
+                        if(err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                        }else{
+                            if(!goalAdd){
+                                res.status(404).send({message:'Error: El objetivo no ha sido creado'});
+                            }else{
+                                res.status(200).send({goal: goalAdd});
+                            }
+                        }
+                    });
                 }
             }
-        });
+        });        
     }else{
-        res.status(200).send({message:'rellene los campos obligatorios'});
+        res.status(200).send({message:'Error: Los campos clave y nombre son obligatorios'});
     }
 }
 
 /**
- * Obtener objetivo
- * @param id: Identificador del objetivo deseado
- * @returns goal: Objetivo solicitado
- */
-function getGoal (req,res){
-    var id = req.params.id;
-
-    Goal.findById(id).exec((err,tuple)=>{
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tuple){
-                res.status(404).send({message: 'No existe tupla con dicho identificador: ' + table}); 
-            }else{                
-                res.status(200).send({goal: tuple});              
-            }
-        }
-    });
-}
-
-/**
- * Obtener todos los objetivos o los asociados al nivel pasado por parámetro
- * @param level: Identificador del nivel (opcional)
+ * Obtener objetivos registrados
+ * @param id: Identificador del objetivo deseado (opcional)
  * @returns goals: Objetivos solicitados
  */
 function getGoals (req, res){
-    var level = req.params.level;
+    var query = {}
 
-    if (level){        
-        LevelGoal.find({'level': level}).populate({path:'goal'}).exec((err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
+    if (req.params.id){
+        var o_id = new mongo.ObjectID(req.params.id);
+        query = { '_id' : o_id };
+    }    
+
+    Goal.find(query).exec((err,goals) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{
+            if (!goals){
+                res.status(200).send({message: 'Ninguna objetivo registrado en el sistema'});
             }else{
-                if (tuples.length==0){
-                    res.status(200).send({message: 'Ningún objetivo asociado al nivel'})
-                }else{
-                    res.status(200).send({goals: tuples});
-                }
+                res.status(200).send({goals});                
             }
-        });
-    }else{
-        Goal.find({}).exec((err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
-            }else{
-                if (tuples.length==0){
-                    res.status(200).send({message: 'Ningún objetivo registrado'});
-                }else{
-                    res.status(200).send({goals: tuples});
-                }
-            }
-        });
-    }
+        }
+    });
 }
 
 /**
@@ -96,21 +78,21 @@ function updateGoal (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    if (update.title.length > 0 && update.key.length > 0) {
-        Goal.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
+    if (update.key && update.name) {
+        Goal.findByIdAndUpdate(id,update,(err,goal) => {
             if (err){
-                res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
             }else{
-                if(!tupleUpdate){
-                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                if(!goal){
+                    res.status(404).send({message: 'Error: el objetivo no ha podido ser actualizado'});
                 }else{
-                    res.status(200).send({goal:tupleUpdate});
+                    res.status(200).send({goal});
                 }
             }
-        })
+        });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: nombre, clave'});
-    }
+        res.status(200).send({message:'Error: Los campos clave y nombre son obligatorios'});
+    } 
 }
 
 /**
@@ -121,15 +103,15 @@ function updateGoal (req, res){
 function removeGoal (req, res){
     var id = req.params.id;
 
-    Goal.findByIdAndRemove(id,(err,tupleRemove) => {
+    Goal.findByIdAndRemove(id,(err,goal) => {
         if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table});
+            if(!goal){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el objetivo'}); 
             }else{
-                LevelGoal.remove({goal: tupleRemove._id}).exec();
-                res.status(200).send({goal:tupleRemove});                
+                LevelGoal.remove({goalID:id});
+                res.status(200).send({goal});
             }
         }
     });
@@ -137,7 +119,6 @@ function removeGoal (req, res){
 
 module.exports = {
     addGoal,
-    getGoal,
     getGoals,
     updateGoal,
     removeGoal

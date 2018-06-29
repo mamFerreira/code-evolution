@@ -1,94 +1,75 @@
 'use strict'
 
+var mongo = require('mongodb');
 var Learning = require ('../models/learning');
 var LevelLearning = require ('../models/level_learning')
-var table = 'learning';
 
 /**
  * Registrar nuevo aprendizaje en BBDD
  * @returns learning: Aprendizaje creado
  */
 function addLearning (req, res){
-    var tuple = new Learning();
+    var learning = new Learning();
     var params = req.body; //Recogemos los datos que llegan por POST
 
-    tuple.order = params.order;
-    tuple.title = params.title;
-    tuple.key = params.key;
-    tuple.description = params.description;
-    tuple.example = params.example;
+    learning.order = params.order;
+    learning.name = params.name;
+    learning.shortName = params.shortName;
+    learning.description = params.description;
+    learning.example = params.example;
     
-    if (tuple.order && tuple.title && tuple.key && tuple.description){
-        tuple.save((err,tupleAdd) => {
-            if(err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});
+    if (learning.order && learning.name && learning.shortName){
+        //Comprobamos si existe aprendizaje con mismo orden
+        Learning.findOne({order:learning.order},(err,learning_db) => {
+            if(err){                
+                res.status(500).send({message:'Error en el servidor', messageError:err.message});  
             }else{
-                if(!tupleAdd){
-                    res.status(404).send({message:'Tupla no registrada: ' + table});
+                if (learning_db){
+                    res.status(200).send({message:'Error: Existe otro aprendizaje con el mismo orden ' + learning.order});
                 }else{
-                    res.status(200).send({learning: tupleAdd});
+                    learning.save((err,learningAdd) => {
+                        if(err){
+                            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                        }else{
+                            if(!learningAdd){
+                                res.status(404).send({message:'Error: El aprendizaje no ha sido creado'});
+                            }else{
+                                res.status(200).send({learning: learningAdd});
+                            }
+                        }
+                    });
                 }
             }
-        });
+        });        
     }else{
-        res.status(200).send({message:'rellene los campos obligatorios'});
+        res.status(200).send({message:'Error: Los campos orden, nombre y nombre corto son obligatorios'});
     }
 }
 
 /**
- * Obtener aprendizaje
- * @param id: Identificador del aprendizaje deseado
- * @returns learning: Aprendizaje solicitado
- */
-function getLearning (req,res){
-    var id = req.params.id;
-
-    Learning.findById(id).exec((err,tuple)=>{
-        if (err){
-            res.status(500).send({message: 'Error en el servidor', messageError: err.message});
-        }else{
-            if(!tuple){
-                res.status(404).send({message: 'No existe tupla con dicho identificador: ' + table}); 
-            }else{                
-                res.status(200).send({learning: tuple});              
-            }
-        }
-    });
-}
-
-/**
- * Obtener todos los aprendizajes o los asociados al nivel pasado por parámetro
- * @param level: Identificador del nivel (opcional)
+ * Obtener aprendizaje registrado
+ * @param id: Identificador de la acción deseada (opcional)
  * @returns learnings: Aprendizaje solicitados
  */
 function getLearnings (req, res){
-    var level = req.params.level;
+    var query = {}
 
-    if (level){        
-        LevelLearning.find({'level': level}).populate({path:'learning'}).exec((err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
+    if (req.params.id){
+        var o_id = new mongo.ObjectID(req.params.id);
+        query = { '_id' : o_id };
+    }    
+
+    Learning.find(query).exec((err,learnings) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{
+            if (!learnings){
+                res.status(200).send({message: 'Ningún aprendizaje registrado en el sistema'});
             }else{
-                if (tuples.length==0){
-                    res.status(200).send({message: 'Ningún aprendizaje asociado al nivel'})
-                }else{
-                    res.status(200).send({learnings: tuples});
-                }
+                res.status(200).send({learnings});                
             }
-        });
-    }else{
-        Learning.find({}).sort({order:1}).exec((err,tuples) => {
-            if (err){
-                res.status(500).send({message: 'Error en el servidor', messageError: err.message});    
-            }else{
-                if (tuples.length==0){
-                    res.status(404).send({message: 'Ningún aprendizaje registrado'});
-                }else{
-                    res.status(200).send({learnings: tuples});
-                }
-            }
-        });
-    }
+        }
+    });
 }
 
 /**
@@ -98,23 +79,23 @@ function getLearnings (req, res){
  */
 function updateLearning (req, res){
     var id = req.params.id;
-    var update = req.body;         
-    
-    if (update.order && update.title.length > 0 && update.key.length > 0  && update.description.length > 0) {
-        Learning.findByIdAndUpdate(id,update,(err,tupleUpdate) => {
+    var update = req.body;     
+
+    if (update.order && update.name && update.shortName) {
+        Learning.findByIdAndUpdate(id,update,(err,learning) => {
             if (err){
-                res.status(500).send({message:'Error al actualizar: ' + table, messageError: err.message}); 
+                res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
             }else{
-                if(!tupleUpdate){
-                    res.status(404).send({message: 'Error al actualizar: ' + table});
+                if(!learning){
+                    res.status(404).send({message: 'Error: el aprendizaje no ha podido ser actualizado'});
                 }else{
-                    res.status(200).send({learning:tupleUpdate});
+                    res.status(200).send({learning});
                 }
             }
         });
     }else{
-        res.status(200).send({message:'Rellena los campos obligatorios: nombre, clave, descripción, ejemplo'});
-    }
+        res.status(200).send({message:'Error: Los campos orden, nombre y nombre corto son obligatorios'});
+    }  
 }
 
 /**
@@ -125,23 +106,22 @@ function updateLearning (req, res){
 function removeLearning (req, res){
     var id = req.params.id;
 
-    Learning.findByIdAndRemove(id,(err,tupleRemove) => {
+    Learning.findByIdAndRemove(id,(err,learning) => {
         if (err){
-            res.status(500).send({message:'Error al eliminar: ' + table, messageError: err.message}); 
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
-            if(!tupleRemove){
-                res.status(404).send({message: 'Error al eliminar: ' + table});
+            if(!learning){
+                res.status(404).send({message: 'Error: No ha podido eliminarse el registro'}); 
             }else{
-                LevelLearning.remove({learning: tupleRemove._id}).exec();
-                res.status(200).send({learning:tupleRemove});
+                LevelLearning.remove({learningID:id});
+                res.status(200).send({learning});
             }
         }
     });
 }
 
 module.exports = {
-    addLearning,
-    getLearning,
+    addLearning,    
     getLearnings,
     updateLearning,
     removeLearning

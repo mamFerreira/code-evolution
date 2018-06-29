@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 import { UserService } from '../../services/user.service';
 import { Global } from '../../enum/global';
+// import { ConsoleReporter } from 'jasmine';
 
 @Component({
   selector: 'app-navigation-menu',
@@ -21,7 +22,7 @@ export class NavigationMenuComponent implements OnInit {
     private _userService: UserService    
   ) {
     this.url = Global.url_api;
-    this.identity = this._userService.getIdentity();
+    this.identity = this._userService.getIdentity();    
     this.option = '';
   }
 

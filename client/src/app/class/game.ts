@@ -94,8 +94,8 @@ export class Game {
             this._evolution = e;
             this._state = new s.State();
             
-            this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
-            this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
+            // this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
+            //this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
 
 
             g.forEach((g, index) => {    
@@ -119,7 +119,7 @@ export class Game {
         
         // Cargamos las acciones disponibles del nivel en el worker
         actions.forEach(a => {
-            let method = a.action.key;
+            let method = a.action.shortName;
             actionJson.push({'method' : method} );
         });        
 

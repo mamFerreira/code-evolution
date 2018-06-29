@@ -19,7 +19,7 @@ export class ActionService {
         this.httpOptions = {
             headers: new HttpHeaders({
               'Content-Type':  'application/json',
-              'Authorization': _userService.getToken()
+              'Authorization': this._userService.getToken()
             })
           };
     }
@@ -34,19 +34,9 @@ export class ActionService {
         return this._http.post(Global.url_api + 'action-add', json, this.httpOptions);
     }
 
-    // Obtener acción por ID
-    getAction(id: string): Observable<any> {
-        return this._http.get(Global.url_api + 'action/' + id, this.httpOptions);
-    }
-
     // Obtener todas las acción del sistema
-    getActions(): Observable<any> {
-        return this._http.get(Global.url_api + 'actions/', this.httpOptions);
-    }
-
-    // Obtener todas las acciones asociadas a un nivel
-    getActionsLevel(idLevel: string): Observable<any> {
-        return this._http.get(Global.url_api + 'actions/' + idLevel, this.httpOptions);
+    getActions(id: string = ''): Observable<any> {
+        return this._http.get(Global.url_api + 'actions-get/' + id, this.httpOptions);
     }
 
     // Actualizar acción

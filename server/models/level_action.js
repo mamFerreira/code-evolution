@@ -1,11 +1,12 @@
 'use strict'
 
+var GLOBAL = require ('../services/global');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var LevelActionShema = new Schema({    
-    level: {type: Schema.ObjectId, ref: 'Level'},
-    action: {type: Schema.ObjectId, ref: 'Action'}
-});
+    levelID: {type: Schema.ObjectId, ref: 'Level'},
+    actionID: {type: Schema.ObjectId, ref: 'Action'}    
+}, { versionKey: false});
 
-module.exports = mongoose.model('Level_Action',LevelActionShema,'level_action');
+module.exports = mongoose.model('Level_Action',LevelActionShema,GLOBAL.TABLE_LEVEL_ACTION);

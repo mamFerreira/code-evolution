@@ -1,20 +1,16 @@
 'use strict'
 
+var GLOBAL = require ('../services/global');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var EvolutionSchema = new Schema({
     order: Number,
+    origin: String,
     name: String,
     description: String,
-    origin: String,
-    image: String,
-    player: String,
     health: Number,
-    tiledset: String,
-    playerW: Number,
-    playerH: Number,
-    numLevels: {type: Number, default: 0},
-});
+    image: String        
+}, { versionKey: false});
 
-module.exports = mongoose.model('Evolution',EvolutionSchema);
+module.exports = mongoose.model('Evolution',EvolutionSchema, GLOBAL.TABLE_EVOLUTION);

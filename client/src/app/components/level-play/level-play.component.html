@@ -4,7 +4,7 @@
 </label>
 <app-alert></app-alert>
 <!--Botones-->
-<div *ngIf="game">
+<div *ngIf="game" class="button-group">
     <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 0 }" [disabled]="game.stateGame === 0 || game.stateGame === 1" (click)="doAction(0);">
         <span class="glyphicon glyphicon-refresh"></span>
     </button>
@@ -108,7 +108,7 @@
             <h1 class="modal-title">¡Nivel Superado!</h1>
             </div>
             <div class="modal-body">
-            <p>Has superado el nivel</p>
+            <h3>Has cumplido todos los objetivos</h3>
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-default" (click)="doAction(0)" >Jugar de nuevo</button>
@@ -117,19 +117,19 @@
         </div>
         </div>
     </div>
-    <div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':game.stateGame!==5,'display-block':game.stateGame===5}">
+    <div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':game.stateGame!==5,'display-block':game.stateGame==5}">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-            <div class="modal-header">        
-                <h1 class="modal-title">¡Nivel no superado!</h1>
-            </div>
-            <div class="modal-body">
-                <p>No has superado el nivel</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" (click)="doAction(0)" >Volver a intentar</button>
-                <button type="button" class="btn btn-default" [routerLink]="['/jugar/evolucion/' + evolution._id]">Cambiar nivel</button>
-            </div>
+                <div class="modal-header">        
+                    <h1 class="modal-title title-game-over">¡Nivel no superado!</h1>
+                </div>
+                <div class="modal-body">
+                    <h3>{{game.msgError}}</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" (click)="doAction(0)" >Volver a intentar</button>
+                    <button type="button" class="btn btn-default" [routerLink]="['/jugar/evolucion/' + evolution._id]">Cambiar nivel</button>
+                </div>
             </div>
         </div>
     </div>

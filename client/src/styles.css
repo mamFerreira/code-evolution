@@ -1,4 +1,4 @@
-/*VARIABLES*/
+/*#region VARIABLES*/
 :root {
     --main-color: #3f5e8c;
     --color-selected: #3e85ed;
@@ -13,7 +13,9 @@
     --checked-color: #A9DFBF;
 }
 
-/*GLOBAL*/
+/*#endregion ENDVARIABLES*/
+
+/*#region ELEMENTOS HTML*/
 html, body{
     margin:0;
     padding:0;
@@ -40,7 +42,7 @@ h1, h2, h3, h4{
 }
 
 h1 {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: bold;    
 }
  
@@ -56,6 +58,19 @@ h4{
     font-size: 12px;    
 }
 
+a {
+    cursor: pointer;
+}
+
+.table th,
+.table td {
+    text-align: center;   
+ }
+
+
+/*#endregion*/
+
+/*#region CLASES COMUNES*/
 .form-control, .btn {
     min-height: 38px;
     border-radius: 2px;
@@ -78,23 +93,9 @@ h4{
 .table-ce tbody tr td{
     font-size:13px;
 }
+/*#endregion*/
 
-.ace-chrome .ace_gutter {
-    width: 28px !important;;
-}
-
-.ace_gutter > .ace_layer {
-    background-color: #3f5e8c;
-    color: #f0f0f0;    
-    font-weight: bold;         
-}
-
-.ace_gutter > .ace_layer > .ace_gutter-cell{
-    padding-left: 2px;
-}
-
-
-/* POPOVER */
+/*#region POPOVER */
 
 .popover{
     max-width:400px;
@@ -124,3 +125,5 @@ h4{
     color: var(--font-color-2);
     background-color: var(--font-color);
 }
+
+/*#endregion*/

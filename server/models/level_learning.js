@@ -1,11 +1,12 @@
 'use strict'
 
+var GLOBAL = require ('../services/global');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var LevelLearningShema = new Schema({    
-    level: {type: Schema.ObjectId, ref: 'Level'},
-    learning: {type: Schema.ObjectId, ref: 'Learning'}
-});
+    levelID: {type: Schema.ObjectId, ref: 'Level'},
+    learningID: {type: Schema.ObjectId, ref: 'Learning'}
+}, { versionKey: false});
 
-module.exports = mongoose.model('Level_Learning',LevelLearningShema,'level_learning');
+module.exports = mongoose.model('Level_Learning',LevelLearningShema,GLOBAL.TABLE_LEVEL_LEARNING);

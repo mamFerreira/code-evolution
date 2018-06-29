@@ -24,18 +24,16 @@ export class LoginComponent implements OnInit {
   private _alertService: AlertService,
   private _userService: UserService
   ) {
-  this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
+  this.user = new User (null, '', '', 'admin@correo.com', '000', false, null, null, null);
   }
 
   ngOnInit() {}
 
-  onSubmitLogin() {
-    this.user.email = this.formlogin.value.email;
-    this.user.password = this.formlogin.value.password;
+  onSubmitLogin() {    
     this._userService.loginUser(this.user).subscribe(
       res => {
-        if (!res.user._id) {          
-          this._alertService.success('Identificación del usuario realizada sin éxito');
+        if (!res.user) {          
+          this._alertService.error(res.message);
         } else {
           // Almacenar en localstorage el usuario en sesión
           localStorage.setItem('identity', JSON.stringify(res.user));
@@ -46,9 +44,9 @@ export class LoginComponent implements OnInit {
                 this._alertService.error('Error en la generación del token');
               } else {
                 localStorage.setItem('token', res.token);
-                this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
+                this.user = new User (null, '', '', '', '', false, null, null, null);
                 this._router.navigate(['/']);
-                window.location.reload();
+                location.reload();
               }
             },
             err => {                         
@@ -71,11 +69,11 @@ export class LoginComponent implements OnInit {
 
     this._userService.addUser(this.user).subscribe(
       res => {
-        if (!res.user._id) {          
-          this._alertService.error('Error al registrarse');
+        if (!res.user) {          
+          this._alertService.error(res.message);
         } else {
-          this._alertService.success('Registro realizado correctamente, identificate con ' + this.user.email);          
-          this.user = new User ('', '', '', '', '', 'ROLE_USER', '', '', 1, null);
+          this._alertService.success('Registro realizado correctamente. Identificate con ' + this.user.email);          
+          this.user = new User (null, '', '', '', '', false, null, null, null);
           this.formregister.reset();
         }
       },

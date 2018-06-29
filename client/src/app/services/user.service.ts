@@ -41,29 +41,14 @@ export class UserService {
     return this._http.post(Global.url_api + 'user-add', json, this.httpOptions);
   }
 
-  // Logueo de usuario
-  loginUser (user_to_login: User, gethash = null): Observable<any> {
-    if ( gethash != null ) {
-      user_to_login.gethash = gethash;
-    }
-    let json = JSON.stringify(user_to_login);
-
-    return this._http.post(Global.url_api + 'user-login', json, httpOptions);
-  }
-
-  // Comprobar la validez del token almacenado en el localStorage
-  checkToken(): Observable<any> {
-    return this._http.get(Global.url_api + 'user-check-token', this.httpOptionsToken);
-  }
-
-  // Obtener usuarios registrados
+  // Obtener usuario por ID
   getUser (idUser: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'user/' + idUser, this.httpOptionsToken);
+    return this._http.get(Global.url_api + 'users-get/' + idUser, this.httpOptionsToken);
   }
 
   // Obtener usuarios registrados
   getUsers (): Observable<any> {    
-    return this._http.get(Global.url_api + 'users', this.httpOptionsToken);
+    return this._http.get(Global.url_api + 'users-get', this.httpOptionsToken);
   }
 
   // Actualizar usuario (solo administrador)
@@ -83,23 +68,14 @@ export class UserService {
     return this._http.delete(Global.url_api + 'user-remove/' + idUser, this.httpOptionsToken);
   }
 
-  // Activar usuario
-  activateUser (idUser: string): Observable<any> {
-    return this._http.get(Global.url_api + 'user-activate/' + idUser, this.httpOptionsToken);
-  }
-
-  // Desactivar usuario
-  desactivateUser (idUser: string): Observable<any> {
-    return this._http.get(Global.url_api + 'user-desactivate/' + idUser, this.httpOptionsToken);
-  }
-
   // Obtener token del local storage
   getToken() {
     let token = localStorage.getItem('token');
-
-    if (token === 'undefined') {
-        token = null;
+        
+    if (token === 'undefined' || token === null) {        
+        token = '';
     }
+
     return token;
   }
 
@@ -111,6 +87,21 @@ export class UserService {
       identity = null;
     }
     return identity;
+  }
+
+  // Logueo de usuario
+  loginUser (user_to_login: User, gethash = null): Observable<any> {
+    if ( gethash != null ) {
+      user_to_login.gethash = gethash;
+    }
+    let json = JSON.stringify(user_to_login);
+
+    return this._http.post(Global.url_api + 'user-login', json, httpOptions);
+  }
+  
+  // Comprobar la validez del token almacenado en el localStorage
+  checkToken(): Observable<any> {        
+    return this._http.get(Global.url_api + 'user-check-token', this.httpOptionsToken);
   }
 
 }

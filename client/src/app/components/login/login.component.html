@@ -1,75 +1,70 @@
 <!--Formulario inicio sesión-->
-<div class="login-form">
-    <h1 class="text-center">Code Evolution</h1>
-    <hr>
-    <app-alert></app-alert> 
-    <form (ngSubmit)="onSubmitLogin()" #formlogin="ngForm" method="post">                    
-        <div class="form-group">
-            <label for="email"><strong>Email:</strong></label>
-            <i class="fa fa-check-circle check" *ngIf="email.valid"></i>
-            <i class="fa fa-exclamation-circle uncheck" *ngIf="email.invalid && email.touched"></i>
-            <input type="text" class="form-control" name="email" placeholder="Email" #email="ngModel" ngModel required email/>
-            <p class="alert alert-danger" *ngIf="email.invalid && email.touched">
-                Introduce una dirección correcta
-            </p>
-        </div>
-        <div class="form-group">
-            <label for="pwd"><strong>Password:</strong></label>
-            <i class="fa fa-check-circle check" *ngIf="password.valid"></i>
-            <i class="fa fa-exclamation-circle uncheck" *ngIf="password.invalid && password.touched"></i>
-            <input type="password" class="form-control" name="password" placeholder="Password" #password="ngModel" ngModel required/>
-            <p class="alert alert-danger" *ngIf="password.invalid && password.touched">
-                Introduce una contraseña válida
-            </p>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary btn-block"  [disabled]="!formlogin.valid">Entrar</button>
-        </div>
-        <div class="clearfix">                      
-            <a href="#" class="btn-link pull-right" data-toggle="modal" data-target="#register-modal">¿Es la primera vez que entras?</a>
-        </div>
+<div class="login-form">    
+    <form class="form-horizontal" method="post" (ngSubmit)="onSubmitLogin()" #formlogin="ngForm">            
+        <legend class="text-center"><h1>CODE EVOLUTION</h1></legend>  
+        <app-alert></app-alert>      
+        <fieldset>         
+            <div class="form-group">
+                <label for="email"><strong>Email:</strong></label>
+                <i class="fa fa-check-circle check" *ngIf="email.valid"></i>
+                <i class="fa fa-exclamation-circle uncheck" *ngIf="email.invalid && email.touched"></i>
+                <input type="text" class="form-control" placeholder="Email" [(ngModel)]="user.email" name="email" #email="ngModel" required email/>
+                <p class="alert alert-danger" *ngIf="email.invalid && email.touched">
+                    Introduce una dirección correcta
+                </p>
+            </div>
+            <div class="form-group">
+                <label for="pwd"><strong>Password:</strong></label>
+                <i class="fa fa-check-circle check" *ngIf="password.valid"></i>
+                <i class="fa fa-exclamation-circle uncheck" *ngIf="password.invalid && password.touched"></i>
+                <input type="password" class="form-control" placeholder="Password" [(ngModel)]="user.password" name="password" #password="ngModel" required/>
+                <p class="alert alert-danger" *ngIf="password.invalid && password.touched">
+                    Introduce una contraseña válida
+                </p>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block"  [disabled]="!formlogin.valid">Entrar</button>
+            </div>
+            <div class="clearfix">                
+                <button type="button" class="btn-link pull-right" data-toggle="modal" data-target="#register-modal">¿Es la primera vez que entras?</button>  
+            </div>
+        </fieldset>
     </form>
 </div>
 <!--Formulario de registro-->
 <div class="modal fade" id="register-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none; margin-top: 25px;">
-    <div class="well well-sm register-form">
-        <app-alert></app-alert>        
+    <div class="well well-sm register-form">             
         <form class="form-horizontal" method="post" (ngSubmit)="onSubmitRegister()" #formregister="ngForm">
             <legend class="text-center"><h1>Registrate</h1></legend>       
+            <app-alert></app-alert>   
             <fieldset>  
                 <div class="form-group">
-                    <span class="col-md-1 text-center"><i class="fa fa-user bigicon"></i></span>
-                    <div class="col-md-10 col-md-offset-1">
-                        <input type="text" placeholder="Nombre" class="form-control" ngModel name="name_r" required #name_r="ngModel"/>
+                    <span class="col-xs-1 text-center"><i class="fa fa-user bigicon"></i></span>
+                    <div class="col-xs-4 col-md-offset-1">
+                        <input type="text" placeholder="Nombre (*)" class="form-control" ngModel name="name_r" required #name_r="ngModel"/>
                         <p class="alert alert-danger" *ngIf="name_r.invalid && name_r.touched"> 
-                        Por favor introduzca el nombre
+                        Campo obligatorio
                         </p>
-                    </div>                    
-                </div>
+                    </div>    
+                    <div class="col-xs-6">
+                        <input type="text" placeholder="Apellidos" class="form-control" ngModel name="surname_r" #surname_r="ngModel"/>                        
+                    </div>                
+                </div>                
                 <div class="form-group">
-                    <span class="col-md-1 text-center"><i class="fa fa-user bigicon"></i></span>
-                    <div class="col-md-10 col-md-offset-1">
-                        <input type="text" placeholder="Apellidos" class="form-control" ngModel name="surname_r" required #surname_r="ngModel"/>
-                        <p class="alert alert-danger" *ngIf="surname_r.invalid && surname_r.touched"> 
-                        Por favor introduzca los apellido
-                        </p>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-1 text-center"><i class="fa fa-envelope bigicon"></i></span>
-                    <div class="col-md-10 col-md-offset-1">
-                        <input type="text" placeholder="Email" class="form-control" ngModel name="email_r" required email #email_r="ngModel"/>
+                    <span class="col-xs-1 text-center"><i class="fa fa-envelope bigicon"></i></span>
+                    <div class="col-xs-10 col-md-offset-1">
+                        <input type="text" placeholder="Email (*)" class="form-control" ngModel name="email_r" required email #email_r="ngModel"/>
                         <p class="alert alert-danger" *ngIf="email_r.invalid && email_r.touched"> 
-                        Por favor introduzca una dirección de correo correcta
+                        Campo obligatorio
                         </p>
                     </div>                    
                 </div>
                 <div class="form-group">
-                    <span class="col-md-1 text-center"><i class="fa fa-key bigicon"></i></span>
-                    <div class="col-md-10 col-md-offset-1">
+                    <span class="col-xs-1 text-center"><i class="fa fa-key bigicon"></i></span>
+                    <div class="col-xs-10 col-md-offset-1">
                         <input type="password" placeholder="Contraseña" class="form-control" ngModel name="password_r" required #password_r="ngModel"/>
                         <p class="alert alert-danger" *ngIf="password_r.invalid && password_r.touched"> 
-                        Por favor introduzca una contraseña
+                        Campo obligatorio
                         </p>
                     </div>
                 </div>

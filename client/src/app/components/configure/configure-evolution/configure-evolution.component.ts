@@ -57,7 +57,7 @@ export class ConfigureEvolutionComponent implements OnInit {
       } else {
         this.boolEdit = false;
         this.title = 'Añadir evolución';
-        this.evolution = new Evolution (null, null, '', '', '', '', '', null , '', null, null);
+        this.evolution = new Evolution (null, null, '', '', '', null, '');
       }      
     });    
   }
@@ -172,7 +172,7 @@ export class ConfigureEvolutionComponent implements OnInit {
             this.makeFileRequest(this.url + 'evolution-upload-P/' +  this.evolution._id, [], this.filePlayer).then(
               (res: any) => {
                   if (res.image) {
-                    this.evolution.player = res.image;
+                    // this.evolution.player = ''; //res.image;
                   } else {
                     this.errorMessage.push('Subida de Player no realizada: ' + res.message);
                   }                       
@@ -183,7 +183,7 @@ export class ConfigureEvolutionComponent implements OnInit {
             this.makeFileRequest(this.url + 'evolution-upload-T/' +  this.evolution._id , [], this.fileTiledSet).then(
               (res: any) => {
                   if (res.image) {
-                    this.evolution.tiledset = res.image;
+                    // this.evolution.tiledset = res.image;
                   } else {
                     this.errorMessage.push('Subida de TiledSet no realizada: ' + res.message);
                   }                       

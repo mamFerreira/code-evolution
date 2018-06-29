@@ -1,19 +1,17 @@
 'use strict'
 
+var GLOBAL = require ('../services/global');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var LevelSchema = new Schema({
     order: Number,
-    title: String,
+    name: String,
     description: String,
-    evolution: {type: Schema.ObjectId, ref: 'Evolution'},
     state: String,
-    active: {type: Number, default: 1},
-    image: String,
     time: {type: Number, default:0},
-    code_default: String,
-    map: String
-});
+    image: String,
+    evolutionID: {type: Schema.ObjectId, ref: 'EVOLUTION'}        
+}, { versionKey: false});
 
-module.exports = mongoose.model('Level',LevelSchema);
+module.exports = mongoose.model('Level',LevelSchema, GLOBAL.TABLE_LEVEL);
