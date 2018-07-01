@@ -55,7 +55,7 @@ function addLevel (req, res){
             }
         });        
     }else{
-        res.status(200).send({message:'Error: Los campos orden, nombre, estado y tiempo son obligatorios'});
+        res.status(200).send({message:'Error: Los campos orden, nombre, estado, tiempo y evolución son obligatorios'});
     }
 }
 
@@ -82,7 +82,7 @@ function getLevels (req, res){
         query = { 'evolutionID' : req.params.evolutionID };
     } 
 
-    Level.find(query).sort({order:1}).exec((err,levels) => {
+    Level.find(query).sort({evolutionID:1,order:1}).exec((err,levels) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message});  
         }else{
@@ -300,10 +300,9 @@ function getActions (req, res){
  * @param id: Identificador de la relación acción nivel
  * @returns level_action: Relación nivel-acción eliminada
  */
-function removeAction (req, res){
-    var id = req.params.id;
-
-    LevelAction.findByIdAndRemove(id,(err,level_action) => {
+function removeAction (req, res){    
+    var query = {levelID: req.params.idLevel, actionID: req.params.idAction}
+    LevelAction.findOneAndRemove(query,(err,level_action) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
@@ -385,9 +384,8 @@ function getLearnings (req, res){
  * @returns level_learning: Relación nivel-aprendizaje eliminada
  */
 function removeLearning (req, res){
-    var id = req.params.id;
-
-    LevelLearning.findByIdAndRemove(id,(err,level_learning) => {
+    var query = {levelID: req.params.idLevel, learningID: req.params.idLearning}
+    LevelLearning.findOneAndRemove(query,(err,level_learning) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
         }else{
@@ -418,7 +416,7 @@ function addGoal (req, res) {
         LevelGoal.find({levelID:level_goal.levelID, goalID: level_goal.goalID}).exec( (err,level_goal_db) => {
             if (err){
                 res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
-            }else{                
+            }else{                            
                 if (level_goal_db.length>0){
 
                     var id = level_goal_db[0]._id;
@@ -465,7 +463,7 @@ function getGoals (req, res){
 
     var levelID = req.params.levelID;
 
-    LevelGoal.find({'levelID': levelID}).populate({path:'goalID'}).exec((err,goals) => {
+    LevelGoal.find({'levelID': levelID}).exec((err,goals) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message});  
         }else{
@@ -481,16 +479,16 @@ function getGoals (req, res){
 
 /**
  * Eliminar objetivo del nivel
- * @param id: Identificador de la relación objetivo nivel
+ * @param idLevel: Identificador del nivel
+ * @param idGoal: Identificador del objetivo
  * @returns level_goal: Relación nivel-objetivo eliminada
  */
-function removeGoal (req, res){
-    var id = req.params.id;
-
-    LevelGoal.findByIdAndRemove(id,(err,level_goal) => {
+function removeGoal (req, res){        
+    var query = {levelID: req.params.idLevel, goalID: req.params.idGoal}        
+    LevelGoal.findOneAndRemove(query,(err,level_goal) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
-        }else{
+        }else{            
             if(!level_goal){
                 res.status(404).send({message: 'Error: No ha podido eliminarse el registro'}); 
             }else{                

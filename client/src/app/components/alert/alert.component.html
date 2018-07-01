@@ -1,4 +1,6 @@
-<div *ngFor="let alert of alerts" class="{{ cssClass(alert) }} alert-dismissable">
-    {{alert.message}}
-    <a class="close" (click)="removeAlert(alert)">&times;</a>
+<div *ngFor="let alert of alerts" class="{{ cssClass(alert) }} alert-dismissable" style="padding:0; min-height:35px; width:100%" >
+    <div class="col-xs-12">
+        <a class="close" (click)="removeAlert(alert)" style="top:0; right:0; font-size:25px;">&times;</a>
+        <label style="margin-top:5px;">{{alert.message}}</label>
+    </div>    
 </div>

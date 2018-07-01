@@ -44,8 +44,7 @@ export class NavigationMenuComponent implements OnInit {
     window.location.reload();
   }
 
-  changeOption(type) {
-    console.log(type);
+  changeOption(type) {    
     this.option = type;    
   }
 

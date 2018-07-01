@@ -7,7 +7,6 @@ import { Level } from '../../models/level.model';
 import { LevelGoal } from '../../models/level_goal.model';
 import { LevelLearning } from '../../models/level_learning.model';
 import { LevelAction } from '../../models/level_action.model';
-import { Position } from '../../models/position.model';
 // Clases
 import { Game } from '../../class/game';
 import { GameAction } from '../../enum/game-action';
@@ -80,14 +79,14 @@ export class LevelPlayComponent implements OnInit {
   loadLevel() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];
-      this._levelSercice.getLevel(id).subscribe(
+      this._levelSercice.getLevels(id).subscribe(
         res => {
           if (!res.level) {
             this.errorMsg += res.message;
           } else {
             this.level = res.level;
             this.loadEvolution();            
-            this.loadCode();
+            // this.loadCode();
           }
         },
         err => {
@@ -101,7 +100,7 @@ export class LevelPlayComponent implements OnInit {
    * Carga de la evolución
    */
   loadEvolution() {
-    this._evolutionService.getEvolution(this.level.evolution).subscribe(
+    this._evolutionService.getEvolutions(this.level.evolution._id).subscribe(
       res => {
         if (!res.evolution) {
           this.errorMsg += res.message;
@@ -121,7 +120,7 @@ export class LevelPlayComponent implements OnInit {
   */
   loadPropertyLevel() {
     // Objetivos
-    this._goalService.getGoalsLevel(this.level._id).subscribe(
+    this._goalService.getGoals(this.level._id).subscribe(
       res => {
         if (!res.goals) {
           this.errorMsg += res.message;
@@ -140,20 +139,6 @@ export class LevelPlayComponent implements OnInit {
                     return 0;
                   }
                 }); 
-                // Posiciones
-                this._levelSercice.getPositions(this.level._id).subscribe(
-                  res => {
-                    if (!res.positions) {
-                      this.errorMsg += res.message;
-                    } else {
-                      this.positions = res.positions;
-                      this.loadGame();
-                    }
-                  },
-                  err => {
-                    this.errorMsg += err.error.message;
-                  }
-                );
               }
             },
             err => {
@@ -168,7 +153,7 @@ export class LevelPlayComponent implements OnInit {
     );
 
     // Aprendizaje
-    this._learningService.getLearningsLevel(this.level._id).subscribe(
+    this._learningService.getLearnings(this.level._id).subscribe(
       res => {
         if (!res.learnings) {
           this.errorMsg += res.message;
@@ -191,7 +176,7 @@ export class LevelPlayComponent implements OnInit {
   /**
    * Carga del código a mostrar en el editor
    */
-  loadCode() {
+  /*loadCode() {
     this._levelSercice.loadCode(this.level._id).subscribe(
       res => {        
         if (!res.code) {
@@ -204,7 +189,7 @@ export class LevelPlayComponent implements OnInit {
         this.errorMsg += err.error.message;
       }
     );
-  }
+  }*/
 
   /**
    * Carga del juego
@@ -247,14 +232,14 @@ export class LevelPlayComponent implements OnInit {
         if (this.code.length === 0) {
           this.game.doAction(GameAction.Stop);
         } else {
-          this._levelSercice.registerCode(this.code, this.level._id).subscribe(
+          /*this._levelSercice.registerCode(this.code, this.level._id).subscribe(
             res => {        
               this.game.doAction(GameAction.Play, this.code);           
             },
             err => {
               this.errorMsg += err.error.message;            
             }
-          ); 
+          ); */
         }                 
       }
       if (this.game.stateGame === GameState.Pause) {

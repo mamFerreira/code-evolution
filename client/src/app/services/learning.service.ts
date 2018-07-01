@@ -24,40 +24,26 @@ export class LearningService {
           };
     }
 
-    /**
-    * OPERACIONES CRUD
-    */
-
-    // Añadir nuevo aprendizaje en el sistema
-    addLearning (learn_to_register: Learning): Observable<any> {
-        let json = JSON.stringify(learn_to_register);
+    // Añadir nuevo aprendizaje
+    addLearning (learning_to_register: Learning): Observable<any> {
+        let json = JSON.stringify(learning_to_register);
         return this._http.post(Global.url_api + 'learning-add', json, this.httpOptions);
     }
 
-    // Obtener aprendizaje por ID
-    getLearning(id: string): Observable<any> {
-        return this._http.get(Global.url_api + 'learning/' + id, this.httpOptions);
-    }
-
-    // Obtener todos los aprendizaje del sistema
-    getLearnings(): Observable<any> {
-        return this._http.get(Global.url_api + 'learnings/', this.httpOptions);
-    }
-
-    // Obtener todos los aprendizaje asociadas a un nivel
-    getLearningsLevel(idLevel: string): Observable<any> {
-        return this._http.get(Global.url_api + 'learnings/' + idLevel, this.httpOptions);
+    // Obtener aprendizajes
+    getLearnings(id: string = ''): Observable<any> {
+        return this._http.get(Global.url_api + 'learnings-get/' + id, this.httpOptions);
     }
 
     // Actualizar aprendizaje
-    updateLearning (learn_to_register: Learning): Observable<any> {
-        let json = JSON.stringify(learn_to_register);
-        return this._http.put(Global.url_api + 'learning-update/' + learn_to_register._id, json, this.httpOptions);
+    updateLearning (learning_to_update: Learning): Observable<any> {
+        let json = JSON.stringify(learning_to_update);
+        return this._http.put(Global.url_api + 'learning-update/' + learning_to_update._id, json, this.httpOptions);
     }
 
-    // Eliminar aprendizaje
-    removeLearning (idLearn: string): Observable<any> {
-        return this._http.delete(Global.url_api + 'learning-remove/' + idLearn, this.httpOptions);
+    // Eliminar acción
+    removeLearning (idLearning: string): Observable<any> {
+        return this._http.delete(Global.url_api + 'learning-remove/' + idLearning, this.httpOptions);
     }
 
 }

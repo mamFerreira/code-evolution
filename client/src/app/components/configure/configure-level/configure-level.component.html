@@ -1,217 +1,174 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">    
-    <h1>{{title}}</h1>                   
-    <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
-    <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div>
-    <div *ngIf="level && evolutions" class="col-lg-10 col-md-10" style="margin-top:10px;">                
-        <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
-            <div class="form-group">
-              <label for="name" class="control-label col-sm-2">Order (*):</label>
-              <div class="col-sm-5">
-                  <input type="text" class="form-control" [(ngModel)]="level.order" name="order" required #order="ngModel">
-              </div>            
-            </div>
-            <div class="form-group">
-              <label for="name" class="control-label col-sm-2">Title (*):</label>
-              <div class="col-sm-10">
-                  <input type="text" class="form-control" [(ngModel)]="level.title" name="title" required #title="ngModel">
-              </div>            
-            </div>
-            <div class="form-group">
-              <label for="name" class="control-label col-sm-2">Description:</label>
-              <div class="col-sm-10">
-                  <textarea rows="5" class="form-control" [(ngModel)]="level.description" name="description" required #description="ngModel"></textarea>
-              </div>            
-            </div>  
-            <div class="form-group">
-                <label for="evolution" class="control-label col-sm-2">Evolution (*):</label>
-                <div class="col-sm-10">
-                    <select  class="form-control" [(ngModel)]="level.evolution" name="evolution">
-                      <option *ngFor="let e of evolutions" [ngValue]="e._id">{{e.order}}-{{e.name}}</option>
-                    </select>
-                </div>            
-            </div>
-            <div class="form-group">
-                <label for="name" class="control-label col-sm-2">State (*):</label>
-                <div class="col-sm-5">
-                    <input type="text" class="form-control" [(ngModel)]="level.state" name="state" required #state="ngModel">
-                </div>            
-            </div> 
-            <div class="form-group">
-              <label for="name" class="control-label col-sm-2">Time seg (*):</label>
-              <div class="col-sm-5">
-                  <input type="text" class="form-control" [(ngModel)]="level.time" name="time" required #time="ngModel">
-              </div>            
-            </div> 
-            <div class="form-group" *ngIf="boolEdit">
-              <label for="name" class="control-label col-sm-2">Image (512x380):</label>
-              <div class="col-sm-6 float-right">
-                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'image')"/>               
-              </div>            
-              <div class="col-sm-2 float-right" *ngIf="level.image && level.image != ''" >
-                  <a class="btn" href="{{url}}level-load/{{level.image}}/I" download="img">Descargar</a>                   
-              </div>
-            </div>
-            <div class="form-group" *ngIf="boolEdit">
-              <label for="name" class="control-label col-sm-2">Code Default (txt):</label>
-              <div class="col-sm-6 float-right">
-                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'code_default')"/>               
-              </div>            
-              <div class="col-sm-2 float-right" *ngIf="level.code_default && level.code_default != ''" >
-                  <a class="btn" href="{{url}}level-load/{{level.code_default}}/C" download="img">Descargar</a>                   
-              </div>
-            </div>  
-            <div class="form-group" *ngIf="boolEdit">
-              <label for="name" class="control-label col-sm-2">Map (json 32x24 16px):</label>
-              <div class="col-sm-6 float-right">
-                <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event, 'map')"/>               
-              </div>            
-              <div class="col-sm-2 float-right" *ngIf="level.map && level.map != ''" >
-                  <a class="btn" href="{{url}}level-load/{{level.map}}/M" download="img">Descargar</a>                   
-              </div>
-            </div> 
-            <div class="col-sm-offset-2 col-sm-10">                
-                <button type="submit" class="btn btn-success">Guardar</button>
-                <a [routerLink]="['/admin/level']" class="btn btn-warning">Volver</a>                        
-                <button *ngIf="boolEdit && level.active==0" (click)='activateLevel();' class="btn btn-success btn-active">Activar</button>
-                <button *ngIf="boolEdit && level.active==1" (click)='desactivateLevel();' class="btn btn-danger btn-active">Desactivar</button>                             
-            </div> 
-        </form>
-        <div *ngIf="boolEdit" class="lists_property">
-            <h2>Gestión de objetivos</h2>
-            <div *ngIf="errorProperty[0]" class="alert alert-warning"> {{errorProperty[0]}}</div>  
-            <table *ngIf="levelGoals.length>0" class="table">
-                <thead class="thead-inverse">
-                    <tr>
-                        <th>#</th>              
-                        <th>Goal</th>
-                        <th>Value 1</th>
-                        <th>Value 2</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let element of levelGoals; let i = index">
-                        <th scope="row">{{i+1}}</th>              
-                        <td>{{element.goal.title}}</td>
-                        <td>{{element.value1}}</td>
-                        <td>{{element.value2}}</td>
-                        <td>
-                            <a (click)="removeGoal(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table> 
-            <form *ngIf="goals" (ngSubmit)="addGoal()" #form="ngForm" class="form-inline">
-                <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="levelGoal.goal" name="goal">
-                        <option *ngFor="let g of goals" [ngValue]="g">{{g.title}}</option>
-                    </select>
+<div class="container">
+    <div class="col-md-8">
+        <app-alert></app-alert>
+        <div class="well well-sm" *ngIf="identity.admin && level">              
+            <form class="form-horizontal" method="post" (ngSubmit)="onSubmit()" #formConfigureLevel="ngForm">
+                <legend class="text-center"><h1>{{title}}</h1></legend>
+                <div class="form-group">
+                    <label for="order" class="control-label col-sm-3">Orden (*):</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" [(ngModel)]="level.order" name="order" required #order="ngModel">
+                    </div>            
+                </div> 
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-3">Nombre (*):</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" [(ngModel)]="level.name" name="name" required #name="ngModel">
+                    </div>            
+                </div>   
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-3">Descripción:</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control" [(ngModel)]="level.description" name="description" #description="ngModel"></textarea>
+                    </div>            
                 </div>
-                <div class="form-group mb-2">
-                    <label for="name" class="control-label">Value 1:</label>
-                    <input type="text" class="form-control" [(ngModel)]="levelGoal.value1" name="value1" required #value1="ngModel">           
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-3">Evolución (*):</label>
+                    <div class="col-sm-9">
+                        <select class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="level.evolutionID" name="level.evolutionID" required>
+                            <option *ngFor="let element of evolutions" [ngValue]="element._id">{{element.name}}</option>
+                        </select>
+                    </div>            
                 </div>
-                <div class="form-group mb-2">
-                    <label for="name" class="control-label">Value 2:</label>
-                    <input type="text" class="form-control" [(ngModel)]="levelGoal.value2" name="value2" required #value2="ngModel">          
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-3">Nombre estado (*):</label>
+                    <div class="col-sm-9">
+                            <input type="text" class="form-control" [(ngModel)]="level.state" name="state" required #state="ngModel">
+                    </div>            
                 </div>
-                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
-            </form>                     
-            <h2>Gestión de aprendizaje</h2>
-            <div *ngIf="errorProperty[1]" class="alert alert-warning"> {{errorProperty[1]}}</div> 
-            <table *ngIf="levelLearnings.length>0" class="table">
-                <thead class="thead-inverse">
-                    <tr>
-                        <th>Order</th>              
-                        <th>Title</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let element of levelLearnings; let i = index">                                     
-                        <td>{{element.learning.order}}</td>
-                        <td>{{element.learning.title}}</td>
-                        <td>
-                            <a (click)="removeLearning(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <form *ngIf="learnings" (ngSubmit)="addLearning()" #form="ngForm" class="form-inline">
-                <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="levelLearning.learning" name="learning">
-                        <option *ngFor="let l of learnings" [ngValue]="l">{{l.order}} {{l.title}}</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
-            </form>
-            <h2>Gestión de acciones</h2>
-            <div *ngIf="errorProperty[2]" class="alert alert-warning"> {{errorProperty[2]}}</div> 
-            <table *ngIf="levelActions.length>0" class="table">
-                <thead class="thead-inverse">
-                    <tr>
-                        <th>#</th>              
-                        <th>Method</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let element of levelActions; let i = index">
-                        <th scope="row">{{i+1}}</th>              
-                        <td>{{element.action.method}}</td>
-                        <td>
-                            <a (click)="removeAction(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <form *ngIf="actions" (ngSubmit)="addAction()" #form="ngForm" class="form-inline">
-                <div class="form-group mb-2">                    
-                    <select  class="form-control" [(ngModel)]="levelAction.action" name="action">
-                        <option *ngFor="let a of actions" [ngValue]="a">{{a.method}}</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
-            </form>
-            <h2>Gestión de posiciones</h2>
-            <div *ngIf="errorProperty[3]" class="alert alert-warning"> {{errorProperty[3]}}</div>
-            <table *ngIf="levelPositions.length>0" class="table">
-                <thead class="thead-inverse">
-                    <tr>
-                        <th>#</th>              
-                        <th>Coord. X</th>
-                        <th>Coord. Y</th>                        
-                        <th>Initial</th>
-                        <th>Action</th>                        
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let element of levelPositions; let i = index">
-                        <th scope="row">{{i+1}}</th>              
-                        <td>{{element.value_x}}</td>
-                        <td>{{element.value_y}}</td>   
-                        <td>{{element.initial}}</td>
-                        <td>
-                            <a (click)="removePosition(element._id);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table> 
-            <form (ngSubmit)="addPosition()" #form="ngForm" class="form-inline">
-                <div class="form-group mb-1">
-                    <label for="name" class="control-label">Cood. X:</label>
-                    <input type="text" class="form-control" [(ngModel)]="position.value_x" name="value_x" required #value_x="ngModel">           
-                </div>
-                <div class="form-group mb-1">
-                    <label for="name" class="control-label">Cood. Y:</label>
-                    <input type="text" class="form-control" [(ngModel)]="position.value_y" name="value_y" required #value_y="ngModel">          
-                </div>
-                <div class="form-group mb-1">
-                    <label for="name" class="control-label">Initial:</label>
-                    <input type="checkbox" class="form-control" [(ngModel)]="position.initial" name="initial" required #initial="ngModel">          
-                </div>
-                <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-3">Tiempo (*):</label>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" [(ngModel)]="level.time" name="time" required #time="ngModel">
+                    </div>           
+                    <label for="name" class="control-label col-sm-1">segundos</label>
+                </div>                
+                <div class="form-group" *ngIf="edit">
+                    <label for="name" class="control-label col-sm-3">Imagen (png):</label>
+                    <div class="col-sm-7">
+                        <input type="file" class="form-control" placeholder='Subir archivo...' (change)="fileChangeEvent($event,'image')"/>               
+                    </div>            
+                    <div class="col-sm-2" *ngIf="level.image" >
+                        <a class="btn" href="{{url}}level-load/{{level._id}}" download="img">Descargar</a>                   
+                    </div>
+                </div>                                                                                                   
+                <div class="form-group text-right">
+                    <button type="submit" class="btn btn-success" [disabled]="!formConfigureLevel.valid">Guardar</button>
+                    <button class="btn btn-warning" [routerLink]="['/admin/level']">Volver</button>                                
+                </div>                        
             </form> 
+            <div *ngIf="edit" class="form-horizontal">                
+                <div style="margin-top:15%">
+                    <h3>Gestión de acciones</h3>            
+                    <table class="table" *ngIf="level.actions">
+                        <thead>
+                            <tr>
+                                <th>#</th> 
+                                <th>Orden</th>              
+                                <th>Nombre</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="level.actions.length>0">
+                            <tr *ngFor="let element of level.actions; let i = index">
+                                <th scope="row">{{i+1}}</th>              
+                                <td>{{element.order}}</td>
+                                <td>{{element.name}}</td>                        
+                                <td>
+                                    <a (click)="removeAction(element._id, i);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="!level.actions.length>0">
+                                <tr class="no-data">
+                                    <td colspan="4">No se han encontrado resultados</td>
+                                </tr>
+                        </tbody> 
+                    </table>
+                    <form *ngIf="actions" (ngSubmit)="addAction()" #form="ngForm" class="form-inline">
+                        <label for="name">Acciones:</label>                  
+                        <select class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="action" name="action">
+                            <option *ngFor="let element of actions" [ngValue]="element">{{element.name}}</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+                    </form>
+                </div>   
+                <div style="margin-top:15%">
+                    <h3>Gestión de aprendizaje</h3>            
+                    <table class="table" *ngIf="level.learnings">
+                        <thead>
+                            <tr>
+                                <th>#</th> 
+                                <th>Orden</th>              
+                                <th>Nombre</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="level.learnings.length>0">
+                            <tr *ngFor="let element of level.learnings; let i = index">
+                                <th scope="row">{{i+1}}</th>              
+                                <td>{{element.order}}</td>
+                                <td>{{element.name}}</td>                        
+                                <td>
+                                    <a (click)="removeLearning(element._id, i);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="!level.learnings.length>0">
+                                <tr class="no-data">
+                                    <td colspan="4">No se han encontrado resultados</td>
+                                </tr>
+                        </tbody> 
+                    </table>
+                    <form *ngIf="learnings" (ngSubmit)="addLearning()" #form="ngForm" class="form-inline">
+                        <label for="name">Aprendizajes:</label>                  
+                        <select class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="learning" name="learning">
+                            <option *ngFor="let element of learnings" [ngValue]="element">{{element.name}}</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary mb-2">Añadir</button>
+                    </form>
+                </div>             
+                <div style="margin-top:15%;">
+                    <h3>Gestión de objetivos</h3>            
+                    <table class="table" *ngIf="level.goals" >
+                        <thead>
+                            <tr>
+                                <th>#</th>              
+                                <th>Nombre</th>
+                                <th>Valor 1</th>
+                                <th>Valor 2</th>
+                                <th>Eliminar</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngIf="level.goals.length>0">
+                            <tr *ngFor="let element of level.goals; let i = index">
+                                <th scope="row">{{i+1}}</th>              
+                                <td>{{element.goal.name}}</td>
+                                <td>{{element.value_1}}</td>
+                                <td>{{element.value_2}}</td>
+                                <td>
+                                    <a (click)="removeGoal(element.goalID, i);" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody *ngIf="!level.goals.length>0">
+                                <tr class="no-data">
+                                    <td colspan="5">No se han encontrado resultados</td>
+                                </tr>
+                        </tbody> 
+                    </table> 
+                    <form *ngIf="goals && levelGoal" (ngSubmit)="addGoal()" #form="ngForm" class="form-inline">                         
+                        <label for="name">Objetivos:</label>                  
+                        <select class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="levelGoal.goal" name="levelGoal.goalID">
+                            <option *ngFor="let element of goals" [ngValue]="element">{{element.name}}</option>
+                        </select>
+                        <label for="name">Valor 1:</label>
+                        <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="levelGoal.value_1" name="value_1" #value_1="ngModel" style="width: 10%;">
+                        <label for="name">Value 2:</label>
+                        <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" [(ngModel)]="levelGoal.value_2" name="value_2" #value_2="ngModel" style="width: 10%;">
+                        <button type="submit" class="btn btn-primary">Añadir</button>                                   
+                    </form>
+                </div> 
+            </div>
         </div>
-    </div>
 </div>

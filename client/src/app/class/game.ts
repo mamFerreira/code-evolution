@@ -4,7 +4,6 @@ import { Evolution } from '../models/evolution.model';
 import { Level } from '../models/level.model';
 import { LevelGoal } from '../models/level_goal.model';
 import { LevelAction } from '../models/level_action.model';
-import { Position } from '../models/position.model';
 
 // Importamos servicios
 import { UserService } from '../services/user.service';
@@ -95,20 +94,15 @@ export class Game {
             this._state = new s.State();
             
             // this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
-            //this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
+            // this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
 
 
-            g.forEach((g, index) => {    
-                this._state.loadGoal(g.goal.title, g.goal.key, g.value1, g.value2);                                       
-            });
-            
-            p.forEach((p) => {
-                if (p.initial) {
-                    this._state.loadPositionPlayer(p.value_x, p.value_y);
-                } else {
-                    this._state.loadPosition(p.value_x, p.value_y);
-                }  
-            });                                   
+            /*g.forEach((g, index) => {    
+                this._state.loadGoal(g.goal.name, g.goal.key, g.value1, g.value2);                                       
+            });*/
+
+            this._state.loadPositionPlayer(0, 0);
+            this._state.loadPosition(20, 20);                                   
         });        
     }
 
@@ -119,7 +113,7 @@ export class Game {
         
         // Cargamos las acciones disponibles del nivel en el worker
         actions.forEach(a => {
-            let method = a.action.shortName;
+            let method = ''; // a.action.shortName;
             actionJson.push({'method' : method} );
         });        
 
@@ -329,7 +323,7 @@ export class Game {
     }  
 
     nextLevel() {
-        this._levelService.nextLevel(this._level._id).subscribe(
+        this._levelService.getLevels(this._level._id).subscribe(
             res => {
                 if (res.level) {                                                                         
                     if (this._level._id === this._identity.level._id) {                                                     

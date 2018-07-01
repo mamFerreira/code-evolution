@@ -162,7 +162,7 @@ function loginUser (req, res){
     User.findOne({email:_email.toLowerCase()}).exec((err,user) => {            
         if(err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message});  
-        }else{
+        }else{            
             if (!user){
                 res.status(200).send({message:'El usuario con email ' + _email + ' no existe.'});
             }else{

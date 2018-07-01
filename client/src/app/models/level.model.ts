@@ -1,17 +1,20 @@
 import { Evolution } from './evolution.model';
+import { Action } from './action.model';
+import { Learning } from './learning.model';
+import { LevelGoal } from './level_goal.model';
 
 export class Level {
     constructor(
         public _id: string,
         public order: number,
-        public title: string,
-        public description: string,
-        public evolution: string,
+        public name: string,
+        public description: string,        
         public state: string,
-        public active: number,
+        public time: number,        
         public image: string,
-        public time: number,
-        public code_default: string,
-        public map: string
+        public evolution: Evolution,
+        public actions: Array<Action>,
+        public learnings: Array<Learning>,
+        public goals: Array<LevelGoal>
     ) {}
 }

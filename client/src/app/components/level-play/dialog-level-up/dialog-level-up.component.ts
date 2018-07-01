@@ -59,7 +59,7 @@ export class DialogLevelUpComponent implements OnInit {
     this.next = true;
 
 
-    this._levelService.nextLevel(this.level).subscribe(
+    this._levelService.getLevels(this.level).subscribe(
       res => {
           if (res.level) {                                        
               if (res.level.evolution._id === this.evolution) {

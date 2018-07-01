@@ -24,29 +24,22 @@ export class EvolutionService {
           };
     }
 
-    /**
-    * OPERACIONES CRUD
-    */
+    // Operaciones CRUD
 
-    // Añadir nueva evolución en el sistema
+    // Añadir nueva evolución
     addEvolution (evolution_to_register: Evolution): Observable<any> {
         let json = JSON.stringify(evolution_to_register);
         return this._http.post(Global.url_api + 'evolution-add', json, this.httpOptions);
     }
 
-    // Obtener evolución por ID
-    getEvolution(id: string): Observable<any> {
-        return this._http.get(Global.url_api + 'evolution/' + id, this.httpOptions);
-    }
+    // Obtener evoluciones
+    getEvolutions(id: string = '', order: string = ''): Observable<any> {
 
-    // Obtener todas las evoluciones del sistema donde el usuario tiene permisos de visualización
-    getEvolutions(): Observable<any> {
-        return this._http.get(Global.url_api + 'evolutions/', this.httpOptions);
-    }
-
-    // Obtener el numero de evoluciones registradas en el sistema
-    getNumEvolutions(): Observable<any> {
-        return this._http.get(Global.url_api + 'evolutions-num/', this.httpOptions);
+        if (order.length > 0) {
+            return this._http.get(Global.url_api + 'evolutions-get-order/' + order, this.httpOptions);
+        } else {
+            return this._http.get(Global.url_api + 'evolutions-get/' + id, this.httpOptions);
+        }        
     }
 
     // Actualizar evolución
@@ -64,21 +57,14 @@ export class EvolutionService {
     * OPERACIONES ESPECIALES
     */
 
-    // Obtener el número de niveles de la evolución
-    getEvolutionNumLevels(idEvolution: string): Observable<any> {
-        return this._http.get(Global.url_api + 'evolution-num-levels/' + idEvolution, this.httpOptions);
-    }
-
-    // Obtener el listado de aprendizaje asociado a la evolución
-    getEvolutionLearnings(idEvolution: string): Observable<any> {
+    // Obtener aprendizaje asociado
+    getLernings(idEvolution: string): Observable<any> {
         return this._http.get(Global.url_api + 'evolution-learning/' + idEvolution, this.httpOptions);
     }
 
-    // Obtener el listado de acciones asociada a la evolución
-    getEvolutionActions(idEvolution: string): Observable<any> {
+    // Obtener acciones asociadas
+    getActions(idEvolution: string): Observable<any> {
         return this._http.get(Global.url_api + 'evolution-action/' + idEvolution, this.httpOptions);
-    }
-
-     
-
+    }     
+    
 }

@@ -1,27 +1,28 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">  
-  <h1>{{title}}</h1>
-  <div *ngIf="errorMessage" class="alert alert-warning"> <strong>Error: </strong>{{errorMessage}}</div>
-  <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
-  <div *ngIf="goal" class="col-lg-8 col-md-8" style="margin-top:50px;">
-      <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Name (*):</label>
-          <div class="col-sm-10">
-              <input type="text" class="form-control" [(ngModel)]="goal.title" name="title" required #title="ngModel">
-          </div>            
-        </div>     
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Key (*):</label>
-          <div class="col-sm-10">
-              <input type="text" class="form-control" [(ngModel)]="goal.key" name="key" required #key="ngModel">
-          </div>            
-        </div>        
-        <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <a [routerLink]="['/admin/goal']" class="btn btn-warning">Volver</a>
-        </div>                         
-      </form>
-  </div>  
+<div class="container">
+    <div class="col-md-8">
+        <app-alert></app-alert>
+        <div class="well well-sm" *ngIf="identity.admin && goal">
+            <form class="form-horizontal" method="post" (ngSubmit)="onSubmit()" #formConfigureGoal="ngForm">
+                <legend class="text-center"><h1>{{title}}</h1></legend> 
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Nombre (*):</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" [(ngModel)]="goal.name" name="name" required #name="ngModel">
+                    </div>            
+                </div>
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Clave (*):</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" [(ngModel)]="goal.key" name="key" required #key="ngModel">
+                    </div>            
+                </div>                                                                                        
+                <div class="text-right">
+                    <button type="submit" class="btn btn-success" [disabled]="!formConfigureGoal.valid">Guardar</button>
+                    <button class="btn btn-warning" [routerLink]="['/admin/goal']">Volver</button>                                
+                </div>                        
+            </form>
+        </div>
+    </div>
 </div>
   
   

@@ -44,7 +44,7 @@ export class EvolutionListComponent implements OnInit {
 
   getNumEvolutions() {
     // Obtener el número de evoluciones
-    this._evolutionService.getNumEvolutions().subscribe(
+    this._evolutionService.getEvolutions().subscribe(
       res => {
         if (!res.num_evolutions) {
           this._router.navigate(['/']);
@@ -83,7 +83,7 @@ export class EvolutionListComponent implements OnInit {
   getLearnings(evolution_selected) {
      // Obtener obtener los aprendizajes asociados a la evolución    
      this.learnings = [];
-     this._evolutionService.getEvolutionLearnings(evolution_selected._id).subscribe(
+     this._evolutionService.getLernings(evolution_selected._id).subscribe(
       res => {
         if (!res.learnings) {          
           this._alertService.error(res.message);                  

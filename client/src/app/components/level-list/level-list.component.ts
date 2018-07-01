@@ -64,7 +64,7 @@ export class LevelListComponent implements OnInit {
   getEvolution() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];      
-      this._evolutionService.getEvolution(id).subscribe(
+      this._evolutionService.getEvolutions(id).subscribe(
         res => {
           if (!res.evolution) {
             this.errosMessagge = res.message;
@@ -108,7 +108,7 @@ export class LevelListComponent implements OnInit {
   }
 
   getGoals() {
-    this._goalService.getGoalsLevel(this.level._id).subscribe(
+    this._goalService.getGoals(this.level._id).subscribe(
       res => {        
         if (res.goals) {
           this.goals = res.goals;          
@@ -121,7 +121,7 @@ export class LevelListComponent implements OnInit {
   }
 
   getLearnings() {
-    this._learningService.getLearningsLevel(this.level._id).subscribe(
+    this._learningService.getLearnings(this.level._id).subscribe(
       res => {
         if (res.learnings) {
           this.learnings = res.learnings.sort( (o1, o2) => {

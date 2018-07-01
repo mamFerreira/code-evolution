@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
-// Importar servicios
+import { AlertService } from '../../../services/alert.service';
 import { UserService } from '../../../services/user.service';
 import { LearningService } from '../../../services/learning.service';
-// Importar modelos
-import { User } from '../../../models/user.model';
 import { Learning } from '../../../models/learning.model';
 
 @Component({
@@ -17,79 +15,68 @@ export class ConfigureLearningComponent implements OnInit {
 
   public title: string;
   public identity;
-  public learning: Learning;
-  public errorMessage: string;
-  public successMessage: string;
-  public boolEdit: boolean;
+  public learning: Learning;  
+  public isEdit: boolean;
 
   constructor(
+    private _alertService: AlertService,
     private _userService: UserService,
     private _learningService: LearningService,
-    private _route: ActivatedRoute,
-    private _router: Router
+    private _route: ActivatedRoute    
   ) { 
     this.title = 'Editar aprendizaje';
     this.identity = this._userService.getIdentity();
-    this.errorMessage = '';  
-    this.successMessage = '';
-    this.boolEdit = true;
+    this.isEdit = true;
   }
 
   ngOnInit() {
     this._route.params.forEach((params: Params) => {              
       if (params['id']) {
-        this.getLearning(params['id']);
+        this._learningService.getLearnings(params['id']).subscribe(
+          res => {
+            if (!res.learnings || res.learnings.length === 0) {
+              this._alertService.error(res.message); 
+            } else {
+              this.learning = res.learnings[0];                      
+            }
+          },
+          err => {
+            this._alertService.error(err.error.message);
+          }
+        );
       } else {
-        this.boolEdit = false;
+        this.isEdit = false;
         this.title = 'Añadir aprendizaje';
         this.learning = new Learning (null, null, '', '', '', '');
       }      
     });
   }
 
-  getLearning (id) {    
-    this._learningService.getLearning(id).subscribe(
-      res => {
-        if (!res.learning) {
-          this.errorMessage = 'Error: No se ha podido obtener el aprendizaje deseado';
-        } else {
-          this.learning = res.learning;                      
-        }
-      },
-      err => {
-        this.errorMessage = err.error.message;
-      }
-    );
-  }
-
   onSubmit() {
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    if (this.boolEdit) {      
+    if (this.isEdit) {      
       this._learningService.updateLearning(this.learning).subscribe(
         res => {
           if (!res.learning) {
-            this.errorMessage = 'Error al actualizar aprendizaje: ' + res.message;
+            this._alertService.error(res.message); 
           } else {        
-            this.successMessage = 'Aprendizaje actualizado correctamente';
+            this._alertService.success('Aprendizaje actualizado correctamente');
           }
         },
         err => {
-          this.errorMessage = err.error.message;
+          this._alertService.error(err.error.message);
         }
       ); 
     } else {      
       this._learningService.addLearning(this.learning).subscribe(
         res => {
           if (!res.learning) {
-            this.errorMessage = 'Error al crear aprendizaje: ' + res.message;
+            this._alertService.error(res.message); 
           } else {        
-            this.successMessage = 'Aprendizaje creado correctamente';
+            this._alertService.success('Aprendizaje creado correctamente');
           }
         },
         err => {
-          this.errorMessage = err.error.message;
+          this._alertService.error(err.error.message);
         }
       ); 
     }

@@ -42,7 +42,7 @@ export class ConfigureActionComponent implements OnInit {
             }
           },
           err => {
-            this._alertService.error(err.message); 
+            this._alertService.error(err.error.message);
           }
         );
       } else {
@@ -65,7 +65,7 @@ export class ConfigureActionComponent implements OnInit {
           }
         },
         err => {
-          this._alertService.error(err.message); 
+          this._alertService.error(err.error.message);
         }
       ); 
     } else {      
@@ -78,7 +78,7 @@ export class ConfigureActionComponent implements OnInit {
           }
         },
         err => {
-          this._alertService.error(err.message);
+          this._alertService.error(err.error.message);
         }
       ); 
     }  

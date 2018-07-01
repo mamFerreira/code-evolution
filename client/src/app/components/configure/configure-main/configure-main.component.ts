@@ -11,6 +11,9 @@ import { GoalService } from '../../../services/goal.service';
 import { LearningService } from '../../../services/learning.service';
 import { ActionService } from '../../../services/action.service';
 
+import { Level } from '../../../models/level.model';
+import { Evolution } from '../../../models/evolution.model';
+
 
 @Component({
   selector: 'app-configure-main',
@@ -22,8 +25,7 @@ export class ConfigureMainComponent implements OnInit {
   public title: string;
   public identity;
   public option: string;
-  public list;
-  public errorMessage: string;
+  public list;  
 
   constructor(
     private _route: ActivatedRoute,
@@ -45,14 +47,15 @@ export class ConfigureMainComponent implements OnInit {
     this._route.params.forEach((params: Params) => {   
       if (params['type']) {
         this.changeOption(params['type']);        
+      } else {
+        this._alertService.error('Error: No ha seleccionado ninguna acción');
       }
     });
   }
 
   changeOption(opt) {
     this.option = opt;    
-    this.list = [];
-    this.errorMessage = '';
+    this.list = [];    
     switch (opt) {
       case 'user':
         this.getUsers();
@@ -73,7 +76,7 @@ export class ConfigureMainComponent implements OnInit {
         this.getActions();
         break;
       default:
-        this.errorMessage = 'Error: Opción incorrecta';
+        this._alertService.error('Error: Opción incorrecta');        
     }
   }
 
@@ -102,13 +105,32 @@ export class ConfigureMainComponent implements OnInit {
     this._evolutionService.getEvolutions().subscribe(
       res => {
         if (!res.evolutions) {
-          this.errorMessage = 'Error al obtener listado de evoluciones';
-        } else {
-          this.list = res.evolutions;
+          this._alertService.error(res.message);          
+        } else {  
+          let cont = 0;          
+          res.evolutions.forEach((item, index, array) => {
+            this._levelService.getLevelsEvolution(item._id).subscribe(              
+              resLevels => {                
+                cont ++;
+                if (resLevels.levels) {
+                  item.levels = resLevels.levels;                  
+                } else {
+                  item.levels = [];
+                }       
+                
+                if (cont === array.length) {                  
+                  this.list = res.evolutions;                  
+                }
+              },
+              errLevels => {
+                this._alertService.error(errLevels.error.message);
+              }
+            );
+          });
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
         this.list = [];
       }
     );
@@ -118,13 +140,32 @@ export class ConfigureMainComponent implements OnInit {
     this._levelService.getLevels().subscribe(
       res => {
         if (!res.levels) {
-          this.errorMessage = 'Error al obtener listado de evoluciones';
+          this._alertService.error(res.message);
         } else {
-          this.list = res.levels;
+          let cont = 0;          
+          res.levels.forEach((item, index, array) => {
+            this._evolutionService.getEvolutions(item.evolutionID).subscribe(              
+              resEvolution => {                
+                cont ++;
+                if (resEvolution.evolutions && resEvolution.evolutions.length > 0) {
+                  item.evolution = resEvolution.evolutions[0];                  
+                } else {
+                  item.evolution = new Evolution('', null, '', '', '', null, '', []);
+                }       
+                
+                if (cont === array.length) {                  
+                  this.list = res.levels;                  
+                }
+              },
+              errLevels => {
+                this._alertService.error(errLevels.error.message);
+              }
+            );
+          });
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
         this.list = [];
       }
     );
@@ -134,13 +175,13 @@ export class ConfigureMainComponent implements OnInit {
     this._goalService.getGoals().subscribe(
       res => {
         if (!res.goals) {
-          this.errorMessage = 'Error al obtener listado de acciones';
+          this._alertService.error(res.message);
         } else {
           this.list = res.goals;
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
         this.list = [];
       }
     );
@@ -150,13 +191,13 @@ export class ConfigureMainComponent implements OnInit {
     this._learningService.getLearnings().subscribe(
       res => {
         if (!res.learnings) {
-          this.errorMessage = 'Error al obtener listado de aprendizajes';
+          this._alertService.error(res.message);
         } else {
           this.list = res.learnings;
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
         this.list = [];
       }
     );
@@ -166,13 +207,13 @@ export class ConfigureMainComponent implements OnInit {
     this._actionService.getActions().subscribe(
       res => {
         if (!res.actions) {
-          this.errorMessage = 'Error al obtener listado de acciones';          
+          this._alertService.error(res.message);         
         } else {
           this.list = res.actions;
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
         this.list = [];
       }
     );
@@ -202,13 +243,14 @@ export class ConfigureMainComponent implements OnInit {
     this._evolutionService.removeEvolution(id).subscribe(
       res => {
         if (!res.evolution) {
-          this.errorMessage = 'Error al eliminar evolución';
-        } else {          
+          this._alertService.error(res.message); 
+        } else {    
+          this._alertService.success('Evolución eliminada con éxito');      
           this.getEvolutions();
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message); 
       }
     );
   }
@@ -217,13 +259,14 @@ export class ConfigureMainComponent implements OnInit {
     this._levelService.removeLevel(id).subscribe(
       res => {
         if (!res.level) {
-          this.errorMessage = 'Error al eliminar nivel';
-        } else {          
+          this._alertService.error(res.message);
+        } else {  
+          this._alertService.success('Nivel eliminado con éxito');            
           this.getLevels();
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message); 
       }
     );
   }
@@ -232,13 +275,14 @@ export class ConfigureMainComponent implements OnInit {
     this._goalService.removeGoal(id).subscribe(
       res => {
         if (!res.goal) {
-          this.errorMessage = 'Error al eliminar objetivo';
-        } else {          
+          this._alertService.error(res.message);
+        } else {       
+          this._alertService.success('Objetivo eliminado con éxito');   
           this.getGoals();
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }
@@ -247,13 +291,14 @@ export class ConfigureMainComponent implements OnInit {
     this._learningService.removeLearning(id).subscribe(
       res => {
         if (!res.learning) {
-          this.errorMessage = 'Error al eliminar aprendizaje';
-        } else {          
+          this._alertService.error(res.message);
+        } else {    
+          this._alertService.success('Aprendizaje eliminado con éxito');         
           this.getLearnings();
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }
@@ -262,13 +307,14 @@ export class ConfigureMainComponent implements OnInit {
     this._actionService.removeAction(id).subscribe(
       res => {
         if (!res.action) {
-          this.errorMessage = 'Error al eliminar acción';
+          this._alertService.error(res.message);
         } else {          
+          this._alertService.success('Acción eliminada con éxito');  
           this.getActions();
         }
       },
       err => {
-        this.errorMessage = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }

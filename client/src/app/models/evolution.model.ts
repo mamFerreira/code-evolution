@@ -1,3 +1,5 @@
+import { Level } from './level.model';
+
 export class Evolution {
     constructor(
         public _id: string,
@@ -6,6 +8,7 @@ export class Evolution {
         public name: string,
         public description: string,
         public health: number,
-        public image: string
+        public image: string,
+        public levels: Array<Level>,
     ) {}
 }

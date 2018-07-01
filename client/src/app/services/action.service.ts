@@ -24,17 +24,13 @@ export class ActionService {
           };
     }
 
-    /**
-    * OPERACIONES CRUD
-    */
-
-    // Añadir nueva acción en el sistema
+    // Añadir nueva acción
     addAction (action_to_register: Action): Observable<any> {
         let json = JSON.stringify(action_to_register);
         return this._http.post(Global.url_api + 'action-add', json, this.httpOptions);
     }
 
-    // Obtener todas las acción del sistema
+    // Obtener acciones
     getActions(id: string = ''): Observable<any> {
         return this._http.get(Global.url_api + 'actions-get/' + id, this.httpOptions);
     }

@@ -59,7 +59,7 @@ function getLearnings (req, res){
         query = { '_id' : o_id };
     }    
 
-    Learning.find(query).exec((err,learnings) => {
+    Learning.find(query).sort({order:1}).exec((err,learnings) => {
         if (err){
             res.status(500).send({message:'Error en el servidor', messageError:err.message});  
         }else{

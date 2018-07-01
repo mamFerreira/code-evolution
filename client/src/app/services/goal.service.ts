@@ -24,29 +24,15 @@ export class GoalService {
           };
     }
 
-    /**
-    * OPERACIONES CRUD
-    */
-
-    // Añadir nuevo objetivo en el sistema
+    // Añadir nuevo objetivo
     addGoal (goal_to_register: Goal): Observable<any> {
         let json = JSON.stringify(goal_to_register);
         return this._http.post(Global.url_api + 'goal-add', json, this.httpOptions);
     }
 
-    // Obtener objetivo por ID
-    getGoal(id: string): Observable<any> {
-        return this._http.get(Global.url_api + 'goal/' + id, this.httpOptions);
-    }
-
-    // Obtener todos los objetivos del sistema
-    getGoals(): Observable<any> {
-        return this._http.get(Global.url_api + 'goals/', this.httpOptions);
-    }
-
-    // Obtener todos los objetivos asociadas a un nivel
-    getGoalsLevel(idLevel: string): Observable<any> {
-        return this._http.get(Global.url_api + 'goals/' + idLevel, this.httpOptions);
+    // Obtener objetivos
+    getGoals(id: string = ''): Observable<any> {
+        return this._http.get(Global.url_api + 'goals-get/' + id, this.httpOptions);
     }
 
     // Actualizar objetivo

@@ -23,11 +23,6 @@ export class AlertComponent implements OnInit {
  
             // add alert to array
             this.alerts.push(alert);
-
-            setInterval(() => {
-                this.removeAlert(alert);            
-            }, 2000);
-
         });
     }
  

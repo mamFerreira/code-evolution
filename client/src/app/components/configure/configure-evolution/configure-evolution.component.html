@@ -1,109 +1,84 @@
-<div class="col-lg-10 col-md-10" *ngIf="identity.role == 'ROLE_ADMIN'">  
-  <h1>{{title}}</h1>  
-  <div *ngFor="let e of errorMessage;" class="alert alert-warning"> <strong>Error: </strong>{{e}}</div>
-  <div *ngIf="successMessage" class="alert alert-success">{{successMessage}}</div> 
-  <div *ngIf="evolution" class="col-lg-10 col-md-10" style="margin-top:50px;">
-      <form (ngSubmit)="onSubmit()" #form="ngForm" class="form-horizontal">        
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Order (*):</label>
-          <div class="col-sm-5">
-              <input type="text" class="form-control" [(ngModel)]="evolution.order" name="order" required #order="ngModel">
-          </div>            
+<div class="container">
+    <div class="col-md-8">
+        <app-alert></app-alert>
+        <div class="well well-sm" *ngIf="identity.admin && evolution">
+            <form class="form-horizontal" method="post" (ngSubmit)="onSubmit()" #formConfigureEvolution="ngForm">
+                <legend class="text-center"><h1>{{title}}</h1></legend>
+
+                <div class="form-group">
+                    <label for="order" class="control-label col-sm-2">Orden (*):</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" [(ngModel)]="evolution.order" name="order" required #order="ngModel">
+                    </div>            
+                </div> 
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Origen (*):</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" [(ngModel)]="evolution.origin" name="origin" required #origin="ngModel">
+                    </div>            
+                </div>   
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Nombre (*):</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" [(ngModel)]="evolution.name" name="name" required #name="ngModel">
+                    </div>            
+                </div>
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Descripción:</label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control" [(ngModel)]="evolution.description" name="description" #description="ngModel"></textarea>
+                    </div>            
+                </div>
+                <div class="form-group">
+                    <label for="name" class="control-label col-sm-2">Salud (*):</label>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" [(ngModel)]="evolution.health" name="health" required #health="ngModel">
+                    </div>            
+                </div>
+                <div class="form-group" *ngIf="isEdit">
+                    <label for="name" class="control-label col-sm-2">Imagen (png):</label>
+                    <div class="col-sm-8">
+                      <input type="file" class="form-control" placeholder='Subir archivo...' (change)="fileChangeEvent($event,'image')"/>               
+                    </div>            
+                    <div class="col-sm-2" *ngIf="evolution.image" >
+                        <a class="btn" href="{{url}}evolution-load/{{evolution._id}}" download="img">Descargar</a>                   
+                    </div>
+                </div>                                                                                                   
+                <div class="form-group text-right">
+                    <button type="submit" class="btn btn-success" [disabled]="!formConfigureEvolution.valid">Guardar</button>
+                    <button class="btn btn-warning" [routerLink]="['/admin/evolution']">Volver</button>                                
+                </div>                        
+            </form>    
+            <div class="form-horizontal" *ngIf="isEdit">      
+                <h3>Listado de niveles </h3>              
+                <table *ngIf="evolution.levels" class="table">
+                    <thead>
+                        <tr>
+                        <th>#</th>              
+                        <th>Orden</th>
+                        <th>Nombre</th>
+                        <th>Tiempo</th>                                                      
+                        <th>Editar</th>
+                        </tr>
+                    </thead>
+                    <tbody *ngIf="evolution.levels.length>0">
+                        <tr *ngFor="let l of evolution.levels; let i = index">
+                        <th scope="row">{{i+1}}</th>              
+                        <td>{{l.order}}</td>
+                        <td>{{l.name}}</td>
+                        <td>{{l.time}}</td>                      
+                        <td>
+                            <a [routerLink]="['/admin/editLevel/'+ l._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>                  
+                        </td>
+                        </tr>
+                    </tbody>  
+                    <tbody *ngIf="!evolution.levels.length>0">
+                            <tr class="no-data">
+                                <td colspan="4">No se han encontrado resultados</td>
+                            </tr>
+                    </tbody>               
+                </table>
+            </div>                     
         </div>
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Name (*):</label>
-          <div class="col-sm-10">
-              <input type="text" class="form-control" [(ngModel)]="evolution.name" name="name" required #name="ngModel">
-          </div>            
-        </div> 
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Description:</label>
-          <div class="col-sm-10">
-              <textarea rows="5" class="form-control" [(ngModel)]="evolution.description" name="description" required #description="ngModel"></textarea>
-          </div>            
-        </div> 
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Origin (*):</label>
-          <div class="col-sm-5">
-              <input type="text" class="form-control" [(ngModel)]="evolution.origin" name="origin" required #origin="ngModel">
-          </div>            
-        </div>  
-        <div class="form-group">
-          <label for="name" class="control-label col-sm-2">Health (*):</label>
-          <div class="col-sm-5">
-              <input type="text" class="form-control" [(ngModel)]="evolution.health" name="health" required #health="ngModel">
-          </div>            
-        </div>  
-        <div class="form-group" *ngIf="boolEdit">
-          <label for="name" class="control-label col-sm-3">Image (png):</label>
-          <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'image')"/>               
-          </div>            
-          <div class="col-sm-2 float-right" *ngIf="evolution.image && evolution.image != ''" >
-              <a class="btn" href="{{url}}evolution-load/{{evolution.image}}/I" download="img">Descargar</a>                   
-          </div>
-        </div>    
-        <div class="form-group" *ngIf="boolEdit">
-          <label for="name" class="control-label col-sm-3">Player (sprite 4x4):</label>
-          <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'player')"/>               
-          </div>            
-          <div class="col-sm-2 float-right" *ngIf="evolution.player && evolution.player != ''" >
-              <a class="btn" href="{{url}}evolution-load/{{evolution.player}}/P" download="img">Descargar</a>                   
-          </div>
-        </div>  
-        <div class="form-group" *ngIf="boolEdit">
-          <label for="name" class="control-label col-sm-3">Player size (width, height):</label>
-          <div class="col-sm-1">
-              <input type="text" class="form-control" [(ngModel)]="evolution.playerW" name="playerW" required #playerW="ngModel">
-          </div>         
-          <div class="col-sm-1">
-            <input type="text" class="form-control" [(ngModel)]="evolution.playerH" name="playerH" required #playerH="ngModel">
-          </div> 
-        </div>  
-        <div class="form-group" *ngIf="boolEdit">
-          <label for="name" class="control-label col-sm-3">Tiledset (png 16px):</label>
-          <div class="col-sm-6 float-right">
-            <input type="file" class="form-control" placeholder='Subir tu imagen...' (change)="fileChangeEvent($event,'tiledset')"/>               
-          </div>            
-          <div class="col-sm-2 float-right" *ngIf="evolution.tiledset && evolution.tiledset != ''" >
-              <a class="btn" href="{{url}}evolution-load/{{evolution.tiledset}}/T" download="img">Descargar</a>                   
-          </div>
-        </div>
-        <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-success">Guardar</button>
-            <a [routerLink]="['/admin/evolution']" class="btn btn-warning">Volver</a>
-        </div>                                    
-      </form>
-      <div class="list_levels" *ngIf="boolEdit">      
-        <h2>Listado de niveles asociados</h2>
-        <div *ngIf="errorLevels" class="alert alert-warning"> {{errorLevels}}</div>
-        <table *ngIf="levels" class="table">
-            <thead class="thead-inverse">
-              <tr>
-                <th>#</th>              
-                <th>Order</th>
-                <th>Title</th>
-                <th>Time</th>                
-                <th>Active</th>                
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let l of levels; let i = index">
-                <th scope="row">{{i+1}}</th>              
-                <td>{{l.order}}</td>
-                <td>{{l.title}}</td>
-                <td>{{l.time}}</td>
-                <td>{{l.active}}</td>
-                <td>
-                    <a [routerLink]="['/admin/editLevel/'+ l._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>                  
-                </td>
-              </tr>
-            </tbody>
-        </table>
-      </div>
-  </div> 
-</div>
-    
-    
+    </div>
+</div>    
