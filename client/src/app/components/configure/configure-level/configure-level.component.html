@@ -31,12 +31,6 @@
                     </div>            
                 </div>
                 <div class="form-group">
-                    <label for="name" class="control-label col-sm-3">Nombre estado (*):</label>
-                    <div class="col-sm-9">
-                            <input type="text" class="form-control" [(ngModel)]="level.state" name="state" required #state="ngModel">
-                    </div>            
-                </div>
-                <div class="form-group">
                     <label for="name" class="control-label col-sm-3">Tiempo (*):</label>
                     <div class="col-sm-2">
                         <input type="text" class="form-control" [(ngModel)]="level.time" name="time" required #time="ngModel">
@@ -49,9 +43,18 @@
                         <input type="file" class="form-control" placeholder='Subir archivo...' (change)="fileChangeEvent($event,'image')"/>               
                     </div>            
                     <div class="col-sm-2" *ngIf="level.image" >
-                        <a class="btn" href="{{url}}level-load/{{level._id}}" download="img">Descargar</a>                   
+                        <a class="btn" href="{{url}}level-load-image/{{level._id}}" download="img">Descargar</a>                   
                     </div>
-                </div>                                                                                                   
+                </div>    
+                <div class="form-group" *ngIf="edit">
+                    <label for="name" class="control-label col-sm-3">Código (txt):</label>
+                    <div class="col-sm-7">
+                        <input type="file" class="form-control" placeholder='Subir archivo...' (change)="fileChangeEvent($event,'file')"/>               
+                    </div>            
+                    <div class="col-sm-2" *ngIf="level.file" >
+                        <a class="btn" href="{{url}}level-load-file/{{level._id}}" download="txt">Descargar</a>                   
+                    </div>
+                </div>                                                                                                
                 <div class="form-group text-right">
                     <button type="submit" class="btn btn-success" [disabled]="!formConfigureLevel.valid">Guardar</button>
                     <button class="btn btn-warning" [routerLink]="['/admin/level']">Volver</button>                                

@@ -1,4 +1,4 @@
-import { StateMain } from '../state-main';
+import { StateMain } from '../state';
 
 export class State extends StateMain {
     

@@ -82,8 +82,7 @@
             <tr>
               <th>#</th>
               <th>Orden</th>
-              <th>Nombre</th>   
-              <th>Estado</th>               
+              <th>Nombre</th>                               
               <th>Evolución</th>     
               <th>Acciones</th>                                     
             </tr>
@@ -92,8 +91,7 @@
             <tr *ngFor="let element of list; let i = index">
               <th scope="row">{{i+1}}</th>
               <td>{{element.evolution.order}}.{{element.order}}</td>
-              <td>{{element.name}}</td>                  
-              <td>{{element.state}}</td> 
+              <td>{{element.name}}</td>                                
               <td>{{element.evolution.name}}</td> 
               <td>
                   <a [routerLink]="['edit/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>

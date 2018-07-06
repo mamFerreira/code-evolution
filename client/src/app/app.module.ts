@@ -14,6 +14,7 @@ import { LevelService } from './services/level.service';
 import { ActionService } from './services/action.service';
 import { GoalService } from './services/goal.service';
 import { LearningService } from './services/learning.service';
+import { GameService } from './services/game.service';
 import { AlertService } from './services/alert.service';
 
 // Importación de componentes
@@ -79,7 +80,8 @@ import { ConfigureActionComponent } from './components/configure/configure-actio
     GoalService,
     LearningService, 
     appRoutingProviders, 
-    AlertService],
+    AlertService,
+    GameService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

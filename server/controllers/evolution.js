@@ -291,8 +291,7 @@ function loadEvolution (req,res){
   * @returns learnings: Listado de aprendizaje asociado a la evolución
   */
  function getEvolutionLearning (req, res) {    
-    var parama_id = new ObjectID(req.params.id);
-
+    var parama_id = new ObjectID(req.params.id);    
     Level.aggregate([
         {$match:
             {'evolutionID': parama_id}

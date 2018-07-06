@@ -29,6 +29,7 @@ export class ConfigureLevelComponent implements OnInit {
   public title: string;
   public url: string;
   public identity;
+  public image: Array<File>;
   public file: Array<File>;
   public level: Level;
   public evolutions: Evolution[];
@@ -76,20 +77,7 @@ export class ConfigureLevelComponent implements OnInit {
               this._alertService.error(res.message); 
             } else {        
               this.level = res.levels[0];               
-              // Evolución
-              this._evolutionService.getEvolutions(this.level._id).subscribe(
-                res => {                  
-                  if (!res.evolutions) {
-                    this._alertService.error(res.message); 
-                  } else {
-                    this.level.evolution = res.evolutions[0];                      
-                  }                                     
-                },
-                err => {
-                  this._alertService.error(err.error.message);
-                }
-              );
-
+              
               // Acciones
               this._levelService.getActions(this.level._id).subscribe(
                 res => {                  
@@ -129,19 +117,17 @@ export class ConfigureLevelComponent implements OnInit {
                 res => {                  
                   if (!res.goals) {
                     this._alertService.error(res.message); 
-                  } else {
-                      let cont = 0;          
+                  } else {                              
                       res.goals.forEach((item, index, array) => {
                         this._goalService.getGoals(item.goalID).subscribe(              
-                          resG => {                                            
-                            cont ++;
+                          resG => {                                                                        
                             if (resG.goals && resG.goals.length > 0) {
                               item.goal = resG.goals[0];                 
                             } else {
                               item.goal = new Goal('', '', '');
                             }       
                             
-                            if (cont === array.length) {                  
+                            if (index === array.length - 1) {                  
                               this.level.goals = res.goals;                   
                             }
                           },
@@ -166,7 +152,7 @@ export class ConfigureLevelComponent implements OnInit {
       } else {
         this.edit = false;
         this.title = 'Añadir nivel';
-        this.level = new Level ('', null, '', '', '', null, '', null, [], [], []);
+        this.level = new Level ('', null, '', '', null, '', '', null, [], [], []);
       }      
     });
   }
@@ -187,7 +173,14 @@ export class ConfigureLevelComponent implements OnInit {
   }
 
   fileChangeEvent(fileInput: any, type: string) {     
-    this.file = <Array<File>> fileInput.target.files;            
+
+    if (type === 'image') {
+      this.image = <Array<File>> fileInput.target.files;            
+    }
+
+    if (type === 'file') {
+      this.file = <Array<File>> fileInput.target.files;            
+    }    
   }
 
   makeFileRequest(url: string, params: Array<string>, files: Array<File>, type: string) {
@@ -225,16 +218,27 @@ export class ConfigureLevelComponent implements OnInit {
           if (!res.level) {
             this._alertService.error(res.message);             
           } else {        
-            if (this.file) {
-              this.makeFileRequest(this.url + 'level-upload/' +  this.level._id, [], this.file, 'image').then(
+            if (this.image) {
+              this.makeFileRequest(this.url + 'level-upload-image/' +  this.level._id, [], this.image, 'image').then(
                 (res: any) => {
                     if (res.image) {
                       this.level.image = res.image;
                     } else {
                       this._alertService.error(res.message); 
                     }                       
-                }
-            );}
+                });
+            }
+
+            if (this.file) {
+              this.makeFileRequest(this.url + 'level-upload-file/' +  this.level._id, [], this.file, 'file').then(
+                (res: any) => {
+                    if (res.file) {
+                      this.level.file = res.file;
+                    } else {
+                      this._alertService.error(res.message); 
+                    }                       
+                });
+            }
             this._alertService.success('Nivel actualizado correctamente');            
           }
         },

@@ -26,12 +26,11 @@ function addLevel (req, res){
 
     level.order = params.order;
     level.name = params.name;        
-    level.description = params.description;
-    level.state = params.state;
+    level.description = params.description;    
     level.time = params.time;
     level.evolutionID = params.evolutionID;
     
-    if (level.order && level.name && level.state && level.time && level.evolutionID){
+    if (level.order && level.name && level.time && level.evolutionID){
         //Comprobamos si existe nivel con mismo orden
         Level.findOne({order:level.order},(err,level_db) => {
             if(err){                
@@ -55,7 +54,7 @@ function addLevel (req, res){
             }
         });        
     }else{
-        res.status(200).send({message:'Error: Los campos orden, nombre, estado, tiempo y evolución son obligatorios'});
+        res.status(200).send({message:'Error: Los campos orden, nombre, tiempo y evolución son obligatorios'});
     }
 }
 
@@ -104,7 +103,7 @@ function updateLevel (req, res){
     var id = req.params.id;
     var update = req.body;     
 
-    if (update.order && update.name && update.state && update.time && update.evolutionID) {
+    if (update.order && update.name && update.time && update.evolutionID) {
         Level.findByIdAndUpdate(id,update,(err,level) => {
             if (err){
                 res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
@@ -117,7 +116,7 @@ function updateLevel (req, res){
             }
         });
     }else{
-        res.status(200).send({message:'Error: Los campos orden, nombre, estado y tiempo son obligatorios'});
+        res.status(200).send({message:'Error: Los campos orden, nombre y tiempo son obligatorios'});
     }    
 }
 
@@ -160,13 +159,13 @@ function removeLevel (req, res){
  * @returns image: Nombre de la imagen. 
  *          level: Nivel antes de la actualización.
  */
-function uploadLevel (req,res){
+function uploadImageLevel (req,res){
     var id = req.params.id;
     var file_name = 'No subido...';    
 
     if (req.files.image){
         var file_path = req.files.image.path;        
-        var file_name = file_path.split('\/')[2];
+        var file_name = file_path.split('\/')[3];
         var ext = file_name.split('\.')[1];        
         var field = {image: file_name};                   
         if (ext=='png'){
@@ -178,13 +177,15 @@ function uploadLevel (req,res){
                         res.status(404).send({message: 'Error: No ha podido actualizarse el registro'}); 
                     }else{
                         // Eliminamos la imagen anterior
-                        let file_old = GLOBAL.PATH_FILE_LEVEL + level.image;
+                        let file_old = GLOBAL.PATH_FILE_LEVEL_IMAGE + level.image;
                         fs.exists(file_old, (exists) => {
                             if(exists){
-                                fs.unlink(file_old)
+                                fs.unlink(file_old, (err) => {
+                                    if (err) console.log(err);
+                                });                                
                             }
-                        });                                              
-                        res.status(200).send({image:file_name, level});
+                            res.status(200).send({image:file_name, level});
+                        });                                                                      
                     }
                 }
             });            
@@ -207,7 +208,7 @@ function uploadLevel (req,res){
  * Cargar imagen de nivel
  * @return imagen de nivel
  */
-function loadLevel (req,res){
+function loadImageLevel (req,res){
 
     var id = req.params.id;        
 
@@ -218,7 +219,7 @@ function loadLevel (req,res){
             if(!level){
                 res.status(200).send({message: 'No existe el nivel indicado'}); 
             }else{                               
-                var path_file = GLOBAL.PATH_FILE_LEVEL + level.image;                    
+                var path_file = GLOBAL.PATH_FILE_LEVEL_IMAGE + level.image;                    
                 fs.exists(path_file, (exists) => {
                     if(exists){
                         res.sendFile(path.resolve(path_file));
@@ -232,6 +233,119 @@ function loadLevel (req,res){
 
 }
 
+/**
+ * Subir fichero del nivel a partir de su id
+ * @returns file: Nombre del fichero. 
+ *          level: Nivel antes de la actualización.
+ */
+function uploadFileLevel (req,res){
+    var id = req.params.id;
+    var file_name = 'No subido...';    
+
+    if (req.files.file){
+        var file_path = req.files.file.path;        
+        var file_name = file_path.split('\/')[3];
+        var ext = file_name.split('\.')[1];        
+        var field = {file: file_name};             
+        
+        if (ext=='txt'){
+            Level.findByIdAndUpdate(id, field, (err,level) => {
+                if (err){
+                    res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+                }else{
+                    if(!level){
+                        res.status(404).send({message: 'Error: No ha podido actualizarse el registro'}); 
+                    }else{
+                        // Eliminamos el fichero anterior
+                        let file_old = GLOBAL.PATH_FILE_LEVEL_FILE + level.file;
+                        fs.exists(file_old, (exists) => {
+                            if(exists){
+                                fs.unlink(file_old, (err) => {
+                                    if (err) console.log(err);
+                                }); 
+                            }
+                        });                                              
+                        res.status(200).send({file:file_name, level});
+                    }
+                }
+            });            
+        }else{
+            fs.unlink(file_path, (err) => {  
+                var msg = "";                              
+                if (err){
+                    msg = err.message;
+                }
+                res.status(200).send({message:'Extensión del archivo no válida (.txt)', messageError:msg});
+            });            
+        }        
+    }else{
+        res.status(200).send({message:'Fichero no subido'});
+    }
+}
+
+/**
+ * Cargar fichero de nivel
+ * @return fichero de nivel
+ */
+function loadFileLevel (req,res){
+
+    var id = req.params.id;        
+
+    Level.findById(id).exec((err,level)=>{            
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
+        }else{
+            if(!level){
+                res.status(200).send({message: 'No existe el nivel indicado'}); 
+            }else{                               
+                var path_file = GLOBAL.PATH_FILE_LEVEL_FILE + level.file;                    
+                fs.exists(path_file, (exists) => {
+                    if(exists){
+                        res.sendFile(path.resolve(path_file));
+                    }else{
+                        res.status(200).send({message:'El fichero no existe'}); 
+                    }
+                });                  
+            }
+        }
+    });
+
+}
+
+/**
+ * Cargar código por defecto del nivel
+ * @return code: Código por defecto o cadena vacía si no existe
+ */
+
+ function loadCodeLevel (req,res){
+    var levelID = req.params.id;        
+
+    Level.findById(levelID).exec( (err, level) => {
+        if (err){
+            res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+        }else{
+            if (!level){
+                res.status(200).send({message: 'Nivel no registrado en el sistema'});
+            }else{
+                var path_file = GLOBAL.PATH_FILE_LEVEL_FILE + level.file; 
+
+                fs.exists(path_file, (exists) => {
+                    if(exists){
+                        fs.readFile(path_file, 'utf-8', (err, data) => {
+                            if (err){
+                                res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                            }else{                                            
+                                res.status(200).send({code:data});
+                            }
+                        });
+                    }else{
+                        res.status(200).send({code:""});
+                    }
+                });                
+            }
+        }
+    });
+ }
 
 /**
  * Asociar nueva acción al nivel. Si ya existe la asociación no hago nada.
@@ -505,8 +619,11 @@ module.exports = {
     getLevels,
     updateLevel,
     removeLevel,
-    uploadLevel,
-    loadLevel,
+    uploadImageLevel,
+    loadImageLevel,
+    uploadFileLevel,
+    loadFileLevel,    
+    loadCodeLevel,
     addAction,
     getActions,
     removeAction,

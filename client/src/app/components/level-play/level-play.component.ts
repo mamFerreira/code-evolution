@@ -2,22 +2,20 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params} from '@angular/router';
 
 // Modelos
-import { Evolution } from '../../models/evolution.model';
 import { Level } from '../../models/level.model';
 import { LevelGoal } from '../../models/level_goal.model';
-import { LevelLearning } from '../../models/level_learning.model';
-import { LevelAction } from '../../models/level_action.model';
+import { Goal } from '../../models/goal.model';
 // Clases
-import { Game } from '../../class/game';
+import { Canvas } from '../../class/canvas.class';
 import { GameAction } from '../../enum/game-action';
 import { GameState } from '../../enum/game-state';
 // Servicios
+import { AlertService } from '../../services/alert.service';
 import { UserService } from '../../services/user.service';
 import { EvolutionService } from '../../services/evolution.service';
 import { LevelService } from '../../services/level.service';
 import { GoalService } from '../../services/goal.service';
-import { LearningService } from '../../services/learning.service';
-import { ActionService } from '../../services/action.service';
+import { GameService } from '../../services/game.service';
 
 @Component({
   selector: 'app-level-play',
@@ -29,180 +27,137 @@ export class LevelPlayComponent implements OnInit {
   
   @ViewChild('editor') editor;  
 
-  private display: string;
-  // Variables string
-  private title: string;
-  private code: string;
-  private errorMsg: string;
-  // Variables control menus
-  private showGoals: boolean;
-  private showActions: boolean;
-  private showLearnings: boolean;
-  // Variables principales
-  private game: Game;
-  private evolution: Evolution;
-  private level: Level;
-  private goals: LevelGoal[];  
-  private learnings: LevelLearning[];
-  private actions: LevelAction[];
-  private positions: Array <Position>; 
-  private lastAction: GameAction;
+  public title: string;  
+  public identity;
+  public configure: Array<boolean>;  
+  public code: string;
+
+  public level: Level;
+  public canvas: Canvas;  
+
+
+
   
-  private closeResult: string;
+  private lastAction: GameAction;  
 
   constructor(    
+    private _alertService: AlertService,
     private _userService: UserService,    
     private _evolutionService: EvolutionService,
-    private _levelSercice: LevelService,
-    private _goalService: GoalService,
-    private _learningService: LearningService,
-    private _actionService: ActionService,
-    
+    private _levelService: LevelService,
+    private _goalService: GoalService,        
+    private _gameService: GameService,
     private _route: ActivatedRoute
   ) {
-    this.title = 'Disfrute del nivel';  
+    this.title = 'Jugar Nivel';  
+    this.identity = this._userService.getIdentity();
     this.code = '';     
-    this.showGoals = true;
-    this.showActions = false;
-    this.showLearnings = false;    
-    this.display = 'none';
+    this.configure = new Array (true, true, true, true);    
   }
 
-  ngOnInit() {               
-    this.loadLevel();
-    this.loadEditor();     
+  ngOnInit() {
+    this.loadLevel();    
   }
 
-  /**
-   * Carga del nivel
-   */
-  loadLevel() {
-    this._route.params.forEach((params: Params) => {
-      let id = params['id'];
-      this._levelSercice.getLevels(id).subscribe(
+  loadLevel () {
+    this._route.params.forEach((params: Params) => {                                
+      this._levelService.getLevels(params['id']).subscribe(
         res => {
-          if (!res.level) {
-            this.errorMsg += res.message;
-          } else {
-            this.level = res.level;
-            this.loadEvolution();            
-            // this.loadCode();
+          if (!res.levels || res.levels.length === 0) {
+            this._alertService.error(res.message); 
+          } else {                                            
+            // Evolución
+            this._evolutionService.getEvolutions(res.levels[0].evolutionID).subscribe(
+              resE => {                  
+                if (!resE.evolutions) {
+                  this._alertService.error(resE.message); 
+                } else {
+                  this.level = res.levels[0]; 
+                  this.level.evolution = resE.evolutions[0];
+                  this.loadCanvas();                  
+                  this.loadEditor();                                          
+                  // Acciones
+                  this._levelService.getActions(this.level._id).subscribe(
+                    resA => {                  
+                      if (!resA.actions) {
+                        this._alertService.error(resA.message); 
+                      } else {
+                        this.level.actions = [];  
+                        resA.actions.forEach(element => {
+                          this.level.actions.push(element.actionID);
+                        });                   
+                      }                                     
+                    },
+                    errA => {
+                      this._alertService.error(errA.error.message);
+                    }
+                  );
+                  // Aprendizaje
+                  this._levelService.getLearnings(this.level._id).subscribe(
+                    resAp => {                  
+                      if (!resAp.learnings) {
+                        this._alertService.error(resAp.message); 
+                      } else {
+                        this.level.learnings = [];  
+                        resAp.learnings.forEach(element => {
+                          this.level.learnings.push(element.learningID);
+                        });                   
+                      }                                     
+                    },
+                    errAp => {
+                      this._alertService.error(errAp.error.message);
+                    }
+                  );
+                  // Objetivos
+                  this._levelService.getGoals(this.level._id).subscribe(
+                    resO => {                  
+                      if (!resO.goals) {
+                        this._alertService.error(resO.message); 
+                      } else {                                                                
+                        resO.goals.forEach((item, index, array) => {
+                            this._goalService.getGoals(item.goalID).subscribe(              
+                              resG => {                                                                        
+                                if (resG.goals && resG.goals.length > 0) {
+                                  item.goal = resG.goals[0];                 
+                                } else {
+                                  item.goal = new Goal('', '', '');
+                                }                                                                       
+                                if (index === array.length - 1) {                  
+                                  this.level.goals = resO.goals;                                            
+                                }
+                              },
+                              errG => {
+                                this._alertService.error(errG.error.message);
+                              }
+                            );
+                          });                                                                                             
+                      }                                     
+                    },
+                    errO => {
+                      this._alertService.error(errO.error.message);
+                    }
+                  );
+                }                                     
+              },
+              errE => {
+                this._alertService.error(errE.error.message);
+              }
+            );                                    
           }
         },
         err => {
-          this.errorMsg += err.error.message;
+          this._alertService.error(err.error.message);
         }
-      );
+      );               
     });
   }
 
-  /**
-   * Carga de la evolución
-   */
-  loadEvolution() {
-    this._evolutionService.getEvolutions(this.level.evolution._id).subscribe(
-      res => {
-        if (!res.evolution) {
-          this.errorMsg += res.message;
-        } else {
-          this.evolution = res.evolution;
-          this.loadPropertyLevel();
-        }
-      },
-      err => {
-        this.errorMsg += err.error.message;
-      }
-    );
+  loadCanvas() {
+    this.canvas = new Canvas(this.level);
+    // this.game.loadState(this.level, this.evolution, this.goals, this.positions);
+    // this.game.loadWorker(this.actions);
   }
 
-  /**
-  * Carga de las objetivos, acciones y posiciones del nivel
-  */
-  loadPropertyLevel() {
-    // Objetivos
-    this._goalService.getGoals(this.level._id).subscribe(
-      res => {
-        if (!res.goals) {
-          this.errorMsg += res.message;
-        } else {
-          this.goals = res.goals;          
-          // Acciones
-          this._actionService.getActions(this.level._id).subscribe(
-            res => {
-              if (!res.actions) {
-                this.errorMsg += res.message;
-              } else {                
-                this.actions = res.actions.sort( (o1, o2) => {
-                  if (o1.order > o2.order) {
-                    return 1;
-                  } else {
-                    return 0;
-                  }
-                }); 
-              }
-            },
-            err => {
-              this.errorMsg += err.error.message;
-            }
-          ); 
-        }
-      },
-      err => {
-        this.errorMsg += err.error.message;
-      }
-    );
-
-    // Aprendizaje
-    this._learningService.getLearnings(this.level._id).subscribe(
-      res => {
-        if (!res.learnings) {
-          this.errorMsg += res.message;
-        } else {
-          this.learnings = res.learnings.sort( (o1, o2) => {
-            if (o1.learning.order > o2.learning.order) {
-              return 1;
-            } else {
-              return 0;
-            }
-          });                    
-        }
-      },
-      err => {
-        this.errorMsg += err.error.message;
-      }
-    );          
-  }
-
-  /**
-   * Carga del código a mostrar en el editor
-   */
-  /*loadCode() {
-    this._levelSercice.loadCode(this.level._id).subscribe(
-      res => {        
-        if (!res.code) {
-          this.errorMsg += res.message;
-        } else {          
-          this.code = res.code;
-        }
-      },
-      err => {        
-        this.errorMsg += err.error.message;
-      }
-    );
-  }*/
-
-  /**
-   * Carga del juego
-   */
-  loadGame() {
-    this.game = new Game(this._userService, this._levelSercice);
-    this.game.loadState(this.level, this.evolution, this.goals, this.positions);
-    this.game.loadWorker(this.actions);
-  }  
-
-  /**
-   * Carga del editor
-   */
   loadEditor() {
     this.editor.setTheme('chrome');
     this.editor.setMode('python');          
@@ -214,48 +169,91 @@ export class LevelPlayComponent implements OnInit {
         wrap: 65,   
         tabSize: 2        
     });    
+    
+    // Cargamos código
+    this._gameService.getGame(this.identity._id, this.level._id).subscribe(
+      res => {        
+        if (!res.games || res.games.length === 0 || res.games[0].code.length === 0) {          
+          this._levelService.getCode(this.level._id).subscribe(
+            res => {
+              if (res.code) {
+                this.code = res.code;
+              } else {
+                this.code = '';
+              }
+            },
+            err => {
+              this._alertService.error(err.error.message);      
+            }
+          );
+
+        } else {
+          this.code = res.games[0].code;
+        }
+      },
+      err => {
+        this._alertService.error(err.error.message);
+      }
+    );
   }
 
-  /**
-   * Gestión de acciones botones de reproducción
-   */
+  getGoalValue (goal: LevelGoal) {
+
+    let resultado: string;
+
+    resultado = goal.value_1 != null && goal.value_2 != null ? ' (' + goal.value_1 + ',' + goal.value_2 + ')' : ''; 
+    resultado = goal.value_1 != null && goal.value_2 == null ? ' (' + goal.value_1 + ')' : resultado; 
+    resultado = goal.value_1 == null && goal.value_2 != null ? ' (' + goal.value_2 + ')' : resultado; 
+
+    return resultado;
+  }
+
   doAction (action: GameAction) {
+
+    if (action === GameAction.ChangeVolume) {
+      this.configure[0] = !this.configure[0];
+    }
 
     if (action !== GameAction.ChangeVolume) {
       this.lastAction = action;
     }    
-
-    if (action === GameAction.Play) {
-     
-      if (this.game.stateGame === GameState.Init) {
-
+    if (action === GameAction.Play) {     
+      if (this.canvas.stateGame === GameState.Init) {
         if (this.code.length === 0) {
-          this.game.doAction(GameAction.Stop);
+          this.canvas.doAction(GameAction.Stop);
         } else {
-          /*this._levelSercice.registerCode(this.code, this.level._id).subscribe(
-            res => {        
-              this.game.doAction(GameAction.Play, this.code);           
-            },
-            err => {
-              this.errorMsg += err.error.message;            
-            }
-          ); */
+          // Registrar el código
         }                 
       }
-      if (this.game.stateGame === GameState.Pause) {
-        this.game.doAction(GameAction.Continue);           
+      if (this.canvas.stateGame === GameState.Pause) {
+        this.canvas.doAction(GameAction.Continue);           
       }
     } else {
-      this.game.doAction(action);
+      this.canvas.doAction(action);
     }
-
   }
 
+  
+  
 
-  onCloseHandled() {
-    this.display = 'none'; 
-  }
 
+  // Comunicación COMPONENT ---> GAME
+  /*
+   - EJECUTAR CÓDIGO
+   - PAUSAR JUEGO
+   - REINICIAR JUEGO
+   - CAMBIAR VOLUMEN
+   - NIVEL
+   - ACCIONES
+   - OBJETIVOS
+  */
+
+  // Comunicación GAME ---> COMPONENT
+  /*
+    - ESTADO DEL JUEGO
+    - CÓDIGO DE CONSOLA
+    - OBJETIVOS COMPLETADOS12
+  */
 
 
 }

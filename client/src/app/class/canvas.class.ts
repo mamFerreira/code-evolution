@@ -16,18 +16,22 @@ import { GameState } from '../enum/game-state';
 import { Food } from './food';
 
 // Declaramos la clase
-export class Game {   
+export class Canvas {   
     
+    public level: Level;
+
+
+
+
     // Variables principales
     private _identity;
     private _state;    
     private _worker: Worker;
     private _checker: Checker;  
-    private _level: Level;
-    private _evolution: Evolution; 
+    private _level: Level;    
     private _fullLoad: boolean;  
     private _soundLU;  
-    private _soundGO;  
+    private _soundGO;      
 
     // Variables intervalos
     private _idIntervalM; 
@@ -37,11 +41,9 @@ export class Game {
     private _codeShell: string;   
     private _msgError: string;       
                              
-    constructor (
-        private _userService: UserService,
-        private _levelService: LevelService,                
-    ) {
-        this._identity = _userService.getIdentity();        
+    constructor ( level: Level) {
+        this.level = level;
+        /*this._identity = _userService.getIdentity();        
         this._checker = new Checker();              
         this._codeShell = '';   
         this._msgError = '';   
@@ -51,13 +53,14 @@ export class Game {
         this._soundLU.volume = 0.2;        
         this._soundGO.volume = 0.2;           
         this._soundLU.load();        
-        this._soundGO.load();                         
+        this._soundGO.load();     
+        this._state = 0;*/
     }
 
     // Propiedades
 
     get stateGame () {
-        return this._state.stateGame;
+        return this._state;
     }
 
     get codeShell () {
@@ -87,10 +90,10 @@ export class Game {
     // Métodos de carga
 
     loadState (l: Level, e: Evolution, g: LevelGoal[], p: Position[]) {        
-        import('./states/' + l.state).then(s => {
+        import('./states/unicellular').then(s => {
             
             this._level = l;
-            this._evolution = e;
+            // this._evolution = e;
             this._state = new s.State();
             
             // this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
@@ -284,7 +287,7 @@ export class Game {
                 this._idIntervalM = setInterval(() => {                                        
                     if (this._state.stateGame === GameState.LevelUp) { 
                         this._soundLU.play();
-                        this.nextLevel();                                                   
+                        //this.nextLevel();                                                   
                         this.finish();                        
                     } else if (this._state.stateGame === GameState.GameOver) {                        
                         this._soundGO.play();                     
@@ -322,7 +325,7 @@ export class Game {
         }
     }  
 
-    nextLevel() {
+    /*nextLevel() {
         this._levelService.getLevels(this._level._id).subscribe(
             res => {
                 if (res.level) {                                                                         
@@ -336,7 +339,7 @@ export class Game {
                 this._msgError = err.message;
             }
         );                
-    }
+    }*/
 
     // Métodos auxiliares    
 

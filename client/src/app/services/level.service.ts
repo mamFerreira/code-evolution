@@ -58,6 +58,11 @@ export class LevelService {
       return this._http.delete(Global.url_api + 'level-remove/' + idLevel, this.httpOptions);
   }
 
+  // Obtener código por defecto del nivel
+  getCode(idLevel: string): Observable<any> {    
+    return this._http.get(Global.url_api + 'level-load-code/' + idLevel, this.httpOptions);
+  }
+
   /**
    * Operaciones de edición
   */

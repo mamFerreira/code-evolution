@@ -1,18 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, Params} from '@angular/router';
+import { ActivatedRoute, Params} from '@angular/router';
 
+import { AlertService } from '../../services/alert.service';
 import { UserService } from '../../services/user.service';
 import { EvolutionService } from '../../services/evolution.service';
 import { LevelService } from '../../services/level.service';
 import { GoalService } from '../../services/goal.service';
-import { LearningService } from '../../services/learning.service';
-import { ActionService } from '../../services/action.service';
+import { GameService } from '../../services/game.service';
 
 import { Evolution } from '../../models/evolution.model';
 import { Level } from '../../models/level.model';
 import { LevelGoal } from '../../models/level_goal.model';
-import { LevelLearning } from '../../models/level_learning.model';
-import { LevelAction } from '../../models/level_action.model';
+import { Goal } from '../../models/goal.model';
+import { Learning } from '../../models/learning.model';
+import { Action } from '../../models/action.model';
 import { Global } from '../../enum/global';
 
 @Component({
@@ -29,31 +30,30 @@ export class LevelListComponent implements OnInit {
   public level: Level;
   public levels: Level[];
   public goals: LevelGoal[];
-  public learnings: LevelLearning[];
-  public actions: LevelAction[];
-  public errosMessagge: string;
+  public learnings: Learning[];
+  public actions: Action[];  
   public identity;
   // Variables control menus
-  private showGoals: boolean;
-  private showActions: boolean;
-  private showLearnings: boolean;
+  public showGoals: boolean;
+  public showActions: boolean;
+  public showLearnings: boolean;
 
-  constructor(    
+  constructor(   
+    private _alertService: AlertService, 
     private _userService: UserService,
     private _evolutionService: EvolutionService,
-    private _levelSercice: LevelService,
+    private _levelService: LevelService, 
     private _goalService: GoalService,
-    private _learningService: LearningService,
-    private _actionService: ActionService,
-    private _route: ActivatedRoute,
-    private _router: Router
+    private _gameService: GameService,   
+    private _route: ActivatedRoute    
   ) {
-    this.title = 'Seleccionar nivel';
+    this.title = 'Seleccionar Nivel';
     this.url = Global.url_api;
     this.identity = this._userService.getIdentity();
     this.showGoals = true;
     this.showActions = true;
-    this.showLearnings = false;
+    this.showLearnings = true;
+    this.levels = new Array<Level> ();
   }
 
   ngOnInit() {
@@ -66,14 +66,14 @@ export class LevelListComponent implements OnInit {
       let id = params['id'];      
       this._evolutionService.getEvolutions(id).subscribe(
         res => {
-          if (!res.evolution) {
-            this.errosMessagge = res.message;
+          if (res.evolutions && res.evolutions.length > 0) {
+            this.evolution = res.evolutions[0];              
           } else {
-            this.evolution = res.evolution;                        
+            this._alertService.error(res.message);
           }
         },
         err => {
-          this.errosMessagge = err.error.message;
+          this._alertService.error(err.error.message);
         }
       );
     });
@@ -83,83 +83,120 @@ export class LevelListComponent implements OnInit {
   getLevels() {
     this._route.params.forEach((params: Params) => {
       let id = params['id'];      
-      this._levelSercice.getLevelsEvolution(id).subscribe(
+      this._levelService.getLevelsEvolution(id).subscribe(
         res => {          
           if (!res.levels) {
-            this._router.navigate(['/']);
-          } else {
-            this.levels = res.levels;                    
-            // Selección del nivel activo
-            if (this.identity.level.evolution._id === id) {            
-              this.level = this.identity.level;                                                                                          
-            } else {
+            this._alertService.error(res.message);
+          } else {   
+            if (this.identity.admin) {
+              this.levels = res.levels;
               this.level = res.levels[0];
-            }   
-            this.getGoals();
-            this.getLearnings();
-            this.getActions();
+              this.getGoals();
+              this.getLearnings();
+              this.getActions();
+            } else {
+              res.levels.forEach((item, index) => {
+                this._gameService.getGame(this.identity._id, item._id).subscribe(
+                  res2 => {
+                    if (res2.games && res2.games.length > 0) {
+                      this.levels.push(item);
+                      this.level = item;                                          
+                    }
+  
+                    if (index === this.levels.length - 1) {
+                      this.getGoals();
+                      this.getLearnings();
+                      this.getActions(); 
+                    }
+                    
+                  },
+                  err2 => {                        
+                    this._alertService.error(err2.error.message);
+                  }
+                );
+              });  
+            }                                                                     
           }
         },
         err => {          
-          this.errosMessagge = err.error.message;
+          this._alertService.error(err.error.message);
         }
       );
     });
   }
 
   getGoals() {
-    this._goalService.getGoals(this.level._id).subscribe(
-      res => {        
-        if (res.goals) {
-          this.goals = res.goals;          
-        }
+    this._levelService.getGoals(this.level._id).subscribe(
+      res => {                  
+        if (!res.goals) {
+          this._alertService.error(res.message); 
+        } else {                              
+            res.goals.forEach((item, index, array) => {
+              this._goalService.getGoals(item.goalID).subscribe(              
+                resG => {                                                                        
+                  if (resG.goals && resG.goals.length > 0) {
+                    item.goal = resG.goals[0];                 
+                  } else {
+                    item.goal = new Goal('', '', '');
+                  }                         
+                  if (index === array.length - 1) {                  
+                    this.level.goals = res.goals;                   
+                  }
+                },
+                errG => {                  
+                  this._alertService.error(errG.message);
+                }
+              );
+            });                                                                                             
+        }                                     
       },
       err => {
-        this.errosMessagge = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }
 
   getLearnings() {
-    this._learningService.getLearnings(this.level._id).subscribe(
-      res => {
-        if (res.learnings) {
-          this.learnings = res.learnings.sort( (o1, o2) => {
-            if (o1.order > o2.order) {
-              return 1;
-            } else {
-              return 0;
-            }
-          });          
-        }
+    this._levelService.getLearnings(this.level._id).subscribe(
+      res => {                  
+        if (!res.learnings) {
+          this._alertService.error(res.message); 
+        } else {
+          this.level.learnings = [];          
+          res.learnings.forEach(element => {
+            this.level.learnings.push(element.learningID);
+          });                             
+        }                                     
       },
       err => {
-        this.errosMessagge = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }
 
   getActions() {
-    this._actionService.getActions(this.level._id).subscribe(
-      res => {
-        if (res.actions) {          
-          this.actions = res.actions.sort( (o1, o2) => {
-            if (o1.order > o2.order) {
-              return 1;
-            } else {
-              return 0;
-            }
-          });  
-        }
+    this._levelService.getActions(this.level._id).subscribe(
+      res => {                  
+        if (!res.actions) {
+          this._alertService.error(res.message); 
+        } else {
+          this.level.actions = [];  
+          res.actions.forEach(element => {
+            this.level.actions.push(element.actionID);
+          });                   
+        }                                     
       },
       err => {
-        this.errosMessagge = err.error.message;
+        this._alertService.error(err.error.message);
       }
     );
   }
 
   changeLevel(level_selected) {
     this.level = level_selected;
+    this.showGoals = true;
+    this.showActions = true;
+    this.showLearnings = true;
     this.getGoals();
     this.getLearnings();
     this.getActions();

@@ -41,13 +41,27 @@ function addUser (req, res){
                         }else{
                             user.password = result;                
                             user.save((err,userAdd) => {
-                                if(err){
+                                if(err){                                    
                                     res.status(500).send({message:'Error en el servidor', messageError:err.message});  
                                 }else{
                                     if(!userAdd){
                                         res.status(404).send({message:'Error: El usuario no ha sido creado'});
                                     }else{
-                                        res.status(200).send({user: userAdd});
+                                        var game = new Game();
+                                        game.overcome = false;    
+                                        game.userID = userAdd._id;
+                                        game.levelID = GLOBAL.ID_FIRST_LEVEL; 
+                                        game.save((err,gameAdd) => {
+                                            if(err){
+                                                res.status(500).send({message:'Error en el servidor', messageError:err.message});  
+                                            }else{
+                                                if(!gameAdd){
+                                                    res.status(404).send({message:'Error: La partida no ha sido creada'});
+                                                }else{
+                                                    res.status(200).send({user: userAdd});
+                                                }
+                                            }
+                                        });                                        
                                     }
                                 }
                             });

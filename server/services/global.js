@@ -1,6 +1,7 @@
 // Rutas Ficheros
 var PATH_FILE_EVOLUTION = './uploads/evolutions/';
-var PATH_FILE_LEVEL = './uploads/levels/';
+var PATH_FILE_LEVEL_IMAGE = './uploads/levels/images/';
+var PATH_FILE_LEVEL_FILE = './uploads/levels/files/';
 
 // Parámetros BBDD
 var PORT = 3977;
@@ -23,7 +24,8 @@ var TOKEN_KEY = 'C0D3-3V0LUT10N';
 
 module.exports = {
     PATH_FILE_EVOLUTION,    
-    PATH_FILE_LEVEL,        
+    PATH_FILE_LEVEL_IMAGE, 
+    PATH_FILE_LEVEL_FILE,      
     PORT,
     PORT_BBDD,
     TABLE_USER,

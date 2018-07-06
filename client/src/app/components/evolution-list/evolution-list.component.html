@@ -1,17 +1,17 @@
 <h1>{{title}}</h1>                                                
 <app-alert></app-alert>
-<div class="row" *ngIf="evolutions && evolution_player && range">                            
-    <div *ngFor="let i of range" class="col-xs-12 col-md-4 full-card">
-        <div *ngIf="evolutions[i]" class="flip-card-enable" (click)="changeEvolution(evolutions[i])" data-toggle="modal" data-target="#evolution-modal">
+<div class="row" *ngIf="evolutions && (contable === evolutions.length || this.identity.admin)">                          
+    <div *ngFor="let e of evolutions,let i=index" class="col-xs-12 col-md-4 full-card">
+        <div *ngIf="playable[i] || this.identity.admin" class="flip-card-enable" (click)="changeEvolution(e)" data-toggle="modal" data-target="#evolution-modal">
             <div class="card">                    
-                <i class="fa fa-user bigicon" [ngClass]="{'active-card': evolutions[i]._id == evolution_player }"></i>
-                <img *ngIf="evolutions[i].image" src="{{url}}evolution-load/{{evolutions[i].image}}/I"/>   
+                <i class="fa fa-user bigicon active-card"></i>
+                <img *ngIf="e.image" src="{{url}}evolution-load/{{e._id}}"/>   
             </div>                    
             <div class="well">
-                <h1>{{evolutions[i].order}}.&nbsp;{{evolutions[i].name}}</h1>
+                <h1>{{e.order}}.&nbsp;{{e.name}}</h1>
             </div>
         </div> 
-        <div *ngIf="!evolutions[i]" class="flip-card">
+        <div *ngIf="!playable[i] && !this.identity.admin" class="flip-card">
             <div class="card">
                 <h6>¿?</h6>
             </div>
@@ -45,11 +45,11 @@
                 <td><strong>Aprendizaje</strong></td>                
                 <td>
                     <div *ngFor="let l of learnings;">
-                        <popover-content #ppLearning title= "{{l.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
+                        <popover-content #ppLearning title= "{{l.name}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
                             <p class="popover-description" [innerHTML]="l.description"></p>
                             <pre *ngIf="l.example" [innerHTML]="l.example" class="popover-example"></pre>                            
                         </popover-content>                                                                    
-                        <a [popover]="ppLearning" class="popover-botton"><strong>{{l.key}}</strong></a>
+                        <a [popover]="ppLearning" class="popover-botton"><strong>{{l.shortName}}</strong></a>
                     </div>
                 </td>
             </tr>                                                                                          

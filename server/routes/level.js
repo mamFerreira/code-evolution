@@ -7,7 +7,8 @@ var md_auth = require ('../middlewares/authenticated');
 var LevelController = require ('../controllers/level');
 var GLOBAL = require ('../services/global');
 
-var md_upload = multipart({uploadDir: GLOBAL.PATH_FILE_LEVEL});
+var md_upload_image = multipart({uploadDir: GLOBAL.PATH_FILE_LEVEL_IMAGE});
+var md_upload_file = multipart({uploadDir: GLOBAL.PATH_FILE_LEVEL_FILE});
 
 var api = express.Router();
 
@@ -17,8 +18,12 @@ api.get('/levels-get/:id?',md_auth.ensureAuth, LevelController.getLevels);
 api.get('/levels-evolution-get/:evolutionID/:order?',md_auth.ensureAuth, LevelController.getLevels);
 api.put('/level-update/:id', md_auth.ensureAuthAdmin ,LevelController.updateLevel);
 api.delete('/level-remove/:id', md_auth.ensureAuthAdmin ,LevelController.removeLevel);
-api.post('/level-upload/:id', [md_auth.ensureAuthAdmin,md_upload], LevelController.uploadLevel);  
-api.get('/level-load/:id',LevelController.loadLevel);
+
+api.post('/level-upload-image/:id', [md_auth.ensureAuthAdmin,md_upload_image], LevelController.uploadImageLevel);  
+api.get('/level-load-image/:id',LevelController.loadImageLevel);
+api.post('/level-upload-file/:id', [md_auth.ensureAuthAdmin,md_upload_file], LevelController.uploadFileLevel);  
+api.get('/level-load-file/:id',LevelController.loadFileLevel);
+api.get('/level-load-code/:id',LevelController.loadCodeLevel);
 
 api.post('/level-action-add', md_auth.ensureAuthAdmin, LevelController.addAction);
 api.get('/level-actions-get/:levelID',md_auth.ensureAuth, LevelController.getActions);

@@ -1,4 +1,4 @@
-import { StateMain } from '../state-main';
+import { StateMain } from '../state';
 import { Position } from '../position';
 import { Global } from '../../enum/global';
 

@@ -39,7 +39,7 @@ export class UserUpdateComponent implements OnInit {
     this._userService.updateUser(this.user).subscribe(
       res => {
         if (!res.user) {
-          this._alertService.error('Error al actualizar el usuario');
+          this._alertService.error(res.message);
         } else {
           localStorage.setItem('identity', JSON.stringify(this.user));
           document.getElementById('navbar-user-email').innerHTML = this.user.email;          

@@ -1,7 +1,7 @@
 <h1>{{title}}</h1>                                                
 <app-alert></app-alert>
 <div class="mt-5">        
-    <div class="col-md-4" *ngIf="levels && evolution">
+    <div class="col-md-4" *ngIf="levels && evolution && level">
         <h2>Listado de niveles: <strong>{{evolution.name}}</strong></h2>
         <table class="table table-levels" cellspacing="0" width="100%">
             <thead>
@@ -14,7 +14,7 @@
             <tbody>
                 <tr *ngFor="let l of levels" [ngClass]="{'table-level-selected': l._id == level._id }" (click)="changeLevel(l)">
                     <td>{{l.order}}</td>
-                    <td>{{l.title}}</td>
+                    <td>{{l.name}}</td>
                     <td>{{l.time}} seg</td>
                 </tr>            
             </tbody>
@@ -25,10 +25,10 @@
         </div>        
     </div>
     <div class="col-md-8 mt-6" *ngIf="level">
-        <h2>{{level.order}}: {{level.title}}</h2>
+        <h2>{{level.order}}: {{level.name}}</h2>
         <h4>{{level.description}}</h4>
         <div class="col-md-4">
-            <table class="table table-bordered table-ce" *ngIf="goals">
+            <table class="table table-bordered table-ce" *ngIf="level.goals">
                 <thead>
                     <tr>
                         <th>Objetivos
@@ -37,12 +37,12 @@
                     </tr>
                 </thead>
                 <tbody class="collapse in goals">
-                    <tr *ngFor="let g of goals">
-                        <td>{{g.goal.title}}</td>                  
+                    <tr *ngFor="let g of level.goals">
+                        <td>{{g.goal.name}}</td>                  
                     </tr>            
                 </tbody>
             </table>            
-            <table class="table table-bordered table-ce" *ngIf="actions">
+            <table class="table table-bordered table-ce" *ngIf="level.actions">
                 <thead>
                     <tr>
                         <th>Acciones
@@ -51,18 +51,18 @@
                     </tr>
                 </thead>
                 <tbody class="collapse in actions">
-                    <tr *ngFor="let a of actions; let i=index">                                                
+                    <tr *ngFor="let a of level.actions; let i=index">                                                
                         <td>
-                            <popover-content #ppAction title= "{{a.action.method}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true" >
-                                <p class="popover-description">{{a.action.description}}</p>
-                                <pre *ngIf="a.action.example" [innerHTML]="a.action.example" class="popover-example"></pre>
+                            <popover-content #ppAction title= "{{a.name}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true" >
+                                <p class="popover-description">{{a.description}}</p>
+                                <pre *ngIf="a.example" [innerHTML]="a.example" class="popover-example"></pre>
                             </popover-content>
-                            <a [popover]="ppAction" class="popover-botton">{{a.action.method}}</a>
+                            <a [popover]="ppAction" class="popover-botton">{{a.name}}</a>
                         </td>
                     </tr>            
                 </tbody>
             </table>
-            <table class="table table-bordered table-ce" *ngIf="learnings">
+            <table class="table table-bordered table-ce" *ngIf="level.learnings">
                 <thead>
                     <tr>
                         <th>Aprendizaje
@@ -70,21 +70,21 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody class="collapse learnings">
-                    <tr *ngFor="let l of learnings">
+                <tbody class="collapse in learnings">
+                    <tr *ngFor="let l of level.learnings">
                     <td>
-                        <popover-content #ppLearning title= "{{l.learning.title}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
-                            <p class="popover-description" [innerHTML]="l.learning.description"></p>
-                            <pre *ngIf="l.learning.example" [innerHTML]="l.learning.example" class="popover-example"></pre>                            
+                        <popover-content #ppLearning title= "{{l.name}}" placement="auto left" [animation]="false" [closeOnClickOutside]="true">
+                            <p class="popover-description" [innerHTML]="l.description"></p>
+                            <pre *ngIf="l.example" [innerHTML]="l.example" class="popover-example"></pre>                            
                         </popover-content>
-                        <a [popover]="ppLearning" class="popover-botton">{{l.learning.title}}</a>
+                        <a [popover]="ppLearning" class="popover-botton">{{l.name}}</a>
                     </td>                  
                     </tr>            
                 </tbody>
             </table>
         </div>
         <div class="col-md-8">
-            <img class="img-fluid" *ngIf="level.image" src="{{url}}level-load/{{level.image}}/I"/>   
+            <img class="img-fluid" *ngIf="level.image" src="{{url}}level-load-image/{{level._id}}"/>   
         </div> 
     </div>       
 </div>
