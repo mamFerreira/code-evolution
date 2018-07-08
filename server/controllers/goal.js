@@ -80,9 +80,9 @@ function updateGoal (req, res){
 
     if (update.key && update.name) {
         Goal.findByIdAndUpdate(id,update,(err,goal) => {
-            if (!err){
+            if (err){
                 res.status(500).send({message:'Error en el servidor', messageError:err.message}); 
-            }else{
+            }else{                
                 if(!goal){
                     res.status(404).send({message: 'Error: el objetivo no ha podido ser actualizado'});
                 }else{

@@ -117,7 +117,7 @@
           <tr *ngFor="let element of list; let i = index">
             <th scope="row">{{i+1}}</th>            
             <td>{{element.name}}</td>                  
-            <td>{{element.shortName}}</td> 
+            <td>{{element.key}}</td> 
             <td>
                 <a [routerLink]="['edit/'+ element._id]" class="button_action" title="Editar"><span class="glyphicon glyphicon-pencil"></span></a>
                 <a (click)="removeGoal(element._id);" class="button_action" title="Eliminar"><span class="glyphicon glyphicon-trash"></span></a>

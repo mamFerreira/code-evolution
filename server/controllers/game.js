@@ -27,6 +27,8 @@ function registerGame (req, res){
             }else{
                 if (game_db){
                     game._id = game_db._id;
+                    game._overcome = game._overcome ? game._overcome : game_db._overcome;
+                    game.code = game.code.length > 0 ? game.code : game_db.code;
                     Game.findOneAndUpdate({_id: game_db._id},game,(err,gameUpdate) => {
                         if (err){
                             res.status(500).send({message:'Error en el servidor', messageError:err.message}); 

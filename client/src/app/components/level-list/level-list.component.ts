@@ -14,7 +14,7 @@ import { LevelGoal } from '../../models/level_goal.model';
 import { Goal } from '../../models/goal.model';
 import { Learning } from '../../models/learning.model';
 import { Action } from '../../models/action.model';
-import { Global } from '../../enum/global';
+import { GLOBAL } from '../../enum/global.enum';
 
 @Component({
   selector: 'app-level-list',
@@ -29,6 +29,7 @@ export class LevelListComponent implements OnInit {
   public evolution: Evolution;
   public level: Level;
   public levels: Level[];
+  public levels_: Level[];
   public goals: LevelGoal[];
   public learnings: Learning[];
   public actions: Action[];  
@@ -48,12 +49,13 @@ export class LevelListComponent implements OnInit {
     private _route: ActivatedRoute    
   ) {
     this.title = 'Seleccionar Nivel';
-    this.url = Global.url_api;
+    this.url = GLOBAL.URL_API;
     this.identity = this._userService.getIdentity();
     this.showGoals = true;
     this.showActions = true;
     this.showLearnings = true;
     this.levels = new Array<Level> ();
+    this.levels_ = new Array<Level> ();
   }
 
   ngOnInit() {
@@ -89,21 +91,32 @@ export class LevelListComponent implements OnInit {
             this._alertService.error(res.message);
           } else {   
             if (this.identity.admin) {
+
               this.levels = res.levels;
               this.level = res.levels[0];
               this.getGoals();
               this.getLearnings();
               this.getActions();
-            } else {
+
+            } else {     
+              let i = 0;
               res.levels.forEach((item, index) => {
                 this._gameService.getGame(this.identity._id, item._id).subscribe(
                   res2 => {
+                    i = i + 1;
                     if (res2.games && res2.games.length > 0) {
-                      this.levels.push(item);
-                      this.level = item;                                          
+                      this.levels_.push(item);                                                              
                     }
   
-                    if (index === this.levels.length - 1) {
+                    if (i === res.levels.length) {                      
+                      this.levels = this.levels_.sort( (l1, l2) => {
+                        if (l1.order > l2.order) {
+                          return 1;
+                        } else {
+                          return 0;
+                        }
+                      });
+                      this.level = this.levels[this.levels.length - 1];
                       this.getGoals();
                       this.getLearnings();
                       this.getActions(); 

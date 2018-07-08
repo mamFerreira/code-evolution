@@ -38,7 +38,7 @@
                 </thead>
                 <tbody class="collapse in goals">
                     <tr *ngFor="let g of level.goals">
-                        <td>{{g.goal.name}}</td>                  
+                        <td *ngIf="g.goal">{{g.goal.name}}</td>                  
                     </tr>            
                 </tbody>
             </table>            

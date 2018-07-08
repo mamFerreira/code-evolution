@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
-import { Global } from '../../../enum/global';
+import { GLOBAL } from '../../../enum/global.enum';
 
 import { AlertService } from '../../../services/alert.service';
 import { UserService } from '../../../services/user.service';
@@ -55,7 +55,7 @@ export class ConfigureLevelComponent implements OnInit {
   ) {     
     this.title = 'Editar nivel';
     this.identity = this._userService.getIdentity();
-    this.url = Global.url_api;
+    this.url = GLOBAL.URL_API;
     this.edit = true;    
     this.levelGoal = new LevelGoal('', null, null, '', '', null);
   }
@@ -431,7 +431,7 @@ export class ConfigureLevelComponent implements OnInit {
       res => {        
         if (!res.level_goal) {
           this._alertService.error(res.message);
-        } else { 
+        } else {           
           this.level.goals.splice(pos, 1);                                   
         }
       },

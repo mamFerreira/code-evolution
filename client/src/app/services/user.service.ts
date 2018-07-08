@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 
 import { User } from '../models/user.model';
-import { Global } from './../enum/global';
+import { GLOBAL } from './../enum/global.enum';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -38,34 +38,34 @@ export class UserService {
   // Registro de nuevo usuario en el sistema
   addUser (user_to_register: User): Observable<any> {
     let json = JSON.stringify(user_to_register);
-    return this._http.post(Global.url_api + 'user-add', json, this.httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'user-add', json, this.httpOptions);
   }
 
   // Obtener usuario por ID
   getUser (idUser: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'users-get/' + idUser, this.httpOptionsToken);
+    return this._http.get(GLOBAL.URL_API + 'users-get/' + idUser, this.httpOptionsToken);
   }
 
   // Obtener usuarios registrados
   getUsers (): Observable<any> {    
-    return this._http.get(Global.url_api + 'users-get', this.httpOptionsToken);
+    return this._http.get(GLOBAL.URL_API + 'users-get', this.httpOptionsToken);
   }
 
   // Actualizar usuario (solo administrador)
   updateUserById (user_to_update: User): Observable<any> {
     let json = JSON.stringify(user_to_update);
-    return this._http.put(Global.url_api + 'user-update/' + user_to_update._id, json, this.httpOptionsToken);
+    return this._http.put(GLOBAL.URL_API + 'user-update/' + user_to_update._id, json, this.httpOptionsToken);
   }
 
   // Actualizar su propio usuario
   updateUser (user_to_update: User): Observable<any> {
     let json = JSON.stringify(user_to_update);
-    return this._http.put(Global.url_api + 'user-update', json, this.httpOptionsToken);
+    return this._http.put(GLOBAL.URL_API + 'user-update', json, this.httpOptionsToken);
   }
 
   // Eliminar usuario
   removeUser (idUser: string): Observable<any> {
-    return this._http.delete(Global.url_api + 'user-remove/' + idUser, this.httpOptionsToken);
+    return this._http.delete(GLOBAL.URL_API + 'user-remove/' + idUser, this.httpOptionsToken);
   }
 
   // Obtener token del local storage
@@ -96,12 +96,12 @@ export class UserService {
     }
     let json = JSON.stringify(user_to_login);
 
-    return this._http.post(Global.url_api + 'user-login', json, httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'user-login', json, httpOptions);
   }
   
   // Comprobar la validez del token almacenado en el localStorage
   checkToken(): Observable<any> {        
-    return this._http.get(Global.url_api + 'user-check-token', this.httpOptionsToken);
+    return this._http.get(GLOBAL.URL_API + 'user-check-token', this.httpOptionsToken);
   }
 
 }

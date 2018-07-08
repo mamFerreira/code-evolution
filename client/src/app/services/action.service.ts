@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { Action } from '../models/action.model';
 import { UserService } from './user.service';
-import { Global } from './../enum/global';
+import { GLOBAL } from './../enum/global.enum';
 
 @Injectable()
 export class ActionService {
@@ -27,23 +27,23 @@ export class ActionService {
     // Añadir nueva acción
     addAction (action_to_register: Action): Observable<any> {
         let json = JSON.stringify(action_to_register);
-        return this._http.post(Global.url_api + 'action-add', json, this.httpOptions);
+        return this._http.post(GLOBAL.URL_API + 'action-add', json, this.httpOptions);
     }
 
     // Obtener acciones
     getActions(id: string = ''): Observable<any> {
-        return this._http.get(Global.url_api + 'actions-get/' + id, this.httpOptions);
+        return this._http.get(GLOBAL.URL_API + 'actions-get/' + id, this.httpOptions);
     }
 
     // Actualizar acción
     updateAction (action_to_update: Action): Observable<any> {
         let json = JSON.stringify(action_to_update);
-        return this._http.put(Global.url_api + 'action-update/' + action_to_update._id, json, this.httpOptions);
+        return this._http.put(GLOBAL.URL_API + 'action-update/' + action_to_update._id, json, this.httpOptions);
     }
 
     // Eliminar acción
     removeAction (idAction: string): Observable<any> {
-        return this._http.delete(Global.url_api + 'action-remove/' + idAction, this.httpOptions);
+        return this._http.delete(GLOBAL.URL_API + 'action-remove/' + idAction, this.httpOptions);
     }
 
 }

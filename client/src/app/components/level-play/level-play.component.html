@@ -8,26 +8,29 @@
         </div>
         <!--Fin Titulo-->
         <!--Botones-->
-        <div class="col-md-offset-3 col-md-4" *ngIf="canvas">
-            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 0 }" [disabled]="canvas.stateGame === 0 || canvas.stateGame === 1" (click)="doAction(0);">
+        <div class="col-md-offset-3 col-md-4">
+            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': state === 1 || state === 4 }" [disabled]="state !== 1 && state !== 4" (click)="executeAction(0)">
                 <span class="glyphicon glyphicon-refresh"></span>
             </button>
-            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 1}" [disabled]="canvas.stateGame !== 0 && canvas.stateGame !== 2" (click)="doAction(1);">
+            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': state === 1 || state === 3 }" [disabled]="state !== 1 && state !== 3" (click)="executeAction(1)">
                 <span class="glyphicon glyphicon-play"></span>
             </button>
-            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': lastAction === 2 }" [disabled]="canvas.stateGame !== 1" (click)="doAction(2);">
+            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': state === 2 }" [disabled]="state !== 2" (click)="executeAction(3)">
                 <span class="glyphicon glyphicon-pause"></span>
             </button>
-            <button type="button" class="btn btn-primary-ce" *ngIf="!configure[0]" (click)="doAction(5);" >
+            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': state === 3 }" [disabled]="state !== 3" (click)="executeAction(4)">
+                <span class="glyphicon glyphicon-stop"></span>
+            </button>
+            <button type="button" class="btn btn-primary-ce" *ngIf="!configure[0]" [disabled]="state === 0" (click)="executeAction(6); configure[0] = !configure[0];" >
                 <span class="glyphicon glyphicon-volume-off"></span>
             </button>
-            <button type="button" class="btn btn-primary-ce" *ngIf="configure[0]" (click)="doAction(5);">
+            <button type="button" class="btn btn-primary-ce" *ngIf="configure[0]" [disabled]="state === 0" (click)="executeAction(5); configure[0] = !configure[0];">
                 <span class="glyphicon glyphicon-volume-up"></span>
             </button> 
-            <button type="button" class="btn btn-primary-ce">
+            <!--<button type="button" class="btn btn-primary-ce">
                 <span class="glyphicon glyphicon-info-sign"></span>
-            </button>
-            <button type="button" class="btn btn-primary-ce" [routerLink]="['/jugar/evolucion/'+ this.level.evolutionID]">
+            </button>-->
+            <button type="button" class="btn btn-primary-ce" [ngClass]="{'active': state !== 2 }" [disabled]="state === 2" [routerLink]="['/jugar/evolucion/'+ this.level.evolutionID]">
                 <span class="glyphicon glyphicon-log-out"></span>
             </button>   
         </div>
@@ -35,7 +38,7 @@
     </div> 
     <div>
         <!--Canvas-->
-        <div class="col-md-5" *ngIf="canvas">
+        <div class="col-md-5" *ngIf="canvas" style="min-width:448px">
             <div id="phaser-game" class="canvas"></div>          
         </div>
         <!--Fin Canvas-->        
@@ -50,9 +53,8 @@
                     </tr>
                 </thead>
                 <tbody class="collapse in goals">
-                    <tr *ngFor="let g of level.goals">
-                        <!--<td [ngClass]="{'goal-no-check': !g[1], 'goal-check': g[1]}">{{g[0]}}</td> -->                 
-                        <td>{{g.goal.name}}{{getGoalValue(g)}}</td>
+                    <tr *ngFor="let g of level.goals">                    
+                        <td *ngIf="g.goal" [ngClass]="{'goal-no-check': goalCheck(g) === -1, 'goal-check':goalCheck(g) === 1}">{{g.goal.name}}{{goalFormat(g)}}</td>
                     </tr>            
                 </tbody>
             </table>
@@ -61,7 +63,7 @@
                     <tr>
                         <th>
                             Acciones
-                            <i class="fa bigicon" data-toggle="collapse" data-target=".actions" [ngClass]="{'fa-plus-square':!configure[2],'fa-minus-square':configure[2]}" (click)="showActions = !configure[2]"></i>                    
+                            <i class="fa bigicon" data-toggle="collapse" data-target=".actions" [ngClass]="{'fa-plus-square':!configure[2],'fa-minus-square':configure[2]}" (click)="configure[2] = !configure[2]"></i>                    
                         </th>
                     </tr>
                 </thead>
@@ -103,44 +105,43 @@
         <!--Editor de textos-->
         <div class="col-md-5">    
             <ace-editor [(text)]="code" #editor class="editor"></ace-editor>
-            <p class="shell" [innerHTML]=""></p>
-            <!--<p class="shell" [ngClass]="{'shell-error': canvas.error }" [innerHTML]="canvas.codeShell"></p>-->
+            <p class="shell" [ngClass]="{'shell-error': state === 6 }" [innerHTML]="console"></p>
+            <!--<p class="shell" [ngClass]="{'shell-error': canvas.error }" [innerHTML]="codeShell"></p>-->
         </div>
         <!--Fin Editor de textos-->
     </div>    
 </div>  
 
-<div *ngIf="canvas && evolution">
-    <div class="backdrop" [ngClass]="{'display-none':canvas.stateGame!==4 && canvas.stateGame!==5,'display-block':canvas.stateGame===4 || canvas.stateGame===5}"></div>
-    <div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':canvas.stateGame!==4,'display-block':canvas.stateGame===4}">
-        <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">        
-            <h1 class="modal-title">¡Nivel Superado!</h1>
-            </div>
-            <div class="modal-body">
-            <h3>Has cumplido todos los objetivos</h3>
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-default" (click)="doAction(0)" >Jugar de nuevo</button>
-            <button type="button" class="btn btn-default">Siguiente</button>
-            </div>
+<!--Modal Final de la Partida-->
+<div class="backdrop" [ngClass]="{'display-none':state !== 5 && state !== 5,'display-block':state === 5 || state === 5}"></div>
+<div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':state !== 5,'display-block':state === 5}">
+    <div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">        
+        <h1 class="modal-title">¡Nivel Superado!</h1>
         </div>
+        <div class="modal-body">
+        <h3>Has cumplido todos los objetivos</h3>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-default" (click)="levelUp(false);executeAction(0)" >Jugar de nuevo</button>
+        <button type="button" class="btn btn-default"(click)="levelUp();" >Siguiente</button>
         </div>
     </div>
-    <div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':canvas.stateGame!==5,'display-block':canvas.stateGame==5}">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">        
-                    <h1 class="modal-title title-game-over">¡Nivel no superado!</h1>
-                </div>
-                <div class="modal-body">
-                    <h3>{{canvas.msgError}}</h3>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" (click)="doAction(0)" >Volver a intentar</button>
-                    <button type="button" class="btn btn-default" [routerLink]="['/jugar/evolucion/' + evolution._id]">Cambiar nivel</button>
-                </div>
+    </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog"  [ngClass]="{'display-none':state !== 6,'display-block':state === 6}">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">        
+                <h1 class="modal-title title-game-over">¡Nivel no superado!</h1>
+            </div>
+            <div class="modal-body">
+                <h3>{{msgGO}}</h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" (click)="executeAction(0)" >Volver a intentar</button>
+                <button *ngIf="level && level.evolution" type="button" class="btn btn-default" [routerLink]="['/jugar/evolucion/' + level.evolution._id]">Cambiar nivel</button>
             </div>
         </div>
     </div>

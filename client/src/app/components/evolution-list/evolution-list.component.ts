@@ -8,7 +8,7 @@ import { GameService } from '../../services/game.service';
 
 import { Evolution } from '../../models/evolution.model';
 import { Learning } from '../../models/learning.model';
-import { Global } from '../../enum/global';
+import { GLOBAL } from '../../enum/global.enum';
 
 @Component({
   selector: 'app-evolution-list',
@@ -35,7 +35,7 @@ export class EvolutionListComponent implements OnInit {
     private _gameService: GameService    
   ) {
     this.title = 'Seleccionar organismo';
-    this.url = Global.url_api;
+    this.url = GLOBAL.URL_API;
     this.identity = this._userService.getIdentity();   
     this.playable = new Array();  
     this.contable = 0;   

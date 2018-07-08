@@ -4,7 +4,7 @@ import { NgForm } from '@angular/forms';
 import { AlertService } from '../../services/alert.service';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
-import { Global } from '../../enum/global';
+import { GLOBAL } from '../../enum/global.enum';
 
 @Component({
   selector: 'app-user-update',
@@ -29,13 +29,12 @@ export class UserUpdateComponent implements OnInit {
     this.title = 'Actualizar datos de cuenta';
     this.user = this._userService.getIdentity();
     this.token = this._userService.getToken();
-    this.url = Global.url_api;
+    this.url = GLOBAL.URL_API;
   }
 
   ngOnInit() { }
 
-  onSubmit() {   
-    console.log(this.user); 
+  onSubmit() {       
     this._userService.updateUser(this.user).subscribe(
       res => {
         if (!res.user) {

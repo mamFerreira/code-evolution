@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, OnChanges, EventEmitter } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { GameState } from '../../../enum/game-state';
+import { StateEnum } from '../../../enum/state.enum';
 
 @Component({
   selector: 'app-dialog-game-over',
@@ -21,7 +21,7 @@ import { GameState } from '../../../enum/game-state';
 
 export class DialogGameOverComponent implements OnInit {
   
-  @Input() stateGame: GameState;
+  @Input() stateGame: StateEnum;
   @Input() evolution: number;
   @Input() strError: string;
   @Output() doAction: EventEmitter<number> = new EventEmitter<number>();

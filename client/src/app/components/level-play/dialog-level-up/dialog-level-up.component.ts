@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
 import { LevelService } from '../../../services/level.service';
-import { GameState } from '../../../enum/game-state';
+import { StateEnum } from '../../../enum/state.enum';
 
 
 // Servicios
@@ -27,7 +27,7 @@ import { GameState } from '../../../enum/game-state';
 
 export class DialogLevelUpComponent implements OnInit {
 
-  @Input() stateGame: GameState;  
+  @Input() stateGame: StateEnum;  
   @Input() level: string; 
   @Input() evolution: string;   
   @Output() doAction: EventEmitter<number> = new EventEmitter<number>();

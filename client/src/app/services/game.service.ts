@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { Game } from '../models/game.model';
 import { UserService } from './user.service';
-import { Global } from './../enum/global';
+import { GLOBAL } from './../enum/global.enum';
 
 @Injectable()
 export class GameService {
@@ -27,17 +27,17 @@ export class GameService {
     // Registrar Partida
     registerGame (game_to_register: Game): Observable<any> {
         let json = JSON.stringify(game_to_register);
-        return this._http.post(Global.url_api + 'game-register', json, this.httpOptions);
+        return this._http.post(GLOBAL.URL_API + 'game-register', json, this.httpOptions);
     }
 
     // Obtener partida
     getGame(userID: string, levelID: string): Observable<any> {        
-        return this._http.get(Global.url_api + 'games-get/' + userID + '/' + levelID, this.httpOptions);
+        return this._http.get(GLOBAL.URL_API + 'games-get/' + userID + '/' + levelID, this.httpOptions);
     }    
 
     // Eliminar partida
     removeGame (idGame: string): Observable<any> {
-        return this._http.delete(Global.url_api + 'game-remove/' + idGame, this.httpOptions);
+        return this._http.delete(GLOBAL.URL_API + 'game-remove/' + idGame, this.httpOptions);
     }
 
 }

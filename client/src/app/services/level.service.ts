@@ -8,7 +8,7 @@ import { LevelLearning } from '../models/level_learning.model';
 import { LevelAction } from '../models/level_action.model';
 
 import { UserService } from './user.service';
-import { Global } from './../enum/global';
+import { GLOBAL } from './../enum/global.enum';
 
 @Injectable()
 export class LevelService {
@@ -34,33 +34,33 @@ export class LevelService {
   // Añadir nuevo nivel
   addLevel (level_to_register: Level): Observable<any> {
     let json = JSON.stringify(level_to_register);
-    return this._http.post(Global.url_api + 'level-add', json, this.httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'level-add', json, this.httpOptions);
   }
 
   // Obtener niveles
   getLevels(id: string = ''): Observable<any> {    
-      return this._http.get(Global.url_api + 'levels-get/' + id, this.httpOptions);
+      return this._http.get(GLOBAL.URL_API + 'levels-get/' + id, this.httpOptions);
   }
 
   // Obtener niveles por evolución
   getLevelsEvolution(idEvolution: string, order: string = ''): Observable<any> {          
-      return this._http.get(Global.url_api + 'levels-evolution-get/' + idEvolution + '/' + order, this.httpOptions);
+      return this._http.get(GLOBAL.URL_API + 'levels-evolution-get/' + idEvolution + '/' + order, this.httpOptions);
   }
 
   // Actualizar nivel
   updateLevel (level_to_register: Level): Observable<any> {
       let json = JSON.stringify(level_to_register);
-      return this._http.put(Global.url_api + 'level-update/' + level_to_register._id, json, this.httpOptions);
+      return this._http.put(GLOBAL.URL_API + 'level-update/' + level_to_register._id, json, this.httpOptions);
   }
 
   // Eliminar nivel
   removeLevel (idLevel: string): Observable<any> {
-      return this._http.delete(Global.url_api + 'level-remove/' + idLevel, this.httpOptions);
+      return this._http.delete(GLOBAL.URL_API + 'level-remove/' + idLevel, this.httpOptions);
   }
 
   // Obtener código por defecto del nivel
   getCode(idLevel: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'level-load-code/' + idLevel, this.httpOptions);
+    return this._http.get(GLOBAL.URL_API + 'level-load-code/' + idLevel, this.httpOptions);
   }
 
   /**
@@ -69,41 +69,41 @@ export class LevelService {
   
   addAction (idLevel: string, idAction: string): Observable<any> {
     let json = {'levelID': idLevel, 'actionID': idAction};
-    return this._http.post(Global.url_api + 'level-action-add', json, this.httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'level-action-add', json, this.httpOptions);
   }
 
   getActions(idLevel: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'level-actions-get/' + idLevel, this.httpOptions);
+    return this._http.get(GLOBAL.URL_API + 'level-actions-get/' + idLevel, this.httpOptions);
   }
 
   removeAction (idLevel: string, idAction: string): Observable<any> {
-    return this._http.delete(Global.url_api + 'level-action-remove/' + idLevel + '/' + idAction, this.httpOptions);
+    return this._http.delete(GLOBAL.URL_API + 'level-action-remove/' + idLevel + '/' + idAction, this.httpOptions);
   }
 
   addLearning (idLevel: string, idLearning: string): Observable<any> {
     let json = {'levelID': idLevel, 'learningID': idLearning};
-    return this._http.post(Global.url_api + 'level-learning-add', json, this.httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'level-learning-add', json, this.httpOptions);
   }
 
   getLearnings(idLevel: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'level-learnings-get/' + idLevel, this.httpOptions);
+    return this._http.get(GLOBAL.URL_API + 'level-learnings-get/' + idLevel, this.httpOptions);
   }
 
   removeLearning (idLevel: string, idLearning: string): Observable<any> {
-    return this._http.delete(Global.url_api + 'level-learning-remove/' + idLevel + '/' + idLearning, this.httpOptions);
+    return this._http.delete(GLOBAL.URL_API + 'level-learning-remove/' + idLevel + '/' + idLearning, this.httpOptions);
   }
 
   addGoal (level_goal: LevelGoal): Observable<any> {
     let json = JSON.stringify(level_goal);
-    return this._http.post(Global.url_api + 'level-goal-add', json, this.httpOptions);
+    return this._http.post(GLOBAL.URL_API + 'level-goal-add', json, this.httpOptions);
   }
 
   getGoals(idLevel: string): Observable<any> {    
-    return this._http.get(Global.url_api + 'level-goals-get/' + idLevel, this.httpOptions);
+    return this._http.get(GLOBAL.URL_API + 'level-goals-get/' + idLevel, this.httpOptions);
   }
 
   removeGoal (idLevel: string, idGoal: string): Observable<any> {
-    return this._http.delete(Global.url_api + 'level-goal-remove/' + idLevel + '/' + idGoal, this.httpOptions);
+    return this._http.delete(GLOBAL.URL_API + 'level-goal-remove/' + idLevel + '/' + idGoal, this.httpOptions);
   }
 
 }

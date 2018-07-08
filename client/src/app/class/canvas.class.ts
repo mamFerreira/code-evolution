@@ -10,128 +10,106 @@ import { UserService } from '../services/user.service';
 import { LevelService } from '../services/level.service';
 
 // Importamos clases
-import { Checker} from './checker';
-import { GameAction } from '../enum/game-action';
-import { GameState } from '../enum/game-state';
-import { Food } from './food';
+import { Checker} from './checker.class';
+import { StateEnum } from '../enum/state.enum';
+import { GLOBAL } from './../enum/global.enum';
+import { Food } from './food.class';
+
 
 // Declaramos la clase
 export class Canvas {   
     
-    public level: Level;
+    private level: Level;
+    private phaser;    
+    private checker: Checker;
+    private worker: Worker;     
 
-
-
-
-    // Variables principales
-    private _identity;
-    private _state;    
-    private _worker: Worker;
-    private _checker: Checker;  
-    private _level: Level;    
-    private _fullLoad: boolean;  
-    private _soundLU;  
-    private _soundGO;      
+    private soundLU;  
+    private soundGO; 
+      
+    public console: string;    
+    public messageGO: string;
+    public path: string;
+               
 
     // Variables intervalos
     private _idIntervalM; 
-    private _idIntervalB;
-
-    // Variables intercamio de información
-    private _codeShell: string;   
-    private _msgError: string;       
+    private _idIntervalB;           
                              
     constructor ( level: Level) {
+        // Variables para el intercambio de información        
+        this.console = '';
+        this.messageGO = '';
+        // Variables principales
         this.level = level;
-        /*this._identity = _userService.getIdentity();        
-        this._checker = new Checker();              
-        this._codeShell = '';   
-        this._msgError = '';   
-        // Sonidos de levelUp y gameOver
-        this._soundLU = new Audio('../../../assets/audio/sound/level-up.mp3');    
-        this._soundGO = new Audio('../../../assets/audio/sound/game-over.mp3'); 
-        this._soundLU.volume = 0.2;        
-        this._soundGO.volume = 0.2;           
-        this._soundLU.load();        
-        this._soundGO.load();     
-        this._state = 0;*/
+        this.checker = new Checker();
+        this.path = '../../..';
+        
+        import('./states/state_' + level.evolution.order.toString() + '_' + level.order.toString() + '.state').then(module => {
+            this.phaser = new module.State(this.level.evolution.health, this.level.time, this.level.goals);
+        }); 
+
+        this.loadAudio();
+        // this.loadWorker();        
+        
     }
 
-    // Propiedades
-
-    get stateGame () {
-        return this._state;
+    get state(): StateEnum {        
+        return this.phaser != null ? this.phaser.state : StateEnum.READY;
     }
 
-    get codeShell () {
-        return 'Code Evolution Shell...' + this._codeShell;
-    }
+    goalCheck(key): number {
 
-    get msgError () {
-        return this._msgError;
-    }
+        let resultado = 0;
 
-    get error () {        
-        if (this._msgError.length === 0) {            
-            return false;
-        } else {            
-            return true;
+        switch (key) {
+            case 'POSITION': {                
+                resultado = 1;
+                break;
+            }                                
         }
+        return resultado;
     }
 
-    get goals () {
-        return this._state.goals;
+
+     // Métodos de carga
+
+    loadAudio() {
+        this.soundLU = new Audio(this.path + GLOBAL.PATH_AUDIO + 'level-up.mp3');            
+        this.soundGO = new Audio(this.path + GLOBAL.PATH_AUDIO + 'game-over.mp3');
+        this.soundLU.volume = 0.2;        
+        this.soundGO.volume = 0.2;           
+        this.soundLU.load();        
+        this.soundGO.load();        
     }
 
-    get volume () {
-        return this._state.volume;
-    }
-
-    // Métodos de carga
-
-    loadState (l: Level, e: Evolution, g: LevelGoal[], p: Position[]) {        
-        import('./states/unicellular').then(s => {
-            
-            this._level = l;
-            // this._evolution = e;
-            this._state = new s.State();
-            
-            // this._state.loadFile(this._evolution.player, this._level.map, this._evolution.tiledset);    
-            // this._state.loadConfigure(this._level.time, this._evolution.health, this._evolution.playerW, this._evolution.playerH, this._level.order);        
-
-
-            /*g.forEach((g, index) => {    
-                this._state.loadGoal(g.goal.name, g.goal.key, g.value1, g.value2);                                       
-            });*/
-
-            this._state.loadPositionPlayer(0, 0);
-            this._state.loadPosition(20, 20);                                   
-        });        
-    }
-
-    loadWorker (actions: LevelAction[]) {
+    loadWorker () {
 
         let actionJson = [];
-        this._worker = new Worker('../../assets/js/worker.js');      
-        
-        // Cargamos las acciones disponibles del nivel en el worker
-        actions.forEach(a => {
-            let method = ''; // a.action.shortName;
-            actionJson.push({'method' : method} );
-        });        
+        this.worker = new Worker(this.path + GLOBAL.PATH_JS + 'worker.js');  
 
-        this.postMessage('initValue', actionJson);
+        // Cargamos las acciones disponibles del nivel en el worker        
+        this.level.actions.forEach((action, index) => {            
+            actionJson.push({'method' : action.shortName} );  
+            
+            if (index === this.level.actions.length - 1) {
+                this.postMessage('initValue', actionJson);
+            }
+            
+        });                
+                
         this.addEventListener(); 
     }
+    
 
     // Métodos comunicación worker
 
     postMessage(action, value) {
-        this._worker.postMessage({'action': action, 'value': [value]});
+        this.worker.postMessage({'action': action, 'value': [value]});
     } 
 
     addEventListener() {
-        this._worker.addEventListener('message', (e) => {            
+        this.worker.addEventListener('message', (e) => {            
 
             switch (e.data.type) {            
                 case 'primary':
@@ -151,9 +129,9 @@ export class Canvas {
                     break;                
             }
 
-            if (this._state.wait) {
+            if (this.phaser.wait) {
                 this._idIntervalB = setInterval(() => {
-                    if (!this._state.wait) {                                              
+                    if (!this.phaser.wait) {                                              
                         this.postMessage('unblock', true);
                         clearInterval(this._idIntervalB);                            
                     }                        
@@ -189,31 +167,31 @@ export class Canvas {
     addEventLisneningPosition(action, value) {
         switch (action) {
             case 'position':
-                this.postMessage('loadValue', this._state.position());
+                this.postMessage('loadValue', this.phaser.position());
                 break;  
             case 'move':
-                if (! this._checker.checkArray(value, 2)) {
+                if (! this.checker.checkArray(value, 2)) {
                     this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
                     return;
                 }          
                 
-                if (! this._checker.checkIntPos(value[0]) || !this._checker.checkIntPos(value[1])) {
+                if (! this.checker.checkIntPos(value[0]) || !this.checker.checkIntPos(value[1])) {
                     this.registerError('Los valores de la acción "move" no son enteros positivos');
                     return;
                 }
-                this._state.move (value[0], value[1]);                                        
+                this.phaser.move (value[0], value[1]);                                        
                 break;
             case 'moveUp': 
-                this._state.moveDirection('U');                                                       
+                this.phaser.moveDirection('U');                                                       
                 break;
             case 'moveDown':
-                this._state.moveDirection('D');
+                this.phaser.moveDirection('D');
                 break;            
             case 'moveLeft':
-                this._state.moveDirection('L');                                                        
+                this.phaser.moveDirection('L');                                                        
                 break;
             case 'moveRight':
-                this._state.moveDirection('R');                                                        
+                this.phaser.moveDirection('R');                                                        
                 break;
             default:
                 this.registerError ('Acción de movimiento ' + action + ' no definida');
@@ -226,17 +204,17 @@ export class Canvas {
 
         switch (action) {
             case 'food':                     
-                this.postMessage('loadValue', this._state.foodCurrent);
+                this.postMessage('loadValue', this.phaser.foodCurrent);
                 break;
             case 'existsFood':
-                this.postMessage('loadValue', this._state.existsFood());     
+                this.postMessage('loadValue', this.phaser.existsFood());     
                 break;
             case 'findNearestFood': 
-                this.postMessage('loadValue', this._state.findNearestFood());             
+                this.postMessage('loadValue', this.phaser.findNearestFood());             
                 break;  
             case 'eat':  
             
-                if (! this._checker.checkArray(value, 1)) {
+                if (! this.checker.checkArray(value, 1)) {
                     this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
                     return;
                 }
@@ -247,10 +225,10 @@ export class Canvas {
                 }   
 
                 food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);                
-                this._state.eat(food);
+                this.phaser.eat(food);
                 break;
             case 'discardFood':
-                if (! this._checker.checkArray(value, 1)) {
+                if (! this.checker.checkArray(value, 1)) {
                     this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
                     return;
                 }
@@ -262,7 +240,7 @@ export class Canvas {
 
                 food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);
 
-                this._state.discardFood(food);
+                this.phaser.discardFood(food);
                 break;
             default:
                 this.registerError ('Acción de alimento ' + action + ' no definida');
@@ -271,7 +249,7 @@ export class Canvas {
 
     // Métodos principales
 
-    doAction (action: GameAction, code: string = null) {
+    /* doAction (action: GameAction, code: string = null) {
         switch (action) { 
             case GameAction.Reload:                
                 this._state.reload();    
@@ -323,7 +301,7 @@ export class Canvas {
 
                 break;
         }
-    }  
+    } */ 
 
     /*nextLevel() {
         this._levelService.getLevels(this._level._id).subscribe(
@@ -344,17 +322,17 @@ export class Canvas {
     // Métodos auxiliares    
 
     addCodeShell (msg, error = false) {
-        this._codeShell += '<br>$ ' + msg;
+        this.console += '<br>$ ' + msg;
 
         if (error) {
-            this._msgError = msg;
+            this.messageGO = msg;
         }
 
     }
 
     registerError(msg) {
         this.addCodeShell('Error:' + msg, true);                
-        this.doAction(GameAction.Stop);
+        // this.doAction(GameAction.STOPPED);
     }
 
     finish () {

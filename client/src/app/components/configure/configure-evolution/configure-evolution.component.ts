@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, Params} from '@angular/router';
 
-import { Global } from '../../../enum/global';
+import { GLOBAL } from '../../../enum/global.enum';
 
 import { AlertService } from '../../../services/alert.service';
 import { UserService } from '../../../services/user.service';
@@ -33,7 +33,7 @@ export class ConfigureEvolutionComponent implements OnInit {
     private _route: ActivatedRoute    
   ) { 
     this.title = 'Editar evolución';
-    this.url = Global.url_api;
+    this.url = GLOBAL.URL_API;
     this.identity = this._userService.getIdentity();
     this.isEdit = true;    
   }
