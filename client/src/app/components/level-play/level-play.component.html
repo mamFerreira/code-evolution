@@ -38,13 +38,13 @@
     </div> 
     <div>
         <!--Canvas-->
-        <div class="col-md-5" *ngIf="canvas" style="min-width:448px">
+        <div class="col-md-5" style="min-width:448px">
             <div id="phaser-game" class="canvas"></div>          
         </div>
         <!--Fin Canvas-->        
         <!--Menús Información-->
-        <div class="col-md-2" *ngIf="level">
-            <table class="table table-bordered table-ce" *ngIf="level.goals">
+        <div class="col-md-2">
+            <table class="table table-bordered table-ce" *ngIf="level && level.goals">
                 <thead>
                     <tr>
                         <th>Objetivos
@@ -54,11 +54,11 @@
                 </thead>
                 <tbody class="collapse in goals">
                     <tr *ngFor="let g of level.goals">                    
-                        <td *ngIf="g.goal" [ngClass]="{'goal-no-check': goalCheck(g) === -1, 'goal-check':goalCheck(g) === 1}">{{g.goal.name}}{{goalFormat(g)}}</td>
+                        <td *ngIf="g.goal" [ngClass]="{'goal-no-check': goalCheck(g.goal.key) === 0, 'goal-check':goalCheck(g.goal.key) === 1}">{{g.goal.name}}{{goalFormat(g)}}</td>
                     </tr>            
                 </tbody>
             </table>
-            <table class="table table-bordered table-ce" *ngIf="level.actions">
+            <table class="table table-bordered table-ce" *ngIf="level && level.actions">
                 <thead>
                     <tr>
                         <th>
@@ -79,7 +79,7 @@
                     </tr>            
                 </tbody>
             </table>                
-            <table class="table table-bordered table-ce" *ngIf="level.learnings">
+            <table class="table table-bordered table-ce" *ngIf="level && level.learnings">
                 <thead>
                     <tr>
                         <th>

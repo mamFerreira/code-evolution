@@ -32,7 +32,7 @@ function addLevel (req, res){
     
     if (level.order && level.name && level.time && level.evolutionID){
         //Comprobamos si existe nivel con mismo orden
-        Level.findOne({order:level.order},(err,level_db) => {
+        Level.findOne({order:level.order, evolutionID: level.evolutionID},(err,level_db) => {
             if(err){                
                 res.status(500).send({message:'Error en el servidor', messageError:err.message});  
             }else{

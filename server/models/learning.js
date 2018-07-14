@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var LearningSchema = new Schema({
-    order: Number,
+    order: String,
     name: String,
     shortName: String,
     description: String,

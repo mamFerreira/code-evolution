@@ -17,7 +17,7 @@ function addLearning (req, res){
     learning.shortName = params.shortName;
     learning.description = params.description;
     learning.example = params.example;
-    
+        
     if (learning.order && learning.name && learning.shortName){
         //Comprobamos si existe aprendizaje con mismo orden
         Learning.findOne({order:learning.order},(err,learning_db) => {

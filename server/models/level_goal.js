@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema; 
 
 var LevelGoalShema = new Schema({        
-    value_1: Number,
+    value_1: String,
     value_2: Number,
     levelID: {type: Schema.ObjectId, ref: 'Level'},
     goalID: {type: Schema.ObjectId, ref: 'Goal'}

@@ -1,17 +1,8 @@
-// Importamos movelos
-import { User } from '../models/user.model';
-import { Evolution } from '../models/evolution.model';
 import { Level } from '../models/level.model';
-import { LevelGoal } from '../models/level_goal.model';
-import { LevelAction } from '../models/level_action.model';
-
-// Importamos servicios
-import { UserService } from '../services/user.service';
-import { LevelService } from '../services/level.service';
-
-// Importamos clases
 import { Checker} from './checker.class';
+import { ActionEnum } from '../enum/action.enum';
 import { StateEnum } from '../enum/state.enum';
+import { GoalEnum } from '../enum/goal.enum';
 import { GLOBAL } from './../enum/global.enum';
 import { Food } from './food.class';
 
@@ -23,19 +14,15 @@ export class Canvas {
     private phaser;    
     private checker: Checker;
     private worker: Worker;     
-
+    private _idIntervalM; 
+    private _idIntervalB;       
     private soundLU;  
     private soundGO; 
       
     public console: string;    
     public messageGO: string;
     public path: string;
-               
 
-    // Variables intervalos
-    private _idIntervalM; 
-    private _idIntervalB;           
-                             
     constructor ( level: Level) {
         // Variables para el intercambio de información        
         this.console = '';
@@ -50,7 +37,7 @@ export class Canvas {
         }); 
 
         this.loadAudio();
-        // this.loadWorker();        
+        this.loadWorker();        
         
     }
 
@@ -58,23 +45,64 @@ export class Canvas {
         return this.phaser != null ? this.phaser.state : StateEnum.READY;
     }
 
-    goalCheck(key): number {
+    goalCheck(key: string): number {
+        return this.phaser.configure != null ? this.phaser.configure.goals[GoalEnum[key]].overcome : -1;                       
+    }    
 
-        let resultado = 0;
-
-        switch (key) {
-            case 'POSITION': {                
-                resultado = 1;
+    doAction (action: ActionEnum, code: string = null) {         
+        switch (action) { 
+            case ActionEnum.RELOAD:  
+                this.phaser.reload();    
+                this.finish();                    
+                this.console = '';  
+                this.messageGO = '';                               
                 break;
-            }                                
+            case ActionEnum.PLAY:                
+                this.checkGoals(code);
+                this.phaser.state = StateEnum.RUNNING;                                
+                this.addConsole('Play...');
+                this.postMessage('execute', code);
+                this._idIntervalM = setInterval(() => {                                        
+                    if (this.phaser.stateGame === StateEnum.LEVELUP) { 
+                        this.soundLU.play();                                                                 
+                        this.finish();                        
+                    } else if (this.phaser.stateGame === StateEnum.GAMEOVER) {                        
+                        this.soundLU.play();                     
+                        this.addConsole('Error: ' + this.phaser.msgError, true);                        
+                        this.finish();
+                    }                                                            
+                }, 50);                                                    
+                break;                
+            case ActionEnum.PAUSE:                                                
+                this.addConsole('Pause');
+                this.phaser.stateGame = StateEnum.PAUSED;
+                break;
+            case ActionEnum.CONTINUE:                
+                this.addConsole('Continue');
+                this.phaser.stateGame = StateEnum.RUNNING;
+                break;
+            case ActionEnum.STOP:      
+                this.soundGO.play();                    
+                this.addConsole('Stop: Corrija y recarga para volver a intentarlo');                    
+                this.phaser.stateGame = StateEnum.GAMEOVER;
+                this.finish();
+                break;
+            case ActionEnum.VOLUMEN_ON:                
+                this.phaser.changeVolume();
+                this.soundLU.volume = 0.2;        
+                this.soundGO.volume = 0.2;             
+                break;
+            case ActionEnum.VOLUMEN_OFF:                
+                this.phaser.changeVolume();
+                this.soundLU.volume = 0;        
+                this.soundGO.volume = 0;             
+                break;
         }
-        return resultado;
-    }
+    }    
 
+    //#region PRIVADOS
 
-     // Métodos de carga
-
-    loadAudio() {
+    private loadAudio() {
         this.soundLU = new Audio(this.path + GLOBAL.PATH_AUDIO + 'level-up.mp3');            
         this.soundGO = new Audio(this.path + GLOBAL.PATH_AUDIO + 'game-over.mp3');
         this.soundLU.volume = 0.2;        
@@ -82,6 +110,60 @@ export class Canvas {
         this.soundLU.load();        
         this.soundGO.load();        
     }
+
+    private addConsole (msg, error = false) {
+        this.console += '<br>$ ' + msg;
+
+        if (error) {
+            this.messageGO = msg;
+        }
+
+    }
+
+    private error(msg) {
+        if (this.phaser.state !== StateEnum.GAMEOVER){
+            this.phaser.state = StateEnum.GAMEOVER;
+        } 
+
+        this.addConsole('Error:' + msg, true);                                     
+    }
+
+    private finish () {
+        this.postMessage('finish', true);        
+        clearInterval(this._idIntervalB);
+        clearInterval(this._idIntervalM);
+    }
+
+    private checkGoals(code: string = '') {
+                                      
+        if (this.phaser.configure.goals[GoalEnum.NO_OPERATOR].active) {
+            if (code.indexOf(this.phaser.configure.goals[GoalEnum.NO_OPERATOR].value_1) >=  0) {
+                this.phaser.configure.goals[GoalEnum.NO_OPERATOR].overcome = 0;                
+            } else {
+                this.phaser.configure.goals[GoalEnum.NO_OPERATOR].overcome = 1;                
+            }
+        }
+
+        if (this.phaser.configure.goals[GoalEnum.OPERATOR].active) {            
+            if (code.indexOf(this.phaser.configure.goals[GoalEnum.OPERATOR].value_1) < 0) {
+                this.phaser.configure.goals[GoalEnum.OPERATOR].overcome = 0;                
+            } else {
+                this.phaser.configure.goals[GoalEnum.OPERATOR].overcome = 1;                
+            }
+        }        
+
+        if (this.phaser.configure.goals[GoalEnum.LINES].active) {
+            if (code.split('\n').length > +this.phaser.configure.goals[GoalEnum.LINES].value_1) {
+                this.phaser.configure.goals[GoalEnum.LINES].overcome = 0;                
+            } else {
+                this.phaser.configure.goals[GoalEnum.LINES].overcome = 1;                
+            }
+        }            
+    }
+
+    //#endregion PRIVADOS
+        
+    //#region WORKER
 
     loadWorker () {
 
@@ -93,16 +175,13 @@ export class Canvas {
             actionJson.push({'method' : action.shortName} );  
             
             if (index === this.level.actions.length - 1) {
-                this.postMessage('initValue', actionJson);
+                this.postMessage('init', actionJson);
             }
             
         });                
                 
         this.addEventListener(); 
     }
-    
-
-    // Métodos comunicación worker
 
     postMessage(action, value) {
         this.worker.postMessage({'action': action, 'value': [value]});
@@ -110,23 +189,77 @@ export class Canvas {
 
     addEventListener() {
         this.worker.addEventListener('message', (e) => {            
-
-            switch (e.data.type) {            
-                case 'primary':
-                    this.addEventListeningPrimary(e.data.action, e.data.value);
+            
+            // Tipo de acciones: Básicas, movimiento, objetos, comunicación
+            switch (e.data.action) {
+                case 'moverArriba':
+                    this.phaser.moveDirection('U');
                     break;
-                case 'position':
-                    this.addEventLisneningPosition(e.data.action, e.data.value);
+                case 'moverAbajo':
+                    this.phaser.moveDirection('D');
                     break;
-                case 'food':
-                    this.addEventListeningFood(e.data.action, e.data.value);
-                    break;                                                                                                                                       
+                case 'moverIzquierda':
+                    this.phaser.moveDirection('L');
+                    break;
+                case 'moverDerecha':
+                    this.phaser.moveDirection('R');
+                    break;
+                case 'mover':                
+                    this.move(e.data.value);
+                    break;
+                case 'x':
+                    this.postMessage('loadValue', 10);             
+                    break;                    
+                case 'y':
+                    this.postMessage('loadValue', 20);             
+                    break;                     
+                case 'buscarComida':
+                    this.postMessage('loadValue', this.phaser.findNearestFood());             
+                    break;                               
+                case 'comer':
+                    this.eat(e.data.value);
+                    break;
+                case 'buscarObjeto':
+                    this.postMessage('loadValue', this.phaser.findNearestFood());             
+                    break;                    
+                case 'coger':
+                    // Igual que comer
+                    break;
+                case 'tirar':
+                    // Igual que comer
+                    break;                    
+                case 'almacenar':     
+                    // Igual que buscar comida               
+                    break;
+                case 'alimentar':
+                    // Igual que tirar alimento
+                    break;
+                case 'preguntar':
+                    this.postMessage('loadValue', e.data.action);  
+                    break;
+                case 'ver':
+                    this.postMessage('loadValue', e.data.action);  
+                    break;
+                case 'escuchar':
+                    this.postMessage('loadValue', e.data.action);  
+                    break;
+                case 'hablar':
+                    this.addConsole(e.data.value[0]);
+                    break;
+                case 'print':
+                    this.addConsole(e.data.value[0]);
+                    break;
+                case 'printArray':
+                    this.printArray(e.data.value);
+                    break;
                 case 'finish':
-                    this.registerError('Ejecución finalizada sin contemplar los objetivos');
+                    this.error('Ejecución finalizada sin contemplar los objetivos');
                     break;
                 case 'error':
-                    this.registerError(e.data.value);
-                    break;                
+                    this.error(e.data.value);
+                    break;
+                default:
+                    this.error ('Acción ' + e.data.action + ' no definida');
             }
 
             if (this.phaser.wait) {
@@ -141,204 +274,47 @@ export class Canvas {
         }, false); 
     }
 
-    addEventListeningPrimary(action, value) {
-        switch (action) {
-            case 'print':
-                this.addCodeShell(value[0]);
-                break;
-            case 'printArray':
-                let index = 0;
-                let v = '(';
-                while (value[0][index]) {
-                    v += value[0][index];
-                    index += 1;
-                    if (value[0][index]) {
-                        v += ', ';
-                    }
-                } 
-                v +=  ')';   
-                this.addCodeShell(v);
-                break;
-            default:
-                this.registerError ('Acción primaria ' + action + ' no definida');
-        }
-    }
-
-    addEventLisneningPosition(action, value) {
-        switch (action) {
-            case 'position':
-                this.postMessage('loadValue', this.phaser.position());
-                break;  
-            case 'move':
-                if (! this.checker.checkArray(value, 2)) {
-                    this.registerError('No ha pasado las coordenadas x e y a la acción "move"');
-                    return;
-                }          
-                
-                if (! this.checker.checkIntPos(value[0]) || !this.checker.checkIntPos(value[1])) {
-                    this.registerError('Los valores de la acción "move" no son enteros positivos');
-                    return;
-                }
-                this.phaser.move (value[0], value[1]);                                        
-                break;
-            case 'moveUp': 
-                this.phaser.moveDirection('U');                                                       
-                break;
-            case 'moveDown':
-                this.phaser.moveDirection('D');
-                break;            
-            case 'moveLeft':
-                this.phaser.moveDirection('L');                                                        
-                break;
-            case 'moveRight':
-                this.phaser.moveDirection('R');                                                        
-                break;
-            default:
-                this.registerError ('Acción de movimiento ' + action + ' no definida');
-        }
-    }
-
-    addEventListeningFood(action, value) {
-
-        let food;
-
-        switch (action) {
-            case 'food':                     
-                this.postMessage('loadValue', this.phaser.foodCurrent);
-                break;
-            case 'existsFood':
-                this.postMessage('loadValue', this.phaser.existsFood());     
-                break;
-            case 'findNearestFood': 
-                this.postMessage('loadValue', this.phaser.findNearestFood());             
-                break;  
-            case 'eat':  
-            
-                if (! this.checker.checkArray(value, 1)) {
-                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
-                    return;
-                }
-            
-                if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
-                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
-                    return;
-                }   
-
-                food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);                
-                this.phaser.eat(food);
-                break;
-            case 'discardFood':
-                if (! this.checker.checkArray(value, 1)) {
-                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
-                    return;
-                }
-            
-                if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
-                    this.registerError('Acción eat: No ha pasado un objeto de tipo alimento');
-                    return;
-                }   
-
-                food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);
-
-                this.phaser.discardFood(food);
-                break;
-            default:
-                this.registerError ('Acción de alimento ' + action + ' no definida');
-        }
-    }    
-
-    // Métodos principales
-
-    /* doAction (action: GameAction, code: string = null) {
-        switch (action) { 
-            case GameAction.Reload:                
-                this._state.reload();    
-                this.finish();                    
-                this._codeShell = '';  
-                this._msgError = '';                               
-                break;
-            case GameAction.Play:
-                this._state.stateGame = GameState.Run;                                
-                this.addCodeShell('Play...');
-                this.postMessage('execute', code);
-                
-                this._idIntervalM = setInterval(() => {                                        
-                    if (this._state.stateGame === GameState.LevelUp) { 
-                        this._soundLU.play();
-                        //this.nextLevel();                                                   
-                        this.finish();                        
-                    } else if (this._state.stateGame === GameState.GameOver) {                        
-                        this._soundGO.play();                     
-                        this.addCodeShell('Error: ' + this._state.msgError, true);                        
-                        this.finish();
-                    }                                                            
-                }, 50);                
-                break;                
-            case GameAction.Pause:                                                
-                this.addCodeShell('Pause');
-                this._state.stateGame = GameState.Pause;
-                break;
-            case GameAction.Continue:                
-                this.addCodeShell('Continue');
-                this._state.stateGame = GameState.Run;
-                break;
-            case GameAction.Stop:      
-                this._soundGO.play();                    
-                this.addCodeShell('Stop: Corrija y recarga para volver a intentarlo');                    
-                this._state.stateGame = GameState.GameOver;
-                this.finish();
-                break;
-            case GameAction.ChangeVolume:                
-                this._state.changeVolume();
-
-                if (this._state.volume) {
-                    this._soundLU.volume = 0.2;        
-                    this._soundGO.volume = 0.2; 
-                } else {
-                    this._soundLU.volume = 0;        
-                    this._soundGO.volume = 0; 
-                }
-
-                break;
-        }
-    } */ 
-
-    /*nextLevel() {
-        this._levelService.getLevels(this._level._id).subscribe(
-            res => {
-                if (res.level) {                                                                         
-                    if (this._level._id === this._identity.level._id) {                                                     
-                        this._identity.level = res.level;                                           
-                        localStorage.setItem('identity', JSON.stringify(this._identity)); 
-                    }
-                }                 
-            },
-            err => {
-                this._msgError = err.message;
+    private printArray(value) { 
+        let index = 0;
+        let v = '(';
+        while (value[0][index]) {
+            v += value[0][index];
+            index += 1;
+            if (value[0][index]) {
+                v += ', ';
             }
-        );                
-    }*/
+        } 
+        v +=  ')';   
+        this.addConsole(v);
+    }
 
-    // Métodos auxiliares    
+    private move(value) {
+        if (! this.checker.checkArray(value, 2)) {
+            this.error('No ha pasado las coordenadas x e y a la acción "move"');
+            return;
+        }          
 
-    addCodeShell (msg, error = false) {
-        this.console += '<br>$ ' + msg;
-
-        if (error) {
-            this.messageGO = msg;
+        if (! this.checker.checkIntPos(value[0]) || !this.checker.checkIntPos(value[1])) {
+            this.error('Los valores de la acción "move" no son enteros positivos');
+            return;
         }
-
+        this.phaser.move (value[0], value[1]); 
     }
 
-    registerError(msg) {
-        this.addCodeShell('Error:' + msg, true);                
-        // this.doAction(GameAction.STOPPED);
+    private eat(value) {
+        if (! this.checker.checkArray(value, 1)) {
+            this.error('Acción eat: No ha pasado un objeto de tipo alimento');
+            return;
+        }
+    
+        if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
+            this.error('Acción eat: No ha pasado un objeto de tipo alimento');
+            return;
+        }   
+
+        let food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);                
+        this.phaser.eat(food);        
     }
 
-    finish () {
-        this.postMessage('finish', true);        
-        clearInterval(this._idIntervalB);
-        clearInterval(this._idIntervalM);
-    }
-
+    //#endregion WORKER
 }

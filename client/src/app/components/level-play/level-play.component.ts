@@ -21,7 +21,7 @@ import { GameService } from '../../services/game.service';
 @Component({
   selector: 'app-level-play',
   templateUrl: './level-play.component.html',
-  styleUrls: ['./level-play.component.css']
+  styleUrls: ['./level-play.component.css'],
 })
 
 export class LevelPlayComponent implements OnInit {
@@ -43,8 +43,8 @@ export class LevelPlayComponent implements OnInit {
     private _goalService: GoalService,        
     private _gameService: GameService,
     private _route: ActivatedRoute,
-    private _router: Router
-  ) {
+    private _router: Router,    
+  ) {    
     this.title = 'Jugar Nivel';  
     this.identity = this._userService.getIdentity();
     this.code = '';     
@@ -216,12 +216,12 @@ export class LevelPlayComponent implements OnInit {
     return resultado;
   }
 
-  goalCheck (goal: LevelGoal): number {
-    return this.canvas != null ? this.canvas.goalCheck(goal.goal.key) : 0;
+  goalCheck (key: string): number {
+    return this.canvas != null ? this.canvas.goalCheck(key) : -1;
   }
 
   executeAction (action: ActionEnum) {
-
+    
     // Registramos el código si play y no esta pausado
     if (action === ActionEnum.PLAY && this.canvas.state !== StateEnum.PAUSED) {
         let game = new Game('', this.code, false, this.identity._id, this.level._id);
@@ -231,16 +231,16 @@ export class LevelPlayComponent implements OnInit {
             if (!res.game) {
               this._alertService.error(res.message); 
             } else {
-              // Llamamos a la acción del canvas pasandole el código con la ejecución
+              this.canvas.doAction(action, this.code);
             }
           },
           err => {
             this._alertService.error(err.error.message);      
           }
         );
-
+    } else {
+      this.canvas.doAction(action);
     }
-
     // Lanzamos la acción en el canvas
   }
 
@@ -299,7 +299,7 @@ export class LevelPlayComponent implements OnInit {
                             resG => {
                               if (!resG.game) {
                                 this._alertService.error(resG.message); 
-                              } else if (next){
+                              } else if (next) {
                                 this._router.navigate(['/jugar']);   
                               }
                             },

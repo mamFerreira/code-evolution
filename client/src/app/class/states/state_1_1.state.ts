@@ -9,18 +9,15 @@ export class State extends MainState {
 
     constructor(health: number, time: number, goals: Array<LevelGoal>) {
 
-        let c = new Configure();  
+        let c = new Configure(goals);  
 
         c.timeMax = time;
-        c.healthMax = health;
-        c.goals = goals;
-
+        c.healthMax = health;        
         c.fileMap = 'map1_1.json';
         c.filePlayer = 'player_1.png';
         c.fileTiledSet = 'tiledset_1.png';
-
         c.positionPlayer = new Position (25, 25);
-        c.sizePlayer = new Size (32, 32);
+        c.sizePlayer = new Size (32, 32);        
 
         c.addPosition(25, 25);
         c.addPosition(150, 30);
@@ -33,6 +30,11 @@ export class State extends MainState {
         c.addPosition(400, 330);
 
         super(c);
+    }
+
+
+    reload(){
+        super.reload();
     }
     
 }

@@ -4,9 +4,6 @@ import {Observable} from 'rxjs/Observable';
 
 import { Level } from '../models/level.model';
 import { LevelGoal } from '../models/level_goal.model';
-import { LevelLearning } from '../models/level_learning.model';
-import { LevelAction } from '../models/level_action.model';
-
 import { UserService } from './user.service';
 import { GLOBAL } from './../enum/global.enum';
 

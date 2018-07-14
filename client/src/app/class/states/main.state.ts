@@ -5,9 +5,9 @@ import * as Phaser from 'phaser-ce/build/custom/phaser-split';
 import { Configure } from '../configure.class';
 import { Position } from '../position.class';
 import { Food } from '../food.class';
-
 import { GLOBAL } from '../../enum/global.enum';
 import { StateEnum } from '../../enum/state.enum';
+import { GoalEnum } from '../../enum/goal.enum';
 
 
 export class MainState extends Phaser.State {
@@ -27,17 +27,7 @@ export class MainState extends Phaser.State {
     // Variables para intercambio de información con canvas.class.ts
     private _state: StateEnum;
     public wait: boolean; 
-    public messageGO: string;  
-    // Variables objetivo    
-    public index: number;        
-    public posGoal: Position;    
-    public indexPos: number;
-    public coinGoal: number;
-    public indexCoin: number;    
-    public foodGoal: number;
-    public foodAll: boolean;
-    public indexFood: number;
-    public indexFoodAll: number;
+    public messageGO: string;      
     // Variables objetivos temporales
     public posGoalTmp: Position;
     // Variables grupos de objetos    
@@ -49,11 +39,9 @@ export class MainState extends Phaser.State {
     // Variables canvas: health
     public healthCurrent: number;
     public healthBar: Phaser.Sprite;        
-    // Variables canvas: coin
-    public coinCurrent: number;
+    // Variables canvas: coin    
     public coinText: Phaser.Text;    
-    // Variables canvas: food
-    public foodCurrent: number;
+    // Variables canvas: food    
     public foodText: Phaser.Text;  
     // Variables canvas: tiempo
     public timeCurrent: number;
@@ -65,11 +53,10 @@ export class MainState extends Phaser.State {
 
         this.configure = configure;
         this.volumeON = Configure.volumenDefault;
-        this.state = StateEnum.UNDEFINED;
-        
-        this.game = new Phaser.Game(576, 480, Phaser.CANVAS, GLOBAL.CANVAS_ID);
+        this.state = StateEnum.UNDEFINED;                                
+        this.game = new Phaser.Game(576, 480, Phaser.CANVAS, GLOBAL.CANVAS_ID);        
         this.game.state.add(Configure.nameState, this);
-        this.game.state.start(Configure.nameState);                                    
+        this.game.state.start(Configure.nameState);              
     }
     
     set state (s: StateEnum) {
@@ -83,7 +70,7 @@ export class MainState extends Phaser.State {
                 this.messageGO = '';               
                 break;
             case StateEnum.RUNNING:
-                this.game.paused = false; 
+                this.game.paused = false;                 
                 this.soundMain.play();               
                 break;        
             case StateEnum.PAUSED:
@@ -114,7 +101,7 @@ export class MainState extends Phaser.State {
     // Funciones básicas Phaser.State
 
     reload() {
-        // Estado del juego
+        // Estado del juego        
         this.state = StateEnum.READY;
 
         // Jugador
@@ -134,11 +121,9 @@ export class MainState extends Phaser.State {
 
         // Marcadores
         this.healthCurrent = this.configure.healthMax;
-        this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;        
-        this.coinCurrent = 0; 
-        this.coinText.text = this.coinCurrent;        
-        this.foodCurrent = 0; 
-        this.foodText.text = this.foodCurrent;
+        this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;                
+        this.coinText.text = 0;       
+        this.foodText.text = 0;
         this.timeCurrent = this.configure.timeMax;
         this.timeText.text = this.timeCurrent;                            
     }
@@ -168,7 +153,7 @@ export class MainState extends Phaser.State {
             this.game.load.image('pos', GLOBAL.PATH_RESOURCE + 'object/position.png');
         }            
         // Carga posición objetivo
-        if (this.posGoal) {
+        if (this.configure.goals[GoalEnum.POSITION].active) {
             this.game.load.image('pos_obj', GLOBAL.PATH_RESOURCE + 'object/positionGoal.png');
         }
     }
@@ -239,8 +224,8 @@ export class MainState extends Phaser.State {
         }
                 
         // Posición objetivo
-        if (this.posGoal) {
-            let s = this.game.add.sprite(this.posGoal.x - (Configure.sizeSprite.width / 2), this.posGoal.y - (Configure.sizeSprite.height / 2), 'pos_obj');
+        if (this.configure.goals[GoalEnum.POSITION].active) {
+            let s = this.game.add.sprite(+this.configure.goals[GoalEnum.POSITION].value_1 - (Configure.sizeSprite.width / 2), this.configure.goals[GoalEnum.POSITION].value_2 - (Configure.sizeSprite.height / 2), 'pos_obj');
             s.width = Configure.sizeSprite.width ;
             s.height = Configure.sizeSprite.height ;
         }   
@@ -279,9 +264,7 @@ export class MainState extends Phaser.State {
         }  
 
         // Comprobar objetivos finales
-        /*if (this.checkGoals()) {
-            this.stateGame = StateEnum.LEVELUP;   
-        }*/       
+        this.checkGoals();        
     }
 
     // Eventos
@@ -373,55 +356,69 @@ export class MainState extends Phaser.State {
 
     // Checked
 
-    /*checkGoals() {
-        let checked = true;
+    private checkGoals() {
 
         // Posición objetivo
-        if (this.posGoal) {
-            if (!this._goals[this._indexPos][1]) {
-                let p_aux = this.positionPlayer();
-                if (!this._posGoal.inRange(p_aux.x, p_aux.y, 5)) {
-                    checked = false;
-                } else {
-                    this._goals[this._indexPos][1] = true;                    
-                }
-            }            
+        if (this.configure.goals[GoalEnum.POSITION].active) {
+            if (this.positionPlayer().inRange(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2, 5)) {
+                this.configure.goals[GoalEnum.POSITION].overcome = 1;
+            }         
         }
 
-        // Alimentos recorridos
-        if (this._foodGoal) {
-            if (!this._goals[this._indexFood][1]) {
-                if (this._foodGoal > this._foodCurrent) {
-                    checked = false;
-                } else {
-                    this._goals[this._indexFood][1] = true;
-                }
+        // Alimentos
+        if (this.configure.goals[GoalEnum.FOOD].active) {
+            if (this.configure.goals[GoalEnum.FOOD].current >= +this.configure.goals[GoalEnum.FOOD].value_1) {
+                this.configure.goals[GoalEnum.FOOD].overcome = 1;
+            }         
+        }
+
+        // Alimentos
+        if (this.configure.goals[GoalEnum.OBJECT].active) {
+            if (this.configure.goals[GoalEnum.OBJECT].current >= +this.configure.goals[GoalEnum.OBJECT].value_1) {
+                this.configure.goals[GoalEnum.OBJECT].overcome = 1;
+            }         
+        }
+
+        // Alimentos
+        if (this.configure.goals[GoalEnum.BABY].active) {
+            if (this.configure.goals[GoalEnum.BABY].current >= +this.configure.goals[GoalEnum.BABY].value_1) {
+                this.configure.goals[GoalEnum.BABY].overcome = 1;
+            }         
+        }
+
+        // Comprobamos si alguno de los objetivos no se ha conseguido     
+        let overcome = 1;                
+        this.configure.goals.forEach((element, index, arr) => {     
+            // Exite objetivo no cumplido
+            if (element.active && element.overcome === 0) {
+                this.state = StateEnum.GAMEOVER;
+                overcome = 0;
             }
-        }
 
-        // Todos los alimentos recogidos
-        if (this._foodAll) {
-            if (!this._goals[this._indexFoodAll][1]) {
-                if (this._groupFood.length > 0) {
-                    checked = false;
-                } else {
-                    this._goals[this._indexFoodAll][1] = true;
-                }
-            }
-        }
+            // Exite objetivo no completado
+            if (element.active && element.overcome === -1) {                
+                overcome = -1;
+            }                                                                         
 
-        return checked;
-    }*/
+            if (arr.length - 1 === index && overcome === 1) {
+                this.state = StateEnum.LEVELUP;
+            }                                                    
+        });  
+        
+
+
+    }
     
     checkPosition(direction): Position {
         let posPlayer = this.positionPlayer();                
         let posNext = new Position (0, 0, false);
-        let positions_tmp = Object.assign([], this.configure.positionsChecked);
-        let range = 5;
-        
-        if (this.posGoal) {
-            positions_tmp.push(this.posGoal);
-        }          
+        let positions_tmp = Object.assign([], this.configure.positionsChecked);        
+        let range = 10;
+
+        if (this.configure.goals[GoalEnum.POSITION].active) {
+            positions_tmp.push(new Position(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2));
+        }        
+              
         positions_tmp.forEach(p => {
             if (!p.inRange(posPlayer.x, posPlayer.y, range)) {                 
                 switch (direction) {
@@ -435,8 +432,8 @@ export class MainState extends Phaser.State {
                             posNext.assign(p);
                         }
                         break;
-                    case 'R':                             
-                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {
+                    case 'R':                                                                       
+                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {                                                      
                             posNext.assign(p);
                         }
                         break;
@@ -505,10 +502,9 @@ export class MainState extends Phaser.State {
         return p;
     }
 
-    moveDirection(direction: string) {
+    moveDirection(direction: string) {  
         
-        this.posGoalTmp = this.checkPosition(direction);
-        
+        this.posGoalTmp = this.checkPosition(direction);        
         if (this.posGoalTmp.active) {
             switch (direction) {
                 case 'D':                                    
@@ -517,7 +513,7 @@ export class MainState extends Phaser.State {
                 case 'U':                    
                     this.player.play('up');
                     break;
-                case 'R':                    
+                case 'R':                  
                     this.player.play('right');
                     break;  
                 case 'L':                    
@@ -543,7 +539,7 @@ export class MainState extends Phaser.State {
                     break;
             }
             this.eventGameOver ('No existe posición para ' + action);                    
-        }        
+        } 
     } 
 
     move (x: number, y: number) {
@@ -604,8 +600,8 @@ export class MainState extends Phaser.State {
                     this.groupFood.remove(aux);                        
 
                     if (!poisonous) {
-                        this.foodCurrent ++;        
-                        this.foodText.text = this.foodCurrent;                        
+                        this.configure.goals[GoalEnum.FOOD].current ++;        
+                        this.foodText.text = this.configure.goals[GoalEnum.FOOD].current.toString;                        
                     } else {
                         this.eventAttacked(this.healthCurrent);
                     }
