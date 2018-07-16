@@ -14,7 +14,4 @@ server/node_modules
 client/e2e/*.js
 client/e2e/*.map
 
-# uploads
-server/uploads/users
-
 .vscode
