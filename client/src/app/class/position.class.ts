@@ -1,4 +1,7 @@
 export class Position {
+
+    static range = 10;
+
     private _x: number;
     private _y: number;
     private _active: boolean;    
@@ -30,23 +33,22 @@ export class Position {
         this._active = value;
     }
 
-    inRange (x: number, y: number, range: number, coord: string = 'xy'): boolean {
-
+    inRange (x: number, y: number, coord: string = 'xy'): boolean {         
         let result = true;
 
         switch (coord) {
             case 'x':            
-                if ( x >= this._x + range || x <= this._x - range) {
+                if ( x >= this._x + Position.range || x <= this._x - Position.range) {
                     result = false;
                 }
                 break;
             case 'y':            
-                if ( y >= this._y + range || y <= this._y - range) {
+                if ( y >= this._y + Position.range || y <= this._y - Position.range) {
                     result = false;
                 }
                 break;                
             case 'xy':
-                if ( x >= this._x + range || x <= this._x - range || y >= this._y + range || y <= this._y - range) {
+                if ( x >= this._x + Position.range || x <= this._x - Position.range || y >= this._y + Position.range || y <= this._y - Position.range) {
                     result = false;
                 }
                 break;

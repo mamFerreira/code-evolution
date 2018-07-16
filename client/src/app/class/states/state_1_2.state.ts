@@ -14,21 +14,20 @@ export class State extends MainState {
         c.markedPosition = true;
         c.timeMax = time;
         c.healthMax = health;        
-        c.fileMap = 'map1_1.json';
+        c.fileMap = 'map1_2.json';
         c.filePlayer = 'player_1.png';
         c.fileTiledSet = 'tiledset_1.png';
-        c.positionInit = new Position (25, 25);
+        c.positionInit = new Position (220, 80);
         c.sizePlayer = new Size (32, 32);        
 
-        c.addPosition(25, 25);
-        c.addPosition(150, 30);
-        c.addPosition(290, 30);
-        c.addPosition(290, 130);
-        c.addPosition(150, 130);
-        c.addPosition(150, 230);
-        c.addPosition(150, 330);
-        c.addPosition(290, 330);
-        c.addPosition(400, 330);                
+        c.addPosition(220, 25);
+        c.addPosition(380, 25);
+        c.addPosition(380, 130);
+        c.addPosition(380, 230);
+        c.addPosition(220, 230);
+        c.addPosition(220, 330);
+        c.addPosition(50, 330);
+        c.addPosition(50, 230);                       
 
         super(c);
     }

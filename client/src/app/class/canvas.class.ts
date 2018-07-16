@@ -52,22 +52,22 @@ export class Canvas {
     doAction (action: ActionEnum, code: string = null) {         
         switch (action) { 
             case ActionEnum.RELOAD:  
-                this.phaser.reload();    
+                this.phaser.reload();                    
                 this.finish();                    
                 this.console = '';  
-                this.messageGO = '';                               
+                this.messageGO = '';                                
                 break;
-            case ActionEnum.PLAY:                
-                this.checkGoals(code);
-                this.phaser.state = StateEnum.RUNNING;                                
+            case ActionEnum.PLAY:                  
+                this.checkGoals(code);                                                
                 this.addConsole('Play...');
                 this.postMessage('execute', code);
+                this.phaser.state = StateEnum.RUNNING;
                 this._idIntervalM = setInterval(() => {                                        
-                    if (this.phaser.stateGame === StateEnum.LEVELUP) { 
+                    if (this.phaser.state === StateEnum.LEVELUP) { 
                         this.soundLU.play();                                                                 
                         this.finish();                        
-                    } else if (this.phaser.stateGame === StateEnum.GAMEOVER) {                        
-                        this.soundLU.play();                     
+                    } else if (this.phaser.state === StateEnum.GAMEOVER) {                                                
+                        this.soundGO.play();                     
                         this.addConsole('Error: ' + this.phaser.msgError, true);                        
                         this.finish();
                     }                                                            
@@ -75,16 +75,15 @@ export class Canvas {
                 break;                
             case ActionEnum.PAUSE:                                                
                 this.addConsole('Pause');
-                this.phaser.stateGame = StateEnum.PAUSED;
+                this.phaser.state = StateEnum.PAUSED;
                 break;
-            case ActionEnum.CONTINUE:                
+            case ActionEnum.CONTINUE:                         
                 this.addConsole('Continue');
-                this.phaser.stateGame = StateEnum.RUNNING;
+                this.phaser.state = StateEnum.RUNNING;
                 break;
             case ActionEnum.STOP:      
-                this.soundGO.play();                    
-                this.addConsole('Stop: Corrija y recarga para volver a intentarlo');                    
-                this.phaser.stateGame = StateEnum.GAMEOVER;
+                this.soundGO.play();                                    
+                this.phaser.state = StateEnum.GAMEOVER;
                 this.finish();
                 break;
             case ActionEnum.VOLUMEN_ON:                
@@ -208,10 +207,10 @@ export class Canvas {
                     this.move(e.data.value);
                     break;
                 case 'x':
-                    this.postMessage('loadValue', 10);             
+                    this.postMessage('loadValue', this.phaser.position.x);             
                     break;                    
                 case 'y':
-                    this.postMessage('loadValue', 20);             
+                    this.postMessage('loadValue', this.phaser.position.y);             
                     break;                     
                 case 'buscarComida':
                     this.postMessage('loadValue', this.phaser.findNearestFood());             

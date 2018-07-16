@@ -12,7 +12,8 @@ import { GoalEnum } from '../../enum/goal.enum';
 
 export class MainState extends Phaser.State {
     
-    // Variables principales     
+    // Variables principales  
+    private _state: StateEnum;   
     public configure: Configure;
     public game: Phaser.Game;
     public player: Phaser.Sprite; 
@@ -20,37 +21,31 @@ export class MainState extends Phaser.State {
     public layerBackground: Phaser.TilemapLayer;
     public layerObject: Phaser.TilemapLayer;
     public layerCollision: Phaser.TilemapLayer;
+    public groupFood: Phaser.Group;
+    public groupObject: Phaser.Group;        
+    public groupBaby: Phaser.Group;
     // Variables sonido
     public soundMain: Phaser.Sound;        
     public soundFood: Phaser.Sound;
     public volumeON: boolean;    
-    // Variables para intercambio de información con canvas.class.ts
-    private _state: StateEnum;
+    // Variables para intercambio de información con canvas.class.ts    
     public wait: boolean; 
     public messageGO: string;      
     // Variables objetivos temporales
-    public posGoalTmp: Position;
-    // Variables grupos de objetos    
-    public groupCoin: Phaser.Group;    
-    public groupFood: Phaser.Group;
-    // Variables canvas: posición click    
+    public goalTemp: Position;
+    // Variables canvas    
     public clickImage: Phaser.Image;
-    public clickText: Phaser.Text;
-    // Variables canvas: health
+    public clickText: Phaser.Text;    
     public healthCurrent: number;
-    public healthBar: Phaser.Sprite;        
-    // Variables canvas: coin    
-    public coinText: Phaser.Text;    
-    // Variables canvas: food    
-    public foodText: Phaser.Text;  
-    // Variables canvas: tiempo
+    public healthBar: Phaser.Sprite;            
+    public coinText: Phaser.Text;        
+    public foodText: Phaser.Text;      
     public timeCurrent: number;
     public timeText: Phaser.Text;
     public timeEvent: Phaser.Event;
         
     constructor(configure: Configure) {
-        super();    
-
+        super();
         this.configure = configure;
         this.volumeON = Configure.volumenDefault;
         this.state = StateEnum.UNDEFINED;                                
@@ -60,10 +55,8 @@ export class MainState extends Phaser.State {
     }
     
     set state (s: StateEnum) {
-
-        this._state = s;
-
-        switch (this._state) {
+        
+        switch (s) {
             case StateEnum.READY:                
                 this.game.paused = true; 
                 this.wait = false;                
@@ -83,41 +76,53 @@ export class MainState extends Phaser.State {
                 this.soundMain.stop();
                 this.game.paused = true;                                   
                 break;             
-        }        
+        }      
+        
+        this._state = s;
     }
 
-    get state () {
+    get state (): StateEnum {
         return this._state;
     }
 
-    loadResource (name, path) {
-        this.game.load.image(name, Configure.path, GLOBAL.PATH_RESOURCE + path);
-    }
+    get position (): Position {         
+        
+        let p_x = Math.round(this.player.x) + (this.configure.sizePlayer.width / 2);
+        let p_y = Math.round(this.player.y) + (this.configure.sizePlayer.height / 2);  
+        let p = new Position (p_x, p_y);
 
-    loadGroup () {
-        return this.game.add.physicsGroup();
-    }
+        for (let i = 0; i < this.configure.positionsChecked.length; i++) {
+            if (this.configure.positionsChecked[i].inRange(p_x, p_y)) {                    
+                p.assign(this.configure.positionsChecked[i]);
+            } 
+        }    
+        return p;       
+    }    
 
-    // Funciones básicas Phaser.State
+    //#region MÉTODOS PHASER
 
     reload() {
         // Estado del juego        
         this.state = StateEnum.READY;
 
         // Jugador
-        this.player.x = this.configure.positionPlayer.x - (this.configure.sizePlayer.width / 2);
-        this.player.y = this.configure.positionPlayer.y - (this.configure.sizePlayer.height / 2);
+        this.player.x = this.configure.positionInit.x - (this.configure.sizePlayer.width / 2);
+        this.player.y = this.configure.positionInit.y - (this.configure.sizePlayer.height / 2);
         this.stopPlayer();
         this.game.world.bringToTop(this.player);
         
         // Posiciones
-        this.posGoalTmp = null;
+        this.goalTemp = null;
 
         // Evento tiempo
         this.game.time.events.remove(this.timeEvent);       
         this.timeEvent = this.game.time.events.loop(Phaser.Timer.SECOND, this.eventTime, this);
 
-        // Marcar como ningún objetivo conseguido
+        // Reiniciar objetivos
+        this.configure.goals.forEach(element => {
+            element.overcome = -1;
+            element.current = 0;
+        });
 
         // Marcadores
         this.healthCurrent = this.configure.healthMax;
@@ -196,23 +201,26 @@ export class MainState extends Phaser.State {
         scoreBoard.drawRect(0, Configure.sizeCanvas.height, Configure.sizeScore.width, Configure.sizeScore.height);
         let healthBoard = this.game.add.graphics();
         healthBoard.lineStyle(2, 0x000000, 1);
-        healthBoard.drawRect(100, Configure.sizeCanvas.height + 10, Configure.sizeBar.width + 2, (Configure.sizeBar.height / 2) + 2);                  
-        let bmd = this.game.add.bitmapData(Configure.sizeBar.width, Configure.sizeBar.height / 2);
+        healthBoard.drawRect(80, Configure.sizeCanvas.height + 20, Configure.sizeBar.width + 2, Configure.sizeBar.height + 2);                  
+        let bmd = this.game.add.bitmapData(Configure.sizeBar.width, Configure.sizeBar.height);
         bmd.ctx.beginPath();
         bmd.ctx.rect(0, 0, Configure.sizeBar.width, Configure.sizeBar.height);
         bmd.ctx.fillStyle = '#21610B';
         bmd.ctx.fill();
-        this.healthBar = this.game.add.sprite(101, Configure.sizeCanvas.height + 11, bmd);    
+        this.healthBar = this.game.add.sprite(81, Configure.sizeCanvas.height + 21, bmd);    
         
         // Marcador: coin
-        this.game.add.image(this.game.width / 1.4, Configure.sizeCanvas.height + 2, 'coin');
-        this.coinText = this.game.add.text(this.game.width / 1.28, Configure.sizeCanvas.height + 2, '', Configure.styleScore);
+        this.game.add.image(Configure.sizeCanvas.width * 0.7, Configure.sizeCanvas.height + 5, 'coin');
+        this.coinText = this.game.add.text((Configure.sizeCanvas.width * 0.7) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 5, '', Configure.styleScore);
+        this.coinText.text = this.configure.goals[GoalEnum.OBJECT].current.toString();
         // Marcador: food
-        this.game.add.image(this.game.width / 1.17, Configure.sizeCanvas.height + 2, 'food');
-        this.foodText = this.game.add.text(this.game.width / 1.1, Configure.sizeCanvas.height + 2, '', Configure.styleScore);  
+        this.game.add.image(Configure.sizeCanvas.width * 0.85, Configure.sizeCanvas.height + 5, 'food');
+        this.foodText = this.game.add.text((Configure.sizeCanvas.width * 0.85) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 5, '', Configure.styleScore);  
+        this.foodText.text = this.configure.goals[GoalEnum.FOOD].current.toString();
         // Marcador: time
-        this.game.add.image(this.game.width / 1.16, Configure.sizeCanvas.height + 30, 'time');
-        this.timeText = this.game.add.text(this.game.width / 1.1, Configure.sizeCanvas.height + 30, '', Configure.styleScore); 
+        this.game.add.image(Configure.sizeCanvas.width * 0.71, Configure.sizeCanvas.height + 35, 'time');
+        this.timeText = this.game.add.text((Configure.sizeCanvas.width * 0.71) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 35, '', Configure.styleScore); 
+        this.timeText.text = this.configure.timeMax;
 
         // Posiciones habilitadas
         if (this.configure.positionsChecked) {
@@ -231,7 +239,7 @@ export class MainState extends Phaser.State {
         }   
         
         // Player
-        this.player = this.game.add.sprite(this.configure.positionPlayer.x - (this.configure.sizePlayer.width / 2), this.configure.positionPlayer.y - (this.configure.sizePlayer.height / 2), 'player', 0);           
+        this.player = this.game.add.sprite(this.configure.positionInit.x - (this.configure.sizePlayer.width / 2), this.configure.positionInit.y - (this.configure.sizePlayer.height / 2), 'player', 0);           
         this.player.animations.add('right', [0, 1, 2, 3], 10, true);
         this.player.animations.add('up', [4, 5, 6, 7], 10, true);
         this.player.animations.add('left', [8, 9, 10, 11], 10, true);
@@ -250,262 +258,30 @@ export class MainState extends Phaser.State {
         this.game.physics.arcade.collide(this.layerCollision, this.player, this.eventCollisionBlock, null, this);
 
         // Comprobar objetivo temporal
-        if (this.posGoalTmp) {
-            let dist = this.game.physics.arcade.distanceToXY(this.player, this.posGoalTmp.x - (this.configure.sizePlayer.width / 2) , this.posGoalTmp.y - (this.configure.sizePlayer.height / 2));
+        if (this.goalTemp) {
+            let dist = this.game.physics.arcade.distanceToXY(this.player, this.goalTemp.x - (this.configure.sizePlayer.width / 2) , this.goalTemp.y - (this.configure.sizePlayer.height / 2));
 
             if (Math.round(dist) >= -1 && Math.round(dist) <= 1) {
                 this.stopPlayer();                             
-                delete this.posGoalTmp;
+                delete this.goalTemp;
                 this.wait = false;  
             } else {
-                this.game.physics.arcade.moveToXY(this.player, this.posGoalTmp.x - (this.configure.sizePlayer.width / 2) , this.posGoalTmp.y - (this.configure.sizePlayer.height / 2), Configure.velocity);
+                this.game.physics.arcade.moveToXY(this.player, this.goalTemp.x - (this.configure.sizePlayer.width / 2) , this.goalTemp.y - (this.configure.sizePlayer.height / 2), Configure.velocity);
             }
-
         }  
 
         // Comprobar objetivos finales
         this.checkGoals();        
-    }
-
-    // Eventos
-
-    eventClick() {
-        let posX = parseInt(this.game.input.mousePointer.x, 10);
-        let posY = parseInt(this.game.input.mousePointer.y, 10);    
-        
-        if (posY > Configure.sizeCanvas.height) {
-            return;
-        }
-        let messagge = 'x = ' + posX + '\ny = ' + posY;
-        // Arriba centro por defecto
-        let posText = new Position (posX - 15, posY - 50, true);
-        let posSpeech = new Position (posX - 45, posY - 60, true);
-        let image = 'speech_U_C';              
-        
-        // Abajo centro
-        if (posY < 60 && posX > 40 && posX  < (this.game.width - 40)) {                    
-            posText.y = posY + 25;
-            posSpeech.x = posX - 45;
-            posSpeech.y = posY;
-            image = 'speech_D_C';
-        }
-
-        // Abajo izquierda
-        if (posY < 60 && posX <= 40) {
-            posText.x = posX + 25;
-            posText.y = posY + 25;
-            posSpeech.x = posX - 10;
-            posSpeech.y = posY;
-            image = 'speech_D_R';
-        }
-
-        // Abajo derecha
-        if (posY < 60 && posX  >= (this.game.width - 40)) {
-            posText.x = posX - 50;
-            posText.y = posY + 25;
-            posSpeech.x = posX - 85;
-            posSpeech.y = posY;
-            image = 'speech_D_L';
-        }
-
-        // Arriba izquierda
-        if (posY >= 60 && posX <= 40) {
-            posText.x = posX + 25;                    
-            posSpeech.x = posX - 10;
-            image = 'speech_U_R';
-        }
-
-        // Abajo derecha
-        if (posY >= 60 && posX  >= (this.game.width - 40)) {
-            posText.x = posX - 50;
-            posSpeech.x = posX - 85;                    
-            image = 'speech_U_L';
-        }
-
-        
-        this.clickImage = this.game.add.sprite(posSpeech.x, posSpeech.y , image);
-        this.clickText = this.game.add.text(posText.x, posText.y, messagge, Configure.stylePositionClick);
-    }
-
-    eventTime() {
-        this.timeCurrent --;
-        this.timeText.text = this.timeCurrent;
-        if (this.timeCurrent <= 0) {
-            this.eventGameOver('Fin del tiempo');                         
-        }
-    }
-
-    eventCollisionBlock() {
-        this.eventGameOver('Colisión');        
-    }
-
-    eventAttacked (hurt: number) {
-        this.healthCurrent -= hurt;        
-        if (this.healthCurrent <= 0) {
-            this.healthCurrent = 0;
-            this.eventGameOver('El organismo ha muerto');
-        }
-        this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;
-    }
-
-    eventGameOver (msg: string) {
-        this.game.time.events.remove(this.timeEvent);         
-        this.messageGO = msg;
-        this.state = StateEnum.GAMEOVER;                  
-    }
-
-    // Checked
-
-    private checkGoals() {
-
-        // Posición objetivo
-        if (this.configure.goals[GoalEnum.POSITION].active) {
-            if (this.positionPlayer().inRange(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2, 5)) {
-                this.configure.goals[GoalEnum.POSITION].overcome = 1;
-            }         
-        }
-
-        // Alimentos
-        if (this.configure.goals[GoalEnum.FOOD].active) {
-            if (this.configure.goals[GoalEnum.FOOD].current >= +this.configure.goals[GoalEnum.FOOD].value_1) {
-                this.configure.goals[GoalEnum.FOOD].overcome = 1;
-            }         
-        }
-
-        // Alimentos
-        if (this.configure.goals[GoalEnum.OBJECT].active) {
-            if (this.configure.goals[GoalEnum.OBJECT].current >= +this.configure.goals[GoalEnum.OBJECT].value_1) {
-                this.configure.goals[GoalEnum.OBJECT].overcome = 1;
-            }         
-        }
-
-        // Alimentos
-        if (this.configure.goals[GoalEnum.BABY].active) {
-            if (this.configure.goals[GoalEnum.BABY].current >= +this.configure.goals[GoalEnum.BABY].value_1) {
-                this.configure.goals[GoalEnum.BABY].overcome = 1;
-            }         
-        }
-
-        // Comprobamos si alguno de los objetivos no se ha conseguido     
-        let overcome = 1;                
-        this.configure.goals.forEach((element, index, arr) => {     
-            // Exite objetivo no cumplido
-            if (element.active && element.overcome === 0) {
-                this.state = StateEnum.GAMEOVER;
-                overcome = 0;
-            }
-
-            // Exite objetivo no completado
-            if (element.active && element.overcome === -1) {                
-                overcome = -1;
-            }                                                                         
-
-            if (arr.length - 1 === index && overcome === 1) {
-                this.state = StateEnum.LEVELUP;
-            }                                                    
-        });  
-        
-
-
-    }
-    
-    checkPosition(direction): Position {
-        let posPlayer = this.positionPlayer();                
-        let posNext = new Position (0, 0, false);
-        let positions_tmp = Object.assign([], this.configure.positionsChecked);        
-        let range = 10;
-
-        if (this.configure.goals[GoalEnum.POSITION].active) {
-            positions_tmp.push(new Position(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2));
-        }        
-              
-        positions_tmp.forEach(p => {
-            if (!p.inRange(posPlayer.x, posPlayer.y, range)) {                 
-                switch (direction) {
-                    case 'D':                                                                      
-                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'x') && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
-                            posNext.assign(p);
-                        }
-                        break;
-                    case 'U':                                                
-                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'x') && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
-                            posNext.assign(p);
-                        }
-                        break;
-                    case 'R':                                                                       
-                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {                                                      
-                            posNext.assign(p);
-                        }
-                        break;
-                    case 'L':                        
-                        if (p.inRange(posPlayer.x, posPlayer.y, range, 'y') && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
-                            posNext.assign(p);
-                        }
-                        break;
-                }
-            }
-        });        
-
-        return posNext;        
     }    
     
-    // Funciones auxiliares
-
-    random (min, max) {
-        return this.game.rnd.integerInRange(min, max);   
-    }
-
-    distance (x1, y1, x2, y2) {
-        return  Phaser.Math.distance(x1, x2, y1, y2);   
-    }
-
-    changeVolume () {
-        this.volumeON = !this.volumeON;
-
-        if (!this.volumeON) {
-            this.soundMain.volume = 0;
-            this.soundFood.volume = 0;
-        } else {
-            this.soundMain.volume = 0.3;
-            this.soundFood.volume = 0.5;
-        }
-    }
-
-    stopPlayer() {
-        this.player.body.velocity.x = 0;
-        this.player.body.velocity.y = 0; 
-        this.player.animations.stop(true);               
-    }
+    //#endregion
         
-    /* Acciones jugador */
-
-    // Posición
-
-    positionPlayer(posFixed: boolean = false) {   
-        let p = new Position (0, 0);
-        let p_x = Math.round(this.player.x) + (this.configure.sizePlayer.width / 2);
-        let p_y = Math.round(this.player.y) + (this.configure.sizePlayer.height / 2);  
-                
-        if (!posFixed) {            
-            p.x = p_x;
-            p.y = p_y;            
-        } else {
-            for (let i = 0; i < this.configure.positionsChecked.length; i++) {
-                if (this.configure.positionsChecked[i].inRange(p_x, p_y, 5)) {                    
-                    p.assign(this.configure.positionsChecked[i]);
-                } 
-            }           
-            if (!p && this.configure.positionPlayer.inRange(p_x, p_y, 5)) {
-                p.assign(this.configure.positionPlayer);
-            }            
-        }        
-        return p;
-    }
+    //#region ACCIONES JUGADOR
 
     moveDirection(direction: string) {  
         
-        this.posGoalTmp = this.checkPosition(direction);        
-        if (this.posGoalTmp.active) {
+        this.goalTemp = this.checkPosition(direction);        
+        if (this.goalTemp.active) {
             switch (direction) {
                 case 'D':                                    
                     this.player.play('down');
@@ -556,15 +332,13 @@ export class MainState extends Phaser.State {
             } else {
                 this.player.play('right');
             }
-            this.posGoalTmp = new Position (x, y); 
+            this.goalTemp = new Position (x, y); 
             this.wait = true;            
         } else {
             this.eventGameOver ('Movimiento no válido a (' + x + ',' + y + ')');
         }    
         
-    }
-
-    // Alimento
+    }    
 
     existsFood() {
         return this.groupFood.length > 0;
@@ -603,7 +377,7 @@ export class MainState extends Phaser.State {
                         this.configure.goals[GoalEnum.FOOD].current ++;        
                         this.foodText.text = this.configure.goals[GoalEnum.FOOD].current.toString;                        
                     } else {
-                        this.eventAttacked(this.healthCurrent);
+                        this.eventInjured(this.healthCurrent);
                     }
                     this.wait = false;    
                     clearInterval(_id);                                                                          
@@ -632,5 +406,212 @@ export class MainState extends Phaser.State {
 
     }
 
+    //#endregion
+
+    //#region MÉTODOS AUXILIARES
+
+    random (min, max) {
+        return this.game.rnd.integerInRange(min, max);   
+    }
+
+    changeVolume () {
+        this.volumeON = !this.volumeON;
+
+        if (!this.volumeON) {
+            this.soundMain.volume = 0;
+            this.soundFood.volume = 0;
+        } else {
+            this.soundMain.volume = 0.3;
+            this.soundFood.volume = 0.5;
+        }
+    }
+
+    //#endregion
+
+    //#region MÉTODOS PRIVADOS
+
+    private eventClick() {
+        let posX = parseInt(this.game.input.mousePointer.x, 10);
+        let posY = parseInt(this.game.input.mousePointer.y, 10);    
+        
+        if (posY < Configure.sizeCanvas.height) {
+                
+            let messagge = 'x = ' + posX + '\ny = ' + posY;            
+            let posText = new Position (posX - 15, posY - 50, true);
+            let posSpeech = new Position (posX - 45, posY - 60, true);
+            let image = 'speech_U_C';              
+            
+            // Abajo centro
+            if (posY < 60 && posX > 40 && posX  < (Configure.sizeCanvas.width - 40)) {                    
+                posText.y = posY + 25;
+                posSpeech.x = posX - 45;
+                posSpeech.y = posY;
+                image = 'speech_D_C';
+            }
+
+            // Abajo izquierda
+            if (posY < 60 && posX <= 40) {
+                posText.x = posX + 25;
+                posText.y = posY + 25;
+                posSpeech.x = posX - 10;
+                posSpeech.y = posY;
+                image = 'speech_D_R';
+            }
+
+            // Abajo derecha
+            if (posY < 60 && posX  >= (Configure.sizeCanvas.width - 40)) {
+                posText.x = posX - 50;
+                posText.y = posY + 25;
+                posSpeech.x = posX - 85;
+                posSpeech.y = posY;
+                image = 'speech_D_L';
+            }
+
+            // Arriba izquierda
+            if (posY >= 60 && posX <= 40) {
+                posText.x = posX + 25;                    
+                posSpeech.x = posX - 10;
+                image = 'speech_U_R';
+            }
+
+            // Abajo derecha
+            if (posY >= 60 && posX  >= (Configure.sizeCanvas.width - 40)) {
+                posText.x = posX - 50;
+                posSpeech.x = posX - 85;                    
+                image = 'speech_U_L';
+            }
+            
+            this.clickImage = this.game.add.sprite(posSpeech.x, posSpeech.y , image);
+            this.clickText = this.game.add.text(posText.x, posText.y, messagge, Configure.stylePositionClick);
+
+        }
+    }
+
+    private eventTime() {
+        this.timeCurrent --;
+        this.timeText.text = this.timeCurrent;
+        if (this.timeCurrent <= 0) {
+            this.eventGameOver('Fin del tiempo');                         
+        }
+    }
+
+    private eventCollisionBlock() {
+        this.eventGameOver('Colisión');        
+    }
+
+    private eventInjured (hurt: number) {
+        this.healthCurrent -= hurt;        
+        if (this.healthCurrent <= 0) {
+            this.healthCurrent = 0;
+            this.eventGameOver('El organismo ha muerto');
+        }
+        this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;
+    }
+
+    private eventGameOver (msg: string) {
+        this.game.time.events.remove(this.timeEvent);         
+        this.messageGO = msg;
+        this.state = StateEnum.GAMEOVER;                  
+    }
+
+    private checkGoals() {
+
+        // Posición objetivo
+        if (this.configure.goals[GoalEnum.POSITION].active) {
+            if (this.position.inRange(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2)) {
+                this.configure.goals[GoalEnum.POSITION].overcome = 1;
+            }         
+        }
+
+        // Alimentos
+        if (this.configure.goals[GoalEnum.FOOD].active) {
+            if (this.configure.goals[GoalEnum.FOOD].current >= +this.configure.goals[GoalEnum.FOOD].value_1) {
+                this.configure.goals[GoalEnum.FOOD].overcome = 1;
+            }         
+        }
+
+        // Objetos
+        if (this.configure.goals[GoalEnum.OBJECT].active) {
+            if (this.configure.goals[GoalEnum.OBJECT].current >= +this.configure.goals[GoalEnum.OBJECT].value_1) {
+                this.configure.goals[GoalEnum.OBJECT].overcome = 1;
+            }         
+        }
+
+        // Alimento crias
+        if (this.configure.goals[GoalEnum.BABY].active) {
+            if (this.configure.goals[GoalEnum.BABY].current >= +this.configure.goals[GoalEnum.BABY].value_1) {
+                this.configure.goals[GoalEnum.BABY].overcome = 1;
+            }         
+        }
+
+        // Comprobamos si alguno de los objetivos no se ha conseguido     
+        let overcome = 1;                
+        this.configure.goals.forEach((element, index, arr) => {     
+            // Exite objetivo no cumplido
+            if (element.active && element.overcome === 0) {
+                this.state = StateEnum.GAMEOVER;
+                overcome = 0;
+            }
+
+            // Exite objetivo no completado
+            if (element.active && element.overcome === -1) {                
+                overcome = -1;
+            }                                                                         
+
+            if (arr.length - 1 === index && overcome === 1) {
+                this.state = StateEnum.LEVELUP;
+            }                                                    
+        });  
+        
+
+
+    }
+    
+    private checkPosition(direction): Position {
+        let posPlayer = this.position;                  
+        let posNext = new Position (0, 0, false);
+        let positions_tmp = Object.assign([], this.configure.positionsChecked);                
+
+        if (this.configure.goals[GoalEnum.POSITION].active) {
+            positions_tmp.push(new Position(+this.configure.goals[GoalEnum.POSITION].value_1, this.configure.goals[GoalEnum.POSITION].value_2));
+        }        
+              
+        positions_tmp.forEach(p => {
+            if (!p.inRange(posPlayer.x, posPlayer.y)) {                 
+                switch (direction) {
+                    case 'D':                                                                      
+                        if (p.inRange(posPlayer.x, posPlayer.y, 'x') && p.y > posPlayer.y && (!posNext.active || p.y < posNext.y)) {
+                            posNext.assign(p);
+                        }
+                        break;
+                    case 'U':                                                
+                        if (p.inRange(posPlayer.x, posPlayer.y, 'x') && p.y < posPlayer.y && (!posNext.active || p.y > posNext.y)) {
+                            posNext.assign(p);
+                        }
+                        break;
+                    case 'R':                                                                       
+                        if (p.inRange(posPlayer.x, posPlayer.y, 'y') && p.x > posPlayer.x && (!posNext.active || p.x < posNext.x)) {                                                      
+                            posNext.assign(p);
+                        }
+                        break;
+                    case 'L':                        
+                        if (p.inRange(posPlayer.x, posPlayer.y, 'y') && p.x < posPlayer.x && (!posNext.active || p.x > posNext.x)) {
+                            posNext.assign(p);
+                        }
+                        break;
+                }
+            }
+        });        
+
+        return posNext;        
+    }
+
+    private stopPlayer() {
+        this.player.body.velocity.x = 0;
+        this.player.body.velocity.y = 0; 
+        this.player.animations.stop(true);               
+    }
+
+    //#endregion
     
 }

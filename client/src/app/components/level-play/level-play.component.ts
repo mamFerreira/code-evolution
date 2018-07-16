@@ -224,20 +224,22 @@ export class LevelPlayComponent implements OnInit {
     
     // Registramos el código si play y no esta pausado
     if (action === ActionEnum.PLAY && this.canvas.state !== StateEnum.PAUSED) {
-        let game = new Game('', this.code, false, this.identity._id, this.level._id);
-        
-        this._gameService.registerGame(game).subscribe(
-          res => {              
-            if (!res.game) {
-              this._alertService.error(res.message); 
-            } else {
-              this.canvas.doAction(action, this.code);
-            }
-          },
-          err => {
-            this._alertService.error(err.error.message);      
+      let game = new Game('', this.code, false, this.identity._id, this.level._id);
+      
+      this._gameService.registerGame(game).subscribe(
+        res => {              
+          if (!res.game) {
+            this._alertService.error(res.message); 
+          } else {
+            this.canvas.doAction(action, this.code);
           }
-        );
+        },
+        err => {
+          this._alertService.error(err.error.message);      
+        }
+      );
+    } else if (action === ActionEnum.PLAY && this.canvas.state === StateEnum.PAUSED) { 
+      this.canvas.doAction(ActionEnum.CONTINUE);
     } else {
       this.canvas.doAction(action);
     }

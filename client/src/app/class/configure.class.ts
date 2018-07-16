@@ -21,26 +21,27 @@ export class Configure {
 
     static sizeCanvas = new Size(448, 385);
     static sizeScore = new Size(448, 65);
-    static sizeBar = new Size(200, 40);
+    static sizeBar = new Size(200, 20);
     static sizeSprite = new Size(32, 32);
     static positionBar = new Position (25, 400);    
-    static velocity = 64;
+    static velocity = 150;
     static volumenDefault = true;    
-    static nameState = 'gameplay';
-
+    static nameState = 'gameplay';    
+    
+    public markedPosition: boolean;
     public fileMap: String;
     public filePlayer: String;
     public fileTiledSet: String;
     public timeMax: number;
     public healthMax: number;
-    public positionPlayer: Position;
+    public positionInit: Position;
     public sizePlayer: Size;
     public positionsChecked: Array<Position>;
     public goals: Array<GoalCheck>;
 
     constructor(goals: Array<LevelGoal>) {
         this.positionsChecked = new Array<Position>();
-        this.goals = new Array<GoalCheck>();
+        this.goals = new Array<GoalCheck>();    
 
         this.goals.push(new GoalCheck (GoalEnum.POSITION));
         this.goals.push(new GoalCheck (GoalEnum.FOOD));
