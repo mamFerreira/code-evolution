@@ -1,14 +1,13 @@
 import { Position } from './position.class';
 
-export class Food {
+export class Objecto {
     public id: number;
-    public type: string;
-    public poisonous: boolean;
+    public trap: boolean;    
     public position: Position;
 
-    constructor(id, type, x, y) {
+    constructor(id, trap, x, y) {
         this.id = id;
-        this.type = type;        
+        this.trap = trap;        
         this.position = new Position(x, y);
     }
 }

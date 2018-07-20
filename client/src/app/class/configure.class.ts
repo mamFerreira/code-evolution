@@ -24,7 +24,7 @@ export class Configure {
     static sizeBar = new Size(200, 20);
     static sizeSprite = new Size(32, 32);
     static positionBar = new Position (25, 400);    
-    static velocity = 150;
+    static velocity = 120;
     static volumenDefault = true;    
     static nameState = 'gameplay';    
     

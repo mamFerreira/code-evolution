@@ -124,7 +124,7 @@ function addMethod (method){
         // Métodos sin argumentos con objeto de retorno
         case 'buscarComida':
         case 'buscarObjeto':
-        case 'almacenar':
+        case 'almacenar':              
             wrapperObject = true;            
             break;                                                                                    
     }  
@@ -137,9 +137,10 @@ function addMethod (method){
     }             
 
     if (wrapperObject) {
+        
         funcionesObjeto.push({
             key: method            
-        });
+        });        
     }
 }
 
@@ -157,7 +158,7 @@ function formatCode(c) {
 function send () {
     if (arguments.length < 1) { 
         throw new TypeError("reply - not enough arguments");         
-    }    
+    }       
     postMessage({ "action": arguments[0], "value": Array.prototype.slice.call(arguments, 1) });
 }
 
@@ -199,7 +200,7 @@ function initApi (i,s){
     ));
 
     // Función print
-    i.setProperty(s, 'print', i.createNativeFunction((v) => {
+    i.setProperty(s, 'print', i.createNativeFunction((v) => {        
         if (v.G === 'Array'){
             send('printArray',v.a);
         } else {
@@ -218,12 +219,13 @@ function initApiPlayer(i, callback){
     }  
     
     for (var index=0; index<funcionesObjeto.length; index++){
+        var element = funcionesObjeto[index].key;
         var wrapper = (callback) => {                                      
-            json = null;            
-            send(funcionesObjeto[index].key);          
+            json = null;                 
+            send(element);          
             waitResponseObject(i, callback);
         };        
-        i.setProperty(obj, funcionesObjeto[index].key, i.createAsyncFunction(wrapper));
+        i.setProperty(obj, element, i.createAsyncFunction(wrapper));
     }
     callback(obj);
 }
@@ -231,7 +233,7 @@ function initApiPlayer(i, callback){
 // Esperar desbloquo del hilo principal
 function waitUnblock(callback){
     intervalResponse = setInterval(()=>{        
-        if (!bloqueado){                   
+        if (!bloqueado){                         
             callback(bloqueado)
             clearInterval(intervalResponse);                
         }
@@ -253,14 +255,14 @@ function waitResponse(callback){
 function waitResponseObject(i, callback){
     
     intervalResponse = setInterval(()=>{          
-        if (json != null){                                        
-            if (json){                                     
+        if (json != null){             
+            if (json){                                                                                    
                 var obj = i.createObject(i.OBJECT);
-                i.setProperty(obj, 'id', i.createPrimitive(json._id));
-                i.setProperty(obj, 'type', i.createPrimitive(json._type));                
-                i.setProperty(obj, 'x', i.createPrimitive(json._position._x));
-                i.setProperty(obj, 'y', i.createPrimitive(json._position._y));                        
-                callback(obj);
+                i.setProperty(obj, 'id', i.createPrimitive(json.id));
+                i.setProperty(obj, 'trampa', i.createPrimitive(json.trap));                
+                i.setProperty(obj, 'x', i.createPrimitive(json.position.x));
+                i.setProperty(obj, 'y', i.createPrimitive(json.position.y));                                                      
+                callback(obj);                
             }else{
                 callback(null);
             }            

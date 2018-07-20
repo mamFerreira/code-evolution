@@ -1,7 +1,7 @@
 <h1>{{title}}</h1>                                                
 <app-alert></app-alert>
 <div class="col-md-12 mt-5">        
-    <div class="col-md-4 row" *ngIf="levels && evolution && level">
+    <div class="col-md-6 row" *ngIf="levels && evolution && level">
         <h2>Listado de niveles: <strong>{{evolution.name}}</strong></h2>
         <table class="table table-levels" cellspacing="0" width="100%">
             <thead>
@@ -24,10 +24,10 @@
             <a class="btn btn-primary btn-lg pull-right" [routerLink]="['/jugar']">VOLVER</a> 
         </div>        
     </div>
-    <div class="col-md-8 mt-6" *ngIf="level">
+    <div class="col-md-6 mt-6" *ngIf="level">
         <h2>{{level.order}}: {{level.name}}</h2>
         <h4>{{level.description}}</h4>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <table class="table table-bordered table-ce" *ngIf="level.goals">
                 <thead>
                     <tr>
@@ -83,7 +83,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-6">
             <img class="img-fluid" *ngIf="level.image" src="{{url}}level-load-image/{{level._id}}"/>   
         </div> 
     </div>       

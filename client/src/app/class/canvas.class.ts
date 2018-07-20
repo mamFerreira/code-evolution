@@ -18,6 +18,7 @@ export class Canvas {
     private _idIntervalB;       
     private soundLU;  
     private soundGO; 
+    private workerFinish: boolean;
       
     public console: string;    
     public messageGO: string;
@@ -30,8 +31,7 @@ export class Canvas {
         // Variables principales
         this.level = level;
         this.checker = new Checker();
-        this.path = '../../..';
-        
+        this.path = '../../..';        
         import('./states/state_' + level.evolution.order.toString() + '_' + level.order.toString() + '.state').then(module => {
             this.phaser = new module.State(this.level.evolution.health, this.level.time, this.level.goals);
         }); 
@@ -55,7 +55,8 @@ export class Canvas {
                 this.phaser.reload();                    
                 this.finish();                    
                 this.console = '';  
-                this.messageGO = '';                                
+                this.messageGO = '';  
+                this.workerFinish = false;                              
                 break;
             case ActionEnum.PLAY:                  
                 this.checkGoals(code);                                                
@@ -66,10 +67,16 @@ export class Canvas {
                     if (this.phaser.state === StateEnum.LEVELUP) { 
                         this.soundLU.play();                                                                 
                         this.finish();                        
-                    } else if (this.phaser.state === StateEnum.GAMEOVER) {                                                
-                        this.soundGO.play();                     
-                        this.addConsole('Error: ' + this.phaser.msgError, true);                        
-                        this.finish();
+                        
+                    } else if (this.phaser.state === StateEnum.GAMEOVER) {                                                                   
+                        this.soundGO.play();  
+                        if (!this.workerFinish) {
+                            this.addConsole('Error: ' + this.phaser.messageGO, true);                        
+                            this.finish();
+                        } else {
+                            clearInterval(this._idIntervalB);
+                            clearInterval(this._idIntervalM);
+                        }                                             
                     }                                                            
                 }, 50);                                                    
                 break;                
@@ -113,14 +120,14 @@ export class Canvas {
     private addConsole (msg, error = false) {
         this.console += '<br>$ ' + msg;
 
-        if (error) {
+        if (error) {            
             this.messageGO = msg;
         }
 
     }
 
     private error(msg) {
-        if (this.phaser.state !== StateEnum.GAMEOVER){
+        if (this.phaser.state !== StateEnum.GAMEOVER) {
             this.phaser.state = StateEnum.GAMEOVER;
         } 
 
@@ -192,18 +199,23 @@ export class Canvas {
             // Tipo de acciones: Básicas, movimiento, objetos, comunicación
             switch (e.data.action) {
                 case 'moverArriba':
+                    this.phaser.wait = true;
                     this.phaser.moveDirection('U');
                     break;
                 case 'moverAbajo':
+                    this.phaser.wait = true;
                     this.phaser.moveDirection('D');
                     break;
                 case 'moverIzquierda':
+                    this.phaser.wait = true;
                     this.phaser.moveDirection('L');
                     break;
                 case 'moverDerecha':
+                    this.phaser.wait = true;
                     this.phaser.moveDirection('R');
                     break;
                 case 'mover':                
+                    this.phaser.wait = true;
                     this.move(e.data.value);
                     break;
                 case 'x':
@@ -212,20 +224,23 @@ export class Canvas {
                 case 'y':
                     this.postMessage('loadValue', this.phaser.position.y);             
                     break;                     
-                case 'buscarComida':
+                case 'buscarComida':                       
                     this.postMessage('loadValue', this.phaser.findNearestFood());             
                     break;                               
                 case 'comer':
-                    this.eat(e.data.value);
+                    this.phaser.wait = true;
+                    this.phaser.eat();
                     break;
                 case 'buscarObjeto':
-                    this.postMessage('loadValue', this.phaser.findNearestFood());             
+                    this.postMessage('loadValue', this.phaser.findNearestObject());             
                     break;                    
                 case 'coger':
-                    // Igual que comer
+                    this.phaser.wait = true;
+                    this.phaser.take();
                     break;
                 case 'tirar':
-                    // Igual que comer
+                    this.phaser.wait = true;
+                    this.phaser.discard();
                     break;                    
                 case 'almacenar':     
                     // Igual que buscar comida               
@@ -245,13 +260,14 @@ export class Canvas {
                 case 'hablar':
                     this.addConsole(e.data.value[0]);
                     break;
-                case 'print':
+                case 'print':                
                     this.addConsole(e.data.value[0]);
                     break;
                 case 'printArray':
                     this.printArray(e.data.value);
                     break;
-                case 'finish':
+                case 'finish':   
+                    this.workerFinish = true;                 
                     this.error('Ejecución finalizada sin contemplar los objetivos');
                     break;
                 case 'error':
@@ -298,21 +314,6 @@ export class Canvas {
             return;
         }
         this.phaser.move (value[0], value[1]); 
-    }
-
-    private eat(value) {
-        if (! this.checker.checkArray(value, 1)) {
-            this.error('Acción eat: No ha pasado un objeto de tipo alimento');
-            return;
-        }
-    
-        if (!value[0].hasOwnProperty('id') || !value[0].hasOwnProperty('type') || !value[0].hasOwnProperty('x') || !value[0].hasOwnProperty('y')) {
-            this.error('Acción eat: No ha pasado un objeto de tipo alimento');
-            return;
-        }   
-
-        let food = new Food(value[0].id, value[0].type, value[0].x, value[0].y);                
-        this.phaser.eat(food);        
     }
 
     //#endregion WORKER

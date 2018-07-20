@@ -2,35 +2,14 @@ export class Position {
 
     static range = 10;
 
-    private _x: number;
-    private _y: number;
-    private _active: boolean;    
+    public x: number;
+    public y: number;
+    public active: boolean;    
 
     constructor(x, y, active = true) {
-        this._x = x;
-        this._y = y;        
-        this._active = active;
-    }
-
-    get x(): number {
-        return this._x;
-    }
-    set x(value: number) {
-        this._x = value;
-    }
-
-    get y(): number {
-        return this._y;
-    }
-    set y(value: number) {
-        this._y = value;
-    }
-
-    get active(): boolean {
-        return this._active;
-    }
-    set active(value: boolean) {
-        this._active = value;
+        this.x = x;
+        this.y = y;        
+        this.active = active;
     }
 
     inRange (x: number, y: number, coord: string = 'xy'): boolean {         
@@ -38,17 +17,17 @@ export class Position {
 
         switch (coord) {
             case 'x':            
-                if ( x >= this._x + Position.range || x <= this._x - Position.range) {
+                if ( x >= this.x + Position.range || x <= this.x - Position.range) {
                     result = false;
                 }
                 break;
             case 'y':            
-                if ( y >= this._y + Position.range || y <= this._y - Position.range) {
+                if ( y >= this.y + Position.range || y <= this.y - Position.range) {
                     result = false;
                 }
                 break;                
             case 'xy':
-                if ( x >= this._x + Position.range || x <= this._x - Position.range || y >= this._y + Position.range || y <= this._y - Position.range) {
+                if ( x >= this.x + Position.range || x <= this.x - Position.range || y >= this.y + Position.range || y <= this.y - Position.range) {
                     result = false;
                 }
                 break;
@@ -59,8 +38,8 @@ export class Position {
     }
 
     assign(p: Position) {
-        this._x = p.x;
-        this._y = p.y;
-        this._active = p.active;
+        this.x = p.x;
+        this.y = p.y;
+        this.active = p.active;
     }
 }
