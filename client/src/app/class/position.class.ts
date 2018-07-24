@@ -37,6 +37,16 @@ export class Position {
         return result;        
     }
 
+    inRangeP (p: Position): boolean {         
+        let result = true;
+
+        if ( p.x >= this.x + Position.range || p.x <= this.x - Position.range || p.y >= this.y + Position.range || p.y <= this.y - Position.range) {
+            result = false;
+        }
+
+        return result;        
+    }
+
     assign(p: Position) {
         this.x = p.x;
         this.y = p.y;

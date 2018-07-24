@@ -42,9 +42,11 @@ export class MainState extends Phaser.State {
     public healthBar: Phaser.Sprite;            
     public coinText: Phaser.Text;        
     public foodText: Phaser.Text;      
+    public babyText: Phaser.Text;      
     public timeCurrent: number;
     public timeText: Phaser.Text;
     public timeEvent: Phaser.Event;
+    public foodBag: Food;
         
     constructor(configure: Configure) {
         super();
@@ -54,7 +56,8 @@ export class MainState extends Phaser.State {
         this.game = new Phaser.Game(576, 480, Phaser.CANVAS, GLOBAL.CANVAS_ID);        
         this.game.state.add(Configure.nameState, this);
         this.game.state.start(Configure.nameState);   
-        this.healthCurrent = this.configure.healthMax;           
+        this.healthCurrent = this.configure.healthMax;    
+        this.foodBag = null;       
     }
     
     set state (s: StateEnum) {
@@ -132,8 +135,10 @@ export class MainState extends Phaser.State {
         this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;                
         this.coinText.text = 0;       
         this.foodText.text = 0;
+        this.babyText.text = 0;
         this.timeCurrent = this.configure.timeMax;
         this.timeText.text = this.timeCurrent;
+        this.foodBag = null;
         
         // Reiniciar los grupos
         this.groupFood.removeBetween(0);        
@@ -159,6 +164,7 @@ export class MainState extends Phaser.State {
         this.game.load.image('health', GLOBAL.PATH_RESOURCE + 'object/health.png');
         this.game.load.image('coin', GLOBAL.PATH_RESOURCE + 'object/coin.png');        
         this.game.load.image('food', GLOBAL.PATH_RESOURCE + 'object/food.png');
+        this.game.load.image('baby', GLOBAL.PATH_RESOURCE + 'object/baby.png');
         this.game.load.image('time', GLOBAL.PATH_RESOURCE + 'object/time.jpeg');                
         // Carga posicion habilitada
         if (this.configure.positionsChecked ) {
@@ -224,9 +230,13 @@ export class MainState extends Phaser.State {
         this.game.add.image(Configure.sizeCanvas.width * 0.85, Configure.sizeCanvas.height + 5, 'food');
         this.foodText = this.game.add.text((Configure.sizeCanvas.width * 0.85) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 5, '', Configure.styleScore);  
         this.foodText.text = this.configure.goals[GoalEnum.FOOD].current.toString();
+        // Marcador: baby
+        this.game.add.image(Configure.sizeCanvas.width * 0.7, Configure.sizeCanvas.height + 35, 'baby');
+        this.babyText = this.game.add.text((Configure.sizeCanvas.width * 0.7) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 35, '', Configure.styleScore); 
+        this.babyText.text = this.configure.goals[GoalEnum.BABY].current.toString();
         // Marcador: time
-        this.game.add.image(Configure.sizeCanvas.width * 0.71, Configure.sizeCanvas.height + 35, 'time');
-        this.timeText = this.game.add.text((Configure.sizeCanvas.width * 0.71) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 35, '', Configure.styleScore); 
+        this.game.add.image(Configure.sizeCanvas.width * 0.86, Configure.sizeCanvas.height + 35, 'time');
+        this.timeText = this.game.add.text((Configure.sizeCanvas.width * 0.86) + Configure.sizeSprite.width, Configure.sizeCanvas.height + 35, '', Configure.styleScore); 
         this.timeText.text = this.configure.timeMax;
 
         // Posiciones habilitadas
@@ -288,7 +298,7 @@ export class MainState extends Phaser.State {
         
     //#region ACCIONES JUGADOR
 
-    moveDirection(direction: string) {  
+    moveDirection(direction: string) {
         
         this.goalTemp = this.checkPosition(direction);        
         if (this.goalTemp.active) {
@@ -383,7 +393,7 @@ export class MainState extends Phaser.State {
         return result;
     }
     
-    eat () {          
+    eat () {
         let index = -1;
         let positionPlayer = this.position;        
         for (let i = 0; i < this.groupFood.length; i++) {
@@ -409,7 +419,7 @@ export class MainState extends Phaser.State {
         }     
     }
 
-    take () {          
+    take () {
         let index = -1;
         let positionPlayer = this.position;        
         for (let i = 0; i < this.groupObject.length; i++) {
@@ -432,6 +442,34 @@ export class MainState extends Phaser.State {
                     this.wait = false;                                            
                     clearInterval(_id);                                                                          
                 }, 1000);                  
+                break;
+            }            
+        }         
+        if (index < 0) {
+            this.eventGameOver ('Ningún objeto cercano para coger');
+        }     
+    }
+
+    store () {
+        let index = -1;
+        let positionPlayer = this.position;        
+        for (let i = 0; i < this.groupFood.length; i++) {
+            let food = this.groupFood.getAt(i);  
+
+            if (positionPlayer.inRange(food.world.x + Configure.sizeSprite.width / 2, food.world.y + Configure.sizeSprite.height / 2)) {                
+                index = i;                
+                let _id = setInterval(
+                () => {       
+                    if (this.foodBag != null) {
+                        food.kill();                        
+                        this.groupFood.remove(food);                         
+                        this.foodBag = new Food(i, food.key, food.world.x + (Configure.sizeSprite.width / 2), food.world.y + (Configure.sizeSprite.height / 2));                                                                
+                        this.wait = false; 
+                    } else {
+                        this.eventGameOver ('Antes de recoger el alimento, tiene que soltar el almacenado');
+                    }                                                                 
+                    clearInterval(_id);                                                                          
+                }, 500);                  
                 break;
             }            
         }         
@@ -463,24 +501,20 @@ export class MainState extends Phaser.State {
         }     
     }
 
-    /*discardFood(food: Food) {              
-        let dist =  Phaser.Math.distance(food.x, food.y, this.player.x, this.player.y); 
-
-        if (dist < (this.configure.sizePlayer.width)) {            
-            this.wait = true;   
+    feed () {
+        if (this.foodBag != null) {
             let _id = setInterval(
-                () => {
-                    let aux = this.groupFood.getAt(food.id);
-                    aux.kill();                        
-                    this.groupFood.remove(aux);    
-                    this.wait = false;    
-                    clearInterval(_id);                                                                                                 
-                }, 200);        
+                () => {                    
+                    this.foodBag = null;                                    
+                    this.configure.goals[GoalEnum.BABY].current ++; 
+                    this.babyText.text = this.configure.goals[GoalEnum.BABY].current;                                            
+                    this.wait = false;                        
+                    clearInterval(_id);                                                                          
+                }, 1000);              
         } else {
-            this.eventGameOver ('Debe de acercarse al alimento para poder desecharlo');
-        }
-
-    }*/
+            this.eventGameOver ('No has recogido ningún alimento');
+        }        
+    }
 
     //#endregion
 
@@ -508,7 +542,13 @@ export class MainState extends Phaser.State {
 
     addObjectGroup (position: Position, name: string) {
         this.groupObject.create(position.x - Configure.sizeSprite.width / 2, position.y - Configure.sizeSprite.height / 2, name);               
-    }    
+    }   
+    
+    addSprite (position: Position, name: string) {
+        let s = this.game.add.sprite(position.x - (Configure.sizeSprite.width / 2), position.y - (Configure.sizeSprite.height / 2), name);
+        s.width = Configure.sizeSprite.width ;
+        s.height = Configure.sizeSprite.height;
+    }
 
     //#endregion
 
@@ -592,7 +632,7 @@ export class MainState extends Phaser.State {
         this.healthBar.width = (this.healthCurrent * Configure.sizeBar.width) / this.configure.healthMax;
     }
 
-    private eventGameOver (msg: string) {
+    public eventGameOver (msg: string) {
         this.game.time.events.remove(this.timeEvent);                      
         this.messageGO = msg;
         this.state = StateEnum.GAMEOVER;                  
