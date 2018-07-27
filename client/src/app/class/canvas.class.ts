@@ -242,11 +242,13 @@ export class Canvas {
                     this.phaser.wait = true;
                     this.phaser.discard();
                     break;                    
-                case 'almacenar':     
-                    // Igual que buscar comida               
+                case 'almacenar':                         
+                    this.phaser.wait = true;
+                    this.phaser.store();           
                     break;
                 case 'alimentar':
-                    // Igual que tirar alimento
+                    this.phaser.wait = true;
+                    this.phaser.feed();
                     break;
                 case 'preguntar':
                     this.postMessage('loadValue', e.data.action);  

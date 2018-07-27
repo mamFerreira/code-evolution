@@ -22,13 +22,13 @@ export class State extends MainState {
         c.fileMap = 'map4_1.json';
         c.filePlayer = 'player_4.png';
         c.fileTiledSet = 'tiledset_4.png';
-        c.positionInit = new Position (350, 140);
+        c.positionInit = new Position (300, 140);
         c.sizePlayer = new Size (40, 40);    
-        c.addPosition(350, 140);                                      
+        c.addPosition(300, 140);                                      
         super(c);
 
         this.region = new Region(new Position(80, 180), new Position(400, 350));
-        this.positionBaby = new Position(400, 140);
+        this.positionBaby = new Position(350, 140);
     }
 
     reload() {        
@@ -43,7 +43,7 @@ export class State extends MainState {
 
     create() {     
         super.create();    
-        this.addSprite(this.positionBaby, 'mammal_baby');
+        this.addSprite(this.positionBaby, 'mammal_baby');        
     }
 
     update() {    
@@ -60,10 +60,11 @@ export class State extends MainState {
     }
 
     feed () {
-        if (this.position.inRangeP(this.positionBaby) {
-            super.feed();
+
+        if (this.position.inRangeP(this.positionBaby, 80)) {
+            super.feed(this.positionBaby);
         } else {
-            this.eventGameOver ('No has recogido ningún alimento');
+            this.eventGameOver ('No tienes a nadie cerca que alimentar');
         }
     }
 }

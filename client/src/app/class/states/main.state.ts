@@ -368,7 +368,7 @@ export class MainState extends Phaser.State {
             let dist = Phaser.Math.distance(food.world.x, food.world.y, pos.x, pos.y);                                      
             if (dist_m === undefined || dist_m > dist) {                
                 dist_m = dist; 
-                result = new Food(i, '', food.world.x + (Configure.sizeSprite.width / 2), food.world.y + (Configure.sizeSprite.height / 2));                
+                result = new Food(i, food.key, food.world.x + (Configure.sizeSprite.width / 2), food.world.y + (Configure.sizeSprite.height / 2));                
             }                
         }       
 
@@ -460,12 +460,12 @@ export class MainState extends Phaser.State {
                 index = i;                
                 let _id = setInterval(
                 () => {       
-                    if (this.foodBag != null) {
+                    if (this.foodBag === null) {
                         food.kill();                        
                         this.groupFood.remove(food);                         
                         this.foodBag = new Food(i, food.key, food.world.x + (Configure.sizeSprite.width / 2), food.world.y + (Configure.sizeSprite.height / 2));                                                                
                         this.wait = false; 
-                    } else {
+                    } else {                        
                         this.eventGameOver ('Antes de recoger el alimento, tiene que soltar el almacenado');
                     }                                                                 
                     clearInterval(_id);                                                                          
@@ -501,16 +501,23 @@ export class MainState extends Phaser.State {
         }     
     }
 
-    feed () {
+    feed (position: Position) {
         if (this.foodBag != null) {
+
+            let _idSprite = this.game.add.sprite(position.x + 5, position.y + 10, 'speech_D_R');
+            let _idText = this.game.add.text(position.x + 40, position.y + 40, 'ÑAM!' , Configure.stylePositionClick);
+
             let _id = setInterval(
-                () => {                    
+                () => {   
+                    _idSprite.kill();                 
+                    _idText.kill();                 
                     this.foodBag = null;                                    
                     this.configure.goals[GoalEnum.BABY].current ++; 
                     this.babyText.text = this.configure.goals[GoalEnum.BABY].current;                                            
                     this.wait = false;                        
                     clearInterval(_id);                                                                          
                 }, 1000);              
+
         } else {
             this.eventGameOver ('No has recogido ningún alimento');
         }        

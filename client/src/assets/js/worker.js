@@ -83,6 +83,7 @@ function addMethod (method){
         case 'coger':
         case 'tirar':         
         case 'alimentar':
+        case 'almacenar':              
             wrapperPlayer = (callback) => {                
                 bloqueado = true;
                 send(method);          
@@ -123,8 +124,7 @@ function addMethod (method){
         
         // Métodos sin argumentos con objeto de retorno
         case 'buscarComida':
-        case 'buscarObjeto':
-        case 'almacenar':              
+        case 'buscarObjeto':        
             wrapperObject = true;            
             break;                                                                                    
     }  
@@ -260,6 +260,7 @@ function waitResponseObject(i, callback){
                 var obj = i.createObject(i.OBJECT);
                 i.setProperty(obj, 'id', i.createPrimitive(json.id));
                 i.setProperty(obj, 'trampa', i.createPrimitive(json.trap));                
+                i.setProperty(obj, 'tipo', i.createPrimitive(json.type)); 
                 i.setProperty(obj, 'x', i.createPrimitive(json.position.x));
                 i.setProperty(obj, 'y', i.createPrimitive(json.position.y));                                                      
                 callback(obj);                

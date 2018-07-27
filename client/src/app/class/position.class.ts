@@ -12,22 +12,24 @@ export class Position {
         this.active = active;
     }
 
-    inRange (x: number, y: number, coord: string = 'xy'): boolean {         
+    inRange (x: number, y: number, coord: string = 'xy', range: number = null): boolean {         
         let result = true;
+
+        range = range === null ? Position.range : range;
 
         switch (coord) {
             case 'x':            
-                if ( x >= this.x + Position.range || x <= this.x - Position.range) {
+                if ( x >= this.x + range || x <= this.x - range) {
                     result = false;
                 }
                 break;
             case 'y':            
-                if ( y >= this.y + Position.range || y <= this.y - Position.range) {
+                if ( y >= this.y + range || y <= this.y - range) {
                     result = false;
                 }
                 break;                
             case 'xy':
-                if ( x >= this.x + Position.range || x <= this.x - Position.range || y >= this.y + Position.range || y <= this.y - Position.range) {
+                if ( x >= this.x + range || x <= this.x - range || y >= this.y + range || y <= this.y - range) {
                     result = false;
                 }
                 break;
@@ -37,10 +39,11 @@ export class Position {
         return result;        
     }
 
-    inRangeP (p: Position): boolean {         
+    inRangeP (p: Position, range: number = null): boolean {         
         let result = true;
+        range = range === null ? Position.range : range;
 
-        if ( p.x >= this.x + Position.range || p.x <= this.x - Position.range || p.y >= this.y + Position.range || p.y <= this.y - Position.range) {
+        if ( p.x >= this.x + range || p.x <= this.x - range || p.y >= this.y + range || p.y <= this.y - range) {
             result = false;
         }
 
