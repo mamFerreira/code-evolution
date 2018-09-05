@@ -114,8 +114,8 @@ function addMethod (method){
         case 'y':
         case 'preguntar':
         case 'ver':
-        case 'escuchar':
-                wrapperPlayer = (callback) => {
+        case 'escuchar':    
+                wrapperPlayer = (callback) => {                    
                     json = null;
                     send(method);
                     waitResponse(callback);

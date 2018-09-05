@@ -251,7 +251,7 @@ export class Canvas {
                     this.phaser.feed();
                     break;
                 case 'preguntar':
-                    this.postMessage('loadValue', e.data.action);  
+                    this.postMessage('loadValue', this.phaser.ask());  
                     break;
                 case 'ver':
                     this.postMessage('loadValue', e.data.action);  
